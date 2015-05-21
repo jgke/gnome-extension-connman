@@ -17,8 +17,10 @@ function init() {
 function enable() {
     menu.menu.addMenuItem(applet.menu, 3);
     menu._indicators.insert_child_at_index(applet.indicators, 2);
+    applet.enable()
 }
 
 function disable() {
     menu.menu.box.remove_actor(applet.menu.actor);
+    applet.disable()
 }
