@@ -27,17 +27,100 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
 const ConnmanInterface = Ext.imports.connmanInterface;
 
+function signalToIcon(value) {
+    if (value > 80)
+        return "excellent";
+    if (value > 55)
+        return "good";
+    if (value > 30)
+        return "ok";
+    if (value > 5)
+        return "weak";
+    return "excellent";
+}
+
+function getIcon(type, strength) {
+    switch (type) {
+        case "ethernet":
+            return "network-wired-symbolic";
+        case "cellular":
+            return "network-cellular-signal-" + signalToIcon(strength) + "-symbolic";
+        case "bluetooth":
+            return "bluetooth-active-symbolic";
+        case "wifi":
+            return "network-wireless-signal-" + signalToIcon(strength) + "-symbolic";
+        case "vpn":
+            return "network-vpn-symbolic";
+        default:
+            return "network-offline-symbolic";
+    }
+}
+
+function getAcquiringIcon(type){
+    switch (type) {
+        case "wifi":
+            return "network-wireless-acquiring-symbolic";
+        case "cellular":
+            return "network-cellular-acquiring-symbolic";
+        case "ethernet":
+            return "network-wired-acquiring-symbolic";
+        case "vpn":
+            return "network-vpn-acquiring-symbolic";
+        case "bluetooth":
+            return "bluetooth-active-symbolic";
+        default :
+            return "network-wireless-acquiring-symbolic";
+    }
+}
+
+function getStatusIcon(type, state, strength) {
+    switch(state) {
+        case "online":
+        case "ready":
+            return getIcon(type, strength);
+        case "configuration":
+        case "association":
+            return getAcquiringIcon(type);
+        case "disconnect":
+        case "idle":
+            return "network-offline-symbolic";
+        case "failure":
+        default:
+            return "network-error-symbolic";
+    }
+}
+
 const Technology = new Lang.Class({
     Name: "Technology",
     Extends: PopupMenu.PopupMenuSection,
 
-    _init: function(icon, name) {
+    _init: function(properties) {
         this.parent();
-        this._menu = new PopupMenu.PopupSubMenuMenuItem(name, true);
-        this._menu.icon.icon_name = icon;
-        this._menu.status.text = "Status";
+        this._menu = new PopupMenu.PopupSubMenuMenuItem("", true);
         this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Connman"));
         this.addMenuItem(this._menu);
+
+        this.update(properties);
+    },
+
+    update: function(properties) {
+        log(Object.keys(properties));
+        this.type = properties.Type.deep_unpack();
+        if(properties.State)
+            this.state = properties.State.deep_unpack();
+        if(properties.Strength)
+            this.strength = properties.Strength.deep_unpack();
+
+        this.icon = getStatusIcon(this.type, this.state, this.strength);
+        if(properties.Name)
+            this.name = properties.Name.deep_unpack();
+
+        if(this.name)
+            this._menu.label.text = this.name;
+        if(this.icon)
+            this._menu.icon.icon_name = this.icon;
+        if(this.state)
+            this._menu.status.text = this.state;
     }
 });
 
@@ -59,10 +142,12 @@ const ConnmanMenu = new Lang.Class({
         this._menu.actor.show();
     },
 
+
     addTechnology: function(path, properties) {
         if(this._technologies[path])
             return;
-        this._technologies[path] = new Technology('network-wired-symbolic', properties.Name.deep_unpack());
+
+        this._technologies[path] = new Technology(properties);
         this.addMenuItem(this._technologies[path]);
     },
 
