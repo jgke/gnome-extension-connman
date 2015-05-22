@@ -25,98 +25,9 @@ const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
-const AGENT_PATH = "/net/connman/agent";
-const BUS_NAME = "net.connman";
-
-const MANAGER_INTERFACE = '<node>\
-<interface name="net.connman.Manager">\
-    <method name="GetProperties">\
-        <arg name="properties" type="a{sv}" direction="out"/>\
-    </method>\
-    <method name="SetProperty">\
-        <arg name="name" type="s" direction="in"/>\
-        <arg name="value" type="v" direction="in"/>\
-    </method>\
-    <method name="GetTechnologies">\
-        <arg name="technologies" type="a(oa{sv})" direction="out"/>\
-    </method>\
-    <method name="GetServices">\
-        <arg name="services" type="a(oa{sv})" direction="out"/>\
-    </method>\
-    <method name="RegisterAgent">\
-        <arg name="path" type="o" direction="in"/>\
-    </method>\
-    <method name="UnregisterAgent">\
-        <arg name="path" type="o" direction="in"/>\
-    </method>\
-\
-    <signal name="PropertyChanged">\
-        <arg name="name" type="s"/>\
-        <arg name="value" type="v"/>\
-    </signal>\
-    <signal name="TechnologyAdded">\
-        <arg name="path" type="o"/>\
-        <arg name="properties" type="a{sv}"/>\
-    </signal>\
-    <signal name="TechnologyRemoved">\
-        <arg name="path" type="o"/>\
-    </signal>\
-    <signal name="ServicesChanged">\
-        <arg name="changed" type="a(oa{sv})"/>\
-        <arg name="removed" type="ao"/>\
-    </signal>\
-</interface>\
-</node>';
-
-const TECHNOLOGY_INTERFACE = '<node>\
-<interface name="net.connman.Technology">\
-    <method name="SetProperty">\
-        <arg name="name" type="s" direction="in"/>\
-        <arg name="value" type="v" direction="in"/>\
-    </method>\
-    <method name="GetProperties">\
-        <arg name="properties" type="a{sv}" direction="out"/>\
-    </method>\
-    <method name="Scan"></method>\
-\
-    <signal name="PropertyChanged">\
-        <arg name="name" type="s"/>\
-        <arg name="value" type="v"/>\
-    </signal>\
-</interface>\
-</node>';
-
-const SERVICE_INTERFACE = '<node>\
-<interface name="net.connman.Service">\
-    <method name="SetProperty">\
-        <arg name="name" type="s" direction="in"/>\
-        <arg name="value" type="v" direction="in"/>\
-    </method>\
-    <method name="Connect"></method>\
-    <method name="Disconnect"></method>\
-\
-    <signal name="PropertyChanged">\
-        <arg name="name" type="s"/>\
-        <arg name="value" type="v"/>\
-    </signal>\
-</interface>\
-</node>';
-
-const ManagerProxyWrapper = Gio.DBusProxy.makeProxyWrapper(MANAGER_INTERFACE);
-const TechnologyProxyWrapper = Gio.DBusProxy.makeProxyWrapper(TECHNOLOGY_INTERFACE);
-const ServiceProxyWrapper = Gio.DBusProxy.makeProxyWrapper(SERVICE_INTERFACE);
-
-function ManagerProxy() {
-    return new ManagerProxyWrapper(Gio.DBus.system, BUS_NAME, '/');
-}
-
-function TechnologyProxy(path) {
-    return new TechnologyProxyWrapper(Gio.DBus.system, BUS_NAME, path);
-}
-
-function ServiceProxy(path) {
-    return new ServiceProxyWrapper(Gio.DBus.system, BUS_NAME, path);
-}
+const ExtensionUtils = imports.misc.extensionUtils;
+const Ext = ExtensionUtils.getCurrentExtension();
+const ConnmanInterface = Ext.imports.connmanInterface;
 
 const Technology = new Lang.Class({
     Name: "Technology",
@@ -193,8 +104,8 @@ const ConnmanApplet = new Lang.Class({
         this.menu.actor.show();
         this._indicator.show();
 
-        this._manager = new ManagerProxy();
-        this._manager.RegisterAgentRemote(AGENT_PATH);
+        this._manager = new ConnmanInterface.ManagerProxy();
+        this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
         this._asig = this._manager.connectSignal("TechnologyAdded",
                 function(proxy, sender, [path, properties]) {
                     this._menu.addTechnology(path, properties);
@@ -228,7 +139,7 @@ const ConnmanApplet = new Lang.Class({
 
     enable: function() {
         if(!this._watch) {
-            this._watch = Gio.DBus.system.watch_name(BUS_NAME,
+            this._watch = Gio.DBus.system.watch_name(ConnmanInterface.BUS_NAME,
                     Gio.BusNameWatcherFlags.NONE,
                     function() { return this._connectEvent() }.bind(this),
                     function() { return this._disconnectEvent() }.bind(this));
