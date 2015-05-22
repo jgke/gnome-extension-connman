@@ -19,6 +19,7 @@
 const Lang = imports.lang;
 
 const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
@@ -94,22 +95,34 @@ const Technology = new Lang.Class({
     Name: "Technology",
     Extends: PopupMenu.PopupMenuSection,
 
-    _init: function(properties) {
+    _init: function(path, properties) {
         this.parent();
+        this._proxy = new ConnmanInterface.TechnologyProxy(path);
         this._menu = new PopupMenu.PopupSubMenuMenuItem("", true);
-        this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Connman"));
+
+        this._powerSwitch = new PopupMenu.PopupSwitchMenuItem("Power");
+        this._powerSwitch.connect('toggled', function(item, state) {
+            let powered = GLib.Variant.new('b', state);
+            this._proxy.SetPropertyRemote('Powered', powered);
+        }.bind(this));
+
+        this._menu.menu.addMenuItem(this._powerSwitch);
+
         this.addMenuItem(this._menu);
 
         this.update(properties);
     },
 
     update: function(properties) {
-        log(Object.keys(properties));
         this.type = properties.Type.deep_unpack();
         if(properties.State)
             this.state = properties.State.deep_unpack();
         if(properties.Strength)
             this.strength = properties.Strength.deep_unpack();
+        if(properties.Powered) {
+            this.powered = properties.Powered.deep_unpack();
+            this._powerSwitch.setToggleState(this.powered);
+        }
 
         this.icon = getStatusIcon(this.type, this.state, this.strength);
         if(properties.Name)
@@ -147,7 +160,7 @@ const ConnmanMenu = new Lang.Class({
         if(this._technologies[path])
             return;
 
-        this._technologies[path] = new Technology(properties);
+        this._technologies[path] = new Technology(path, properties);
         this.addMenuItem(this._technologies[path]);
     },
 
