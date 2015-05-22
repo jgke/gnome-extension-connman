@@ -19,7 +19,6 @@
 const Lang = imports.lang;
 
 const Main = imports.ui.main;
-const PopupMenu = imports.ui.popupMenu;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();

@@ -19,9 +19,7 @@
 const Lang = imports.lang;
 
 const Gio = imports.gi.Gio;
-const St = imports.gi.St;
 
-const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
