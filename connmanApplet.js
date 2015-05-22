@@ -25,6 +25,7 @@ const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
+const AGENT_PATH = "/net/connman/agent";
 const BUS_NAME = "net.connman";
 
 const MANAGER_INTERFACE = '<node>\
@@ -138,7 +139,7 @@ const ConnmanMenu = new Lang.Class({
 
     _init: function() {
         this.parent();
-        this.addMenuItem(new Technology('network-wired-symbolic', "Technology name"));
+        this._technologies = {};
     },
 
     hide: function() {
@@ -147,6 +148,29 @@ const ConnmanMenu = new Lang.Class({
 
     show: function() {
         this._menu.actor.show();
+    },
+
+    addTechnology: function(path, properties) {
+        if(this._technologies[path])
+            return;
+        this._technologies[path] = new Technology('network-wired-symbolic', properties.Name.deep_unpack());
+        this.addMenuItem(this._technologies[path]);
+    },
+
+    removeTechnology: function(path) {
+        let technology = this._technologies[path];
+        if(!technology)
+            return;
+        technology.destroy();
+        delete this._technologies[path];
+        /* FIXME: for some reason destroying the technology
+         * leaves a hole, but for some reason this fixes it */
+        this.addMenuItem(new PopupMenu.PopupMenuItem("Connman"), 0);
+        this.firstMenuItem.destroy();
+    },
+
+    clear: function() {
+        this._technologies = {};
     }
 });
 
@@ -168,11 +192,38 @@ const ConnmanApplet = new Lang.Class({
     _connectEvent: function() {
         this.menu.actor.show();
         this._indicator.show();
+
+        this._manager = new ManagerProxy();
+        this._manager.RegisterAgentRemote(AGENT_PATH);
+        this._asig = this._manager.connectSignal("TechnologyAdded",
+                function(proxy, sender, [path, properties]) {
+                    this._menu.addTechnology(path, properties);
+                }.bind(this));
+        this._rsig = this._manager.connectSignal("TechnologyRemoved",
+                function(proxy, sender, [path, properties]) {
+                    this._menu.removeTechnology(path);
+                }.bind(this));
+
+        this._manager.GetTechnologiesRemote(function(result, exception) {
+            if(!result || exception) {
+                return;
+            }
+            let technologies = result[0];
+            for each(let [path, properties] in technologies) {
+                this._menu.addTechnology(path, properties);
+            }
+        }.bind(this));
     },
 
     _disconnectEvent: function() {
+        this._menu.removeAll();
         this.menu.actor.hide();
         this._indicator.hide();
+        if(this._manager) {
+            this._manager.disconnectSignal(this._asig);
+            this._manager.disconnectSignal(this._rsig);
+        }
+        this._manager = null;
     },
 
     enable: function() {
