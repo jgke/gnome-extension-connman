@@ -101,21 +101,35 @@ const SERVICE_INTERFACE = '<node>\
 </interface>\
 </node>';
 
-const ManagerProxy = Gio.DBusProxy.makeProxyWrapper(MANAGER_INTERFACE);
-const TechnologyProxy = Gio.DBusProxy.makeProxyWrapper(TECHNOLOGY_INTERFACE);
-const Service_Proxy = Gio.DBusProxy.makeProxyWrapper(SERVICE_INTERFACE);
+const ManagerProxyWrapper = Gio.DBusProxy.makeProxyWrapper(MANAGER_INTERFACE);
+const TechnologyProxyWrapper = Gio.DBusProxy.makeProxyWrapper(TECHNOLOGY_INTERFACE);
+const ServiceProxyWrapper = Gio.DBusProxy.makeProxyWrapper(SERVICE_INTERFACE);
 
-function Manager() {
-    return new ManagerProxy(Gio.DBus.system, BUS_NAME, '/');
+function ManagerProxy() {
+    return new ManagerProxyWrapper(Gio.DBus.system, BUS_NAME, '/');
 }
 
-function Technology(path) {
-    return new TechnologyProxy(Gio.DBus.system, BUS_NAME, path);
+function TechnologyProxy(path) {
+    return new TechnologyProxyWrapper(Gio.DBus.system, BUS_NAME, path);
 }
 
 function ServiceProxy(path) {
-    return new Service_Proxy(Gio.DBus.system, BUS_NAME, path);
+    return new ServiceProxyWrapper(Gio.DBus.system, BUS_NAME, path);
 }
+
+const Technology = new Lang.Class({
+    Name: "Technology",
+    Extends: PopupMenu.PopupMenuSection,
+
+    _init: function(icon, name) {
+        this.parent();
+        this._menu = new PopupMenu.PopupSubMenuMenuItem(name, true);
+        this._menu.icon.icon_name = icon;
+        this._menu.status.text = "Status";
+        this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Connman"));
+        this.addMenuItem(this._menu);
+    }
+});
 
 /* menu with technologies */
 const ConnmanMenu = new Lang.Class({
@@ -124,16 +138,15 @@ const ConnmanMenu = new Lang.Class({
 
     _init: function() {
         this.parent();
-        this._text = new PopupMenu.PopupMenuItem("Connman");
-        this.addMenuItem(this._text);
+        this.addMenuItem(new Technology('network-wired-symbolic', "Technology name"));
     },
 
     hide: function() {
-        this._text.actor.hide();
+        this._menu.actor.hide();
     },
 
     show: function() {
-        this._text.actor.show();
+        this._menu.actor.show();
     }
 });
 
