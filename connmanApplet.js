@@ -91,6 +91,35 @@ function getStatusIcon(type, state, strength) {
     }
 }
 
+/* specific submenu for a technology */
+const TechnologyMenu = new Lang.Class({
+    Name: "TechnologyMenu",
+    Extends: PopupMenu.PopupSubMenuMenuItem,
+
+    _init: function(proxy, powered) {
+        this.parent("", true);
+        this._proxy = proxy;
+        this.powered = powered;
+        this._powerSwitch = new PopupMenu.PopupMenuItem("Power");
+        this._powerSwitch.connect('activate', function() {
+            this.powered = !this.powered;
+            let powered = GLib.Variant.new('b', this.powered);
+            this._proxy.SetPropertyRemote('Powered', powered);
+            this.update();
+        }.bind(this));
+        this.menu.addMenuItem(this._powerSwitch);
+    },
+
+    update: function() {
+        if(this.powered)
+            this._powerSwitch.label.text = "Turn Off";
+        else
+            this._powerSwitch.label.text = "Turn On";
+    },
+
+});
+
+/* Menu item with technology name, icons and submenu with specific items */
 const Technology = new Lang.Class({
     Name: "Technology",
     Extends: PopupMenu.PopupMenuSection,
@@ -98,15 +127,7 @@ const Technology = new Lang.Class({
     _init: function(path, properties) {
         this.parent();
         this._proxy = new ConnmanInterface.TechnologyProxy(path);
-        this._menu = new PopupMenu.PopupSubMenuMenuItem("", true);
-
-        this._powerSwitch = new PopupMenu.PopupSwitchMenuItem("Power");
-        this._powerSwitch.connect('toggled', function(item, state) {
-            let powered = GLib.Variant.new('b', state);
-            this._proxy.SetPropertyRemote('Powered', powered);
-        }.bind(this));
-
-        this._menu.menu.addMenuItem(this._powerSwitch);
+        this._menu = new TechnologyMenu(this._proxy, properties.Powered.deep_unpack());
 
         this.addMenuItem(this._menu);
 
@@ -120,8 +141,8 @@ const Technology = new Lang.Class({
         if(properties.Strength)
             this.strength = properties.Strength.deep_unpack();
         if(properties.Powered) {
-            this.powered = properties.Powered.deep_unpack();
-            this._powerSwitch.setToggleState(this.powered);
+            this._menu.powered = properties.Powered.deep_unpack();
+            this._menu.update();
         }
 
         this.icon = getStatusIcon(this.type, this.state, this.strength);
