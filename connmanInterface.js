@@ -19,6 +19,7 @@
 const Gio = imports.gi.Gio;
 
 const BUS_NAME = "net.connman";
+const MANAGER_PATH = "/";
 const AGENT_PATH = "/net/connman/agent";
 
 const _MANAGER_INTERFACE = '<node>\
@@ -42,7 +43,6 @@ const _MANAGER_INTERFACE = '<node>\
     <method name="UnregisterAgent">\
         <arg name="path" type="o" direction="in"/>\
     </method>\
-\
     <signal name="PropertyChanged">\
         <arg name="name" type="s"/>\
         <arg name="value" type="v"/>\
@@ -71,7 +71,6 @@ const _TECHNOLOGY_INTERFACE = '<node>\
         <arg name="properties" type="a{sv}" direction="out"/>\
     </method>\
     <method name="Scan"></method>\
-\
     <signal name="PropertyChanged">\
         <arg name="name" type="s"/>\
         <arg name="value" type="v"/>\
@@ -87,7 +86,6 @@ const _SERVICE_INTERFACE = '<node>\
     </method>\
     <method name="Connect"></method>\
     <method name="Disconnect"></method>\
-\
     <signal name="PropertyChanged">\
         <arg name="name" type="s"/>\
         <arg name="value" type="v"/>\
@@ -95,12 +93,33 @@ const _SERVICE_INTERFACE = '<node>\
 </interface>\
 </node>';
 
+const _AGENT_INTERFACE= '<node>\
+<interface name="net.connman.Agent">\
+    <method name="Release"></method>\
+    <method name="ReportError">\
+        <arg name="service" type="o" direction="in"/>\
+        <arg name="error" type="s" direction="in"/>\
+    </method>\
+    <method name="RequestBrowser">\
+        <arg name="service" type="o" direction="in"/>\
+        <arg name="url" type="s" direction="in"/>\
+    </method>\
+    <method name="RequestInput">\
+        <arg name="service" type="o" direction="in"/>\
+        <arg name="fields" type="a{sv}" direction="in"/>\
+        <arg name="values" type="a{sv}" direction="out"/>\
+    </method>\
+    <method name="Cancel"></method>\
+</interface>\
+</node>';
+
 const _ManagerProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_MANAGER_INTERFACE);
 const _TechnologyProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_TECHNOLOGY_INTERFACE);
 const _ServiceProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_SERVICE_INTERFACE);
+const _AgentProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_AGENT_INTERFACE);
 
 function ManagerProxy() {
-    return new _ManagerProxyWrapper(Gio.DBus.system, BUS_NAME, '/');
+    return new _ManagerProxyWrapper(Gio.DBus.system, BUS_NAME, MANAGER_PATH);
 }
 
 function TechnologyProxy(path) {
@@ -109,4 +128,8 @@ function TechnologyProxy(path) {
 
 function ServiceProxy(path) {
     return new _ServiceProxyWrapper(Gio.DBus.system, BUS_NAME, path);
+}
+
+function AgentProxy() {
+    return new _AgentProxyWrapper(Gio.DBus.system, BUS_NAME, AGENT_PATH);
 }
