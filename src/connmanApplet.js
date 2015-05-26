@@ -92,11 +92,11 @@ function getStatusIcon(type, state, strength) {
     }
 }
 
-const EthernetItem = new Lang.Class({
-    Name: 'EthernetItem',
+const ConnectionItem = new Lang.Class({
+    Name: 'ConnectionItem',
     Extends: PopupMenu.PopupSubMenuMenuItem,
 
-    _init: function(proxy, indicator) {
+    _init: function(type, proxy, indicator) {
         this.parent('', true);
 
         this._proxy = proxy;
@@ -119,9 +119,11 @@ const EthernetItem = new Lang.Class({
 
         this._indicator = indicator;
         this._indicator.show();
-        this.label.text = "Wired Connection";
+        this.label.text = "Connection";
+        this._settings = new PopupMenu.PopupMenuItem("Settings");
+
         this.menu.addMenuItem(this._connectionSwitch);
-        this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Wired Settings"));
+        this.menu.addMenuItem(this._settings);
     },
 
     update: function(properties) {
@@ -133,13 +135,33 @@ const EthernetItem = new Lang.Class({
             this._connectionSwitch.label.text = "Reconnect";
         else
             this._connectionSwitch.label.text = "Disconnect";
-        this.icon.icon_name = getStatusIcon('ethernet', this.state);
-        this._indicator.icon_name = this.icon.icon_name;
+    },
+
+    setIcon: function(iconName) {
+        this._indicator.icon_name = iconName;
+        this.icon.icon_name = iconName;
     },
 
     destroy: function() {
         this._indicator.destroy();
         this.parent();
+    }
+});
+
+const EthernetItem = new Lang.Class({
+    Name: "EthernetItem",
+    Extends: ConnectionItem,
+
+    _init: function(proxy, indicator) {
+        this.parent('ethernet', proxy, indicator);
+        this.label.text = "Wired Connection";
+        this._settings.label.text = "Wired Settings";
+    },
+
+    update: function(properties) {
+        this.parent(properties);
+        this.setIcon(getStatusIcon('ethernet', this.state));
+        this._indicator.icon_name = getStatusIcon('ethernet', this.state);
     }
 });
 
@@ -202,18 +224,17 @@ const ConnmanMenu = new Lang.Class({
         }
 
         if(!this._services[path]) {
-            switch(type) {
-            case 'ethernet':
-                let proxy = new ConnmanInterface.ServiceProxy(path);
-                let indicator = this._createIndicator();
-                this._services[path] = new EthernetItem(proxy, indicator);
-                this._services[path].update(properties);
-                this.addMenuItem(this._services[path]);
-                return;
-            default:
-                log('tried to update unknown service type ' + type);
-            }
-            technology.addService(this._services[path]);
+            let proxy = new ConnmanInterface.ServiceProxy(path);
+            let indicator = this._createIndicator();
+
+            let service;
+            if(type == "ethernet")
+                service = new EthernetItem(proxy, indicator);
+            else
+                service = new ConnectionItem(type, proxy, indicator);
+
+            this.addMenuItem(service);
+            this._services[path] = service;
         }
         this._services[path].update(properties);
     },
@@ -325,7 +346,8 @@ const ConnmanApplet = new Lang.Class({
             this._manager.disconnectSignal(this._psig);
         }
         this._manager = null;
-        this._agent.destroy();
+        if(this._agent)
+            this._agent.destroy();
         this._agent = null;
     },
 
@@ -346,7 +368,8 @@ const ConnmanApplet = new Lang.Class({
             Gio.DBus.system.unwatch_name(this._watch);
             this._watch = null;
         }
-        this._agent.destroy();
+        if(this._agent)
+            this._agent.destroy();
         this._agent = null;
     },
 });
