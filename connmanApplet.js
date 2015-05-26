@@ -26,6 +26,7 @@ const PopupMenu = imports.ui.popupMenu;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
+const ConnmanAgent = Ext.imports.connmanAgent;
 const ConnmanInterface = Ext.imports.connmanInterface;
 
 function signalToIcon(value) {
@@ -284,6 +285,8 @@ const ConnmanApplet = new Lang.Class({
         this.menu.actor.show();
 
         this._manager = new ConnmanInterface.ManagerProxy();
+        this._agent = new ConnmanAgent.Agent();
+
         this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
         this._asig = this._manager.connectSignal("TechnologyAdded",
                 function(proxy, sender, [path, properties]) {
@@ -322,6 +325,8 @@ const ConnmanApplet = new Lang.Class({
             this._manager.disconnectSignal(this._psig);
         }
         this._manager = null;
+        this._agent.destroy();
+        this._agent = null;
     },
 
     enable: function() {
@@ -341,5 +346,7 @@ const ConnmanApplet = new Lang.Class({
             Gio.DBus.system.unwatch_name(this._watch);
             this._watch = null;
         }
+        this._agent.destroy();
+        this._agent = null;
     },
 });
