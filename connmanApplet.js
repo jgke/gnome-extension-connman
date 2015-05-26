@@ -91,75 +91,38 @@ function getStatusIcon(type, state, strength) {
     }
 }
 
-/* specific submenu for a technology */
-const TechnologyMenu = new Lang.Class({
-    Name: "TechnologyMenu",
+const EthernetItem = new Lang.Class({
+    Name: "EthernetItem",
     Extends: PopupMenu.PopupSubMenuMenuItem,
 
-    _init: function(proxy, powered) {
+    _init: function(proxy, indicator) {
         this.parent("", true);
+
         this._proxy = proxy;
-        this.powered = powered;
-        this._powerSwitch = new PopupMenu.PopupMenuItem("Power");
-        this._powerSwitch.connect('activate', function() {
-            this.powered = !this.powered;
-            let powered = GLib.Variant.new('b', this.powered);
-            this._proxy.SetPropertyRemote('Powered', powered);
-            this.update();
+
+        this._connected = true;
+        this._connectionSwitch = new PopupMenu.PopupMenuItem("Connect");
+        this._connectionSwitch.connect('activate', function() {
         }.bind(this));
-        this.menu.addMenuItem(this._powerSwitch);
-    },
 
-    update: function() {
-        if(this.powered)
-            this._powerSwitch.label.text = "Turn Off";
-        else
-            this._powerSwitch.label.text = "Turn On";
-    },
-
-});
-
-/* This class handles specific technology with an indicator and a submenu. */
-const Technology = new Lang.Class({
-    Name: "Technology",
-    Extends: PopupMenu.PopupMenuSection,
-
-    _init: function(indicator, type, properties) {
-        this.parent();
         this._indicator = indicator;
-        this._indicator.icon_name = "network-wired-disconnected-symbolic";
         this._indicator.show();
-
-        this._type = type.split("/").pop();
-
-        this._proxy = new ConnmanInterface.TechnologyProxy(type);
-        this._menu = new TechnologyMenu(this._proxy, properties.Powered.deep_unpack());
-
-        this.addMenuItem(this._menu);
-
-        this.update(properties);
+        this.label.text = "Wired Connection";
+        this.menu.addMenuItem(this._connectionSwitch);
+        this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Wired Settings"));
     },
 
     update: function(properties) {
         if(properties.State)
             this.state = properties.State.deep_unpack();
-        if(properties.Strength)
-            this.strength = properties.Strength.deep_unpack();
-        if(properties.Powered) {
-            this._menu.powered = properties.Powered.deep_unpack();
-            this._menu.update();
-        }
-
-        this.icon = getStatusIcon(this.type, this.state, this.strength);
-        if(properties.Name)
-            this.name = properties.Name.deep_unpack();
-
-        if(this.name)
-            this._menu.label.text = this.name;
-        if(this.icon)
-            this._menu.icon.icon_name = this.icon;
-        if(this.state)
-            this._menu.status.text = this.state;
+        if(this.state == "idle")
+            this._connectionSwitch.label.text = "Connect";
+        else if(this.state == "failure")
+            this._connectionSwitch.label.text = "Reconnect";
+        else
+            this._connectionSwitch.label.text = "Disconnect";
+        this.icon.icon_name = getStatusIcon("ethernet", this.state);
+        this._indicator.icon_name = this.icon.icon_name;
     },
 
     destroy: function() {
@@ -173,11 +136,11 @@ const ConnmanMenu = new Lang.Class({
     Name: "ConnmanMenu",
     Extends: PopupMenu.PopupMenuSection,
 
-    _init: function(addIndicator) {
+    _init: function(createIndicator) {
         this.parent();
         this._technologies = {};
         this._services = {};
-        this._addIndicator = addIndicator;
+        this._createIndicator = createIndicator;
     },
 
     hide: function() {
@@ -189,54 +152,81 @@ const ConnmanMenu = new Lang.Class({
     },
 
     addTechnology: function(type, properties) {
+        log("adding technology " + type);
+        /* ethernet devices are handled as services */
+        if(type == "ethernet")
+            return;
         if(this._technologies[type])
             return;
-
-        this._technologies[type] = new Technology(this._addIndicator(),
-                type, properties);
-        this.addMenuItem(this._technologies[type]);
+        log("tried to add unknown technology " + type);
     },
 
-    removeTechnology: function(type) {
-        let technology = this._technologies[type];
-        if(!technology)
-            return;
-        technology.destroy();
-        delete this._technologies[type];
-        /* FIXME: for some reason destroying the technology
-         * leaves a hole, but for some reason this fixes it */
+    /* FIXME: for some reason destroying an item from the menu
+     * leaves a hole, but for some reason this fixes it */
+    fixMenu: function() {
         this.addMenuItem(new PopupMenu.PopupMenuItem("Connman"), 0);
         this.firstMenuItem.destroy();
     },
 
-    updateService: function(path, properties) {
-        log(path);
-        log(properties);
-        let type = properties.Type.deep_unpack();
+    removeTechnology: function(type) {
+        log("removing technology " + type);
         let technology = this._technologies[type];
-        if(!technology)
+        if(!technology) {
+            log("tried to remove unknown technology " + type);
             return;
-        switch(type.split("/").pop()) {
-            case "ethernet":
         }
+        technology.destroy();
+        delete this._technologies[type];
+        this.fixMenu();
+    },
+
+    updateService: function(path, properties) {
+        log("updating service " + path);
+        let type = properties.Type.deep_unpack().split("/").pop();
+        if(type != "ethernet") {
+            var technology = this._technologies[type];
+            if(!technology)
+                return;
+        }
+
         if(!this._services[path]) {
-            this._services[path] = new Service(path, properties);
+            switch(type) {
+            case "ethernet":
+                let proxy = new ConnmanInterface.ServiceProxy(path);
+                let indicator = this._createIndicator();
+                this._services[path] = new EthernetItem(proxy, indicator);
+                this._services[path].update(properties);
+                this.addMenuItem(this._services[path]);
+                return;
+            default:
+                log("tried to update unknown service type " + type);
+            }
             technology.addService(this._services[path]);
         }
-        else
-            this._services[path].update(properties);
+        this._services[path].update(properties);
     },
 
     removeService: function(path) {
-        let type = properties.Type.deep_unpack();
-        let technology = this._technologies[type];
-        if(!technology)
+        log("removing service " + path);
+        if(!this._services[path]) {
+            log("tried to remove unknown service " + path);
             return;
+        }
         this._services[path].destroy();
         delete this._services[path];
+        this.fixMenu();
     },
 
     clear: function() {
+        for(let path in this._services) {
+            this._services[path].destroy();
+            delete this._services[path];
+        }
+        for(let type in this._technologies) {
+            this._technologies[type].destroy();
+            delete this._technologies[type];
+        }
+        this._services = {};
         this._technologies = {};
     }
 });
@@ -261,11 +251,11 @@ const ConnmanApplet = new Lang.Class({
         this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
         this._asig = this._manager.connectSignal("TechnologyAdded",
                 function(proxy, sender, [path, properties]) {
-                    this._menu.addTechnology(path, properties);
+                    this._menu.addTechnology(path.split("/").pop(), properties);
                 }.bind(this));
         this._rsig = this._manager.connectSignal("TechnologyRemoved",
                 function(proxy, sender, [path, properties]) {
-                    this._menu.removeTechnology(path);
+                    this._menu.removeTechnology(path.split("/").pop());
                 }.bind(this));
         this._psig = this._manager.connectSignal("PropertyChanged",
                 function(proxy, sender, [property, value]) {}.bind(this));
@@ -279,12 +269,21 @@ const ConnmanApplet = new Lang.Class({
 
         this._manager.GetTechnologiesRemote(function(result, exception) {
             if(!result || exception) {
+                log("error fetching technologies: " + exception);
                 return;
             }
             let technologies = result[0];
-            for each(let [path, properties] in technologies) {
-                this._menu.addTechnology(path, properties);
-            }
+            for each(let [path, properties] in technologies)
+                this._menu.addTechnology(path.split("/").pop(), properties);
+            this._manager.GetServicesRemote(function(result, exception) {
+                if(!result || exception) {
+                    log("error fetching services: " + exception);
+                    return;
+                }
+                let services = result[0];
+                for each(let [path, properties] in services)
+                    this._menu.updateService(path, properties);
+            }.bind(this));
         }.bind(this));
         this.indicators.show();
     },
