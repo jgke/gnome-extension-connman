@@ -187,12 +187,9 @@ const ConnmanMenu = new Lang.Class({
 
     addTechnology: function(type, properties) {
         log('adding technology ' + type);
-        /* ethernet devices are handled as services */
-        if(type == 'ethernet')
-            return;
         if(this._technologies[type])
             return;
-        log('tried to add unknown technology ' + type);
+        this._technologies[type] = {};
     },
 
     /* FIXME: for some reason destroying an item from the menu
@@ -235,6 +232,7 @@ const ConnmanMenu = new Lang.Class({
 
             this.addMenuItem(service);
             this._services[path] = service;
+            this._technologies[type][path] = service;
         }
         this._services[path].update(properties);
     },
