@@ -103,7 +103,18 @@ const EthernetItem = new Lang.Class({
         this._connected = true;
         this._connectionSwitch = new PopupMenu.PopupMenuItem("Connect");
         this._connectionSwitch.connect('activate', function() {
+            if(this.state == "idle" || this.state == "failure")
+                this._proxy.ConnectRemote();
+            else
+                this._proxy.DisconnectRemote();
         }.bind(this));
+
+        this._proxy.connectSignal("PropertyChanged",
+                function(proxy, sender, [name, value]) {
+                    let obj = {};
+                    obj[name] = value;
+                    this.update(obj);
+                }.bind(this));
 
         this._indicator = indicator;
         this._indicator.show();
@@ -244,6 +255,31 @@ const ConnmanApplet = new Lang.Class({
         this.menu.actor.show();
     },
 
+    _updateAllServices: function() {
+        this._manager.GetServicesRemote(function(result, exception) {
+            if(!result || exception) {
+                log("error fetching services: " + exception);
+                return;
+            }
+            let services = result[0];
+            for each(let [path, properties] in services)
+                this._menu.updateService(path, properties);
+        }.bind(this));
+    },
+
+    _updateAllTechnologies: function() {
+        this._manager.GetTechnologiesRemote(function(result, exception) {
+            if(!result || exception) {
+                log("error fetching technologies: " + exception);
+                return;
+            }
+            let technologies = result[0];
+            for each(let [path, properties] in technologies)
+                this._menu.addTechnology(path.split("/").pop(), properties);
+            this._updateAllServices();
+        }.bind(this));
+    },
+
     _connectEvent: function() {
         this.menu.actor.show();
 
@@ -258,33 +294,20 @@ const ConnmanApplet = new Lang.Class({
                     this._menu.removeTechnology(path.split("/").pop());
                 }.bind(this));
         this._psig = this._manager.connectSignal("PropertyChanged",
-                function(proxy, sender, [property, value]) {}.bind(this));
+                function(proxy, sender, [property, value]) {
+                }.bind(this));
         this._ssig = this._manager.connectSignal("ServicesChanged",
                 function(proxy, sender, [changed, removed]) {
-                    for each(let [path, properties] in changed)
+                    log("Services Changed");
+                    for each(let [path, properties] in changed) {
                         this._menu.updateService(path, properties);
-                    for each(let path in removed)
+                    }
+                    for each(let path in removed) {
                         this._menu.removeService(path);
+                    }
                 }.bind(this));
 
-        this._manager.GetTechnologiesRemote(function(result, exception) {
-            if(!result || exception) {
-                log("error fetching technologies: " + exception);
-                return;
-            }
-            let technologies = result[0];
-            for each(let [path, properties] in technologies)
-                this._menu.addTechnology(path.split("/").pop(), properties);
-            this._manager.GetServicesRemote(function(result, exception) {
-                if(!result || exception) {
-                    log("error fetching services: " + exception);
-                    return;
-                }
-                let services = result[0];
-                for each(let [path, properties] in services)
-                    this._menu.updateService(path, properties);
-            }.bind(this));
-        }.bind(this));
+        this._updateAllTechnologies();
         this.indicators.show();
     },
 
