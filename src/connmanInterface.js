@@ -18,9 +18,9 @@
 
 const Gio = imports.gi.Gio;
 
-const BUS_NAME = "net.connman";
-const MANAGER_PATH = "/";
-const AGENT_PATH = "/net/connman/agent";
+const BUS_NAME = 'net.connman';
+const MANAGER_PATH = '/';
+const AGENT_PATH = '/net/connman/agent';
 
 const _MANAGER_INTERFACE = '<node>\
 <interface name="net.connman.Manager">\

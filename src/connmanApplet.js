@@ -31,86 +31,86 @@ const ConnmanInterface = Ext.imports.connmanInterface;
 
 function signalToIcon(value) {
     if (value > 80)
-        return "excellent";
+        return 'excellent';
     if (value > 55)
-        return "good";
+        return 'good';
     if (value > 30)
-        return "ok";
+        return 'ok';
     if (value > 5)
-        return "weak";
-    return "excellent";
+        return 'weak';
+    return 'excellent';
 }
 
 function getIcon(type, strength) {
     switch (type) {
-        case "ethernet":
-            return "network-wired-symbolic";
-        case "cellular":
-            return "network-cellular-signal-" + signalToIcon(strength) + "-symbolic";
-        case "bluetooth":
-            return "bluetooth-active-symbolic";
-        case "wifi":
-            return "network-wireless-signal-" + signalToIcon(strength) + "-symbolic";
-        case "vpn":
-            return "network-vpn-symbolic";
+        case 'ethernet':
+            return 'network-wired-symbolic';
+        case 'cellular':
+            return 'network-cellular-signal-' + signalToIcon(strength) + '-symbolic';
+        case 'bluetooth':
+            return 'bluetooth-active-symbolic';
+        case 'wifi':
+            return 'network-wireless-signal-' + signalToIcon(strength) + '-symbolic';
+        case 'vpn':
+            return 'network-vpn-symbolic';
         default:
-            return "network-offline-symbolic";
+            return 'network-offline-symbolic';
     }
 }
 
 function getAcquiringIcon(type){
     switch (type) {
-        case "wifi":
-            return "network-wireless-acquiring-symbolic";
-        case "cellular":
-            return "network-cellular-acquiring-symbolic";
-        case "ethernet":
-            return "network-wired-acquiring-symbolic";
-        case "vpn":
-            return "network-vpn-acquiring-symbolic";
-        case "bluetooth":
-            return "bluetooth-active-symbolic";
+        case 'wifi':
+            return 'network-wireless-acquiring-symbolic';
+        case 'cellular':
+            return 'network-cellular-acquiring-symbolic';
+        case 'ethernet':
+            return 'network-wired-acquiring-symbolic';
+        case 'vpn':
+            return 'network-vpn-acquiring-symbolic';
+        case 'bluetooth':
+            return 'bluetooth-active-symbolic';
         default :
-            return "network-wireless-acquiring-symbolic";
+            return 'network-wireless-acquiring-symbolic';
     }
 }
 
 function getStatusIcon(type, state, strength) {
     switch(state) {
-        case "online":
-        case "ready":
+        case 'online':
+        case 'ready':
             return getIcon(type, strength);
-        case "configuration":
-        case "association":
+        case 'configuration':
+        case 'association':
             return getAcquiringIcon(type);
-        case "disconnect":
-        case "idle":
-            return "network-offline-symbolic";
-        case "failure":
+        case 'disconnect':
+        case 'idle':
+            return 'network-offline-symbolic';
+        case 'failure':
         default:
-            return "network-error-symbolic";
+            return 'network-error-symbolic';
     }
 }
 
 const EthernetItem = new Lang.Class({
-    Name: "EthernetItem",
+    Name: 'EthernetItem',
     Extends: PopupMenu.PopupSubMenuMenuItem,
 
     _init: function(proxy, indicator) {
-        this.parent("", true);
+        this.parent('', true);
 
         this._proxy = proxy;
 
         this._connected = true;
         this._connectionSwitch = new PopupMenu.PopupMenuItem("Connect");
         this._connectionSwitch.connect('activate', function() {
-            if(this.state == "idle" || this.state == "failure")
+            if(this.state == 'idle' || this.state == 'failure')
                 this._proxy.ConnectRemote();
             else
                 this._proxy.DisconnectRemote();
         }.bind(this));
 
-        this._proxy.connectSignal("PropertyChanged",
+        this._proxy.connectSignal('PropertyChanged',
                 function(proxy, sender, [name, value]) {
                     let obj = {};
                     obj[name] = value;
@@ -127,13 +127,13 @@ const EthernetItem = new Lang.Class({
     update: function(properties) {
         if(properties.State)
             this.state = properties.State.deep_unpack();
-        if(this.state == "idle")
+        if(this.state == 'idle')
             this._connectionSwitch.label.text = "Connect";
-        else if(this.state == "failure")
+        else if(this.state == 'failure')
             this._connectionSwitch.label.text = "Reconnect";
         else
             this._connectionSwitch.label.text = "Disconnect";
-        this.icon.icon_name = getStatusIcon("ethernet", this.state);
+        this.icon.icon_name = getStatusIcon('ethernet', this.state);
         this._indicator.icon_name = this.icon.icon_name;
     },
 
@@ -145,7 +145,7 @@ const EthernetItem = new Lang.Class({
 
 /* menu with technologies and services */
 const ConnmanMenu = new Lang.Class({
-    Name: "ConnmanMenu",
+    Name: 'ConnmanMenu',
     Extends: PopupMenu.PopupMenuSection,
 
     _init: function(createIndicator) {
@@ -164,27 +164,27 @@ const ConnmanMenu = new Lang.Class({
     },
 
     addTechnology: function(type, properties) {
-        log("adding technology " + type);
+        log('adding technology ' + type);
         /* ethernet devices are handled as services */
-        if(type == "ethernet")
+        if(type == 'ethernet')
             return;
         if(this._technologies[type])
             return;
-        log("tried to add unknown technology " + type);
+        log('tried to add unknown technology ' + type);
     },
 
     /* FIXME: for some reason destroying an item from the menu
      * leaves a hole, but for some reason this fixes it */
     fixMenu: function() {
-        this.addMenuItem(new PopupMenu.PopupMenuItem("Connman"), 0);
+        this.addMenuItem(new PopupMenu.PopupMenuItem('Connman'), 0);
         this.firstMenuItem.destroy();
     },
 
     removeTechnology: function(type) {
-        log("removing technology " + type);
+        log('removing technology ' + type);
         let technology = this._technologies[type];
         if(!technology) {
-            log("tried to remove unknown technology " + type);
+            log('tried to remove unknown technology ' + type);
             return;
         }
         technology.destroy();
@@ -193,9 +193,9 @@ const ConnmanMenu = new Lang.Class({
     },
 
     updateService: function(path, properties) {
-        log("updating service " + path);
-        let type = properties.Type.deep_unpack().split("/").pop();
-        if(type != "ethernet") {
+        log('updating service ' + path);
+        let type = properties.Type.deep_unpack().split('/').pop();
+        if(type != 'ethernet') {
             var technology = this._technologies[type];
             if(!technology)
                 return;
@@ -203,7 +203,7 @@ const ConnmanMenu = new Lang.Class({
 
         if(!this._services[path]) {
             switch(type) {
-            case "ethernet":
+            case 'ethernet':
                 let proxy = new ConnmanInterface.ServiceProxy(path);
                 let indicator = this._createIndicator();
                 this._services[path] = new EthernetItem(proxy, indicator);
@@ -211,7 +211,7 @@ const ConnmanMenu = new Lang.Class({
                 this.addMenuItem(this._services[path]);
                 return;
             default:
-                log("tried to update unknown service type " + type);
+                log('tried to update unknown service type ' + type);
             }
             technology.addService(this._services[path]);
         }
@@ -219,9 +219,9 @@ const ConnmanMenu = new Lang.Class({
     },
 
     removeService: function(path) {
-        log("removing service " + path);
+        log('removing service ' + path);
         if(!this._services[path]) {
-            log("tried to remove unknown service " + path);
+            log('tried to remove unknown service ' + path);
             return;
         }
         this._services[path].destroy();
@@ -245,7 +245,7 @@ const ConnmanMenu = new Lang.Class({
 
 /* main applet class handling everything */
 const ConnmanApplet = new Lang.Class({
-    Name: "ConnmanApplet",
+    Name: 'ConnmanApplet',
     Extends: PanelMenu.SystemIndicator,
 
     _init: function() {
@@ -259,7 +259,7 @@ const ConnmanApplet = new Lang.Class({
     _updateAllServices: function() {
         this._manager.GetServicesRemote(function(result, exception) {
             if(!result || exception) {
-                log("error fetching services: " + exception);
+                log('error fetching services: ' + exception);
                 return;
             }
             let services = result[0];
@@ -271,12 +271,12 @@ const ConnmanApplet = new Lang.Class({
     _updateAllTechnologies: function() {
         this._manager.GetTechnologiesRemote(function(result, exception) {
             if(!result || exception) {
-                log("error fetching technologies: " + exception);
+                log('error fetching technologies: ' + exception);
                 return;
             }
             let technologies = result[0];
             for each(let [path, properties] in technologies)
-                this._menu.addTechnology(path.split("/").pop(), properties);
+                this._menu.addTechnology(path.split('/').pop(), properties);
             this._updateAllServices();
         }.bind(this));
     },
@@ -288,20 +288,20 @@ const ConnmanApplet = new Lang.Class({
         this._agent = new ConnmanAgent.Agent();
 
         this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
-        this._asig = this._manager.connectSignal("TechnologyAdded",
+        this._asig = this._manager.connectSignal('TechnologyAdded',
                 function(proxy, sender, [path, properties]) {
-                    this._menu.addTechnology(path.split("/").pop(), properties);
+                    this._menu.addTechnology(path.split('/').pop(), properties);
                 }.bind(this));
-        this._rsig = this._manager.connectSignal("TechnologyRemoved",
+        this._rsig = this._manager.connectSignal('TechnologyRemoved',
                 function(proxy, sender, [path, properties]) {
-                    this._menu.removeTechnology(path.split("/").pop());
+                    this._menu.removeTechnology(path.split('/').pop());
                 }.bind(this));
-        this._psig = this._manager.connectSignal("PropertyChanged",
+        this._psig = this._manager.connectSignal('PropertyChanged',
                 function(proxy, sender, [property, value]) {
                 }.bind(this));
-        this._ssig = this._manager.connectSignal("ServicesChanged",
+        this._ssig = this._manager.connectSignal('ServicesChanged',
                 function(proxy, sender, [changed, removed]) {
-                    log("Services Changed");
+                    log('Services Changed');
                     for each(let [path, properties] in changed) {
                         this._menu.updateService(path, properties);
                     }

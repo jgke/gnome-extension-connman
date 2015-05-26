@@ -19,7 +19,7 @@
 const Lang = imports.lang;
 
 const Agent = new Lang.Class({
-    Name: "Agent",
+    Name: 'Agent',
 
     _init: function() {
 
