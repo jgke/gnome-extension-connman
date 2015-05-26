@@ -288,6 +288,7 @@ const ConnmanApplet = new Lang.Class({
     },
 
     _updateAllTechnologies: function() {
+        this._menu.clear();
         this._manager.GetTechnologiesRemote(function(result, exception) {
             if(!result || exception) {
                 log('error fetching technologies: ' + exception);
