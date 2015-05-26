@@ -119,14 +119,20 @@ const TechnologyMenu = new Lang.Class({
 
 });
 
-/* Menu item with technology name, icons and submenu with specific items */
+/* This class handles specific technology with an indicator and a submenu. */
 const Technology = new Lang.Class({
     Name: "Technology",
     Extends: PopupMenu.PopupMenuSection,
 
-    _init: function(path, properties) {
+    _init: function(indicator, type, properties) {
         this.parent();
-        this._proxy = new ConnmanInterface.TechnologyProxy(path);
+        this._indicator = indicator;
+        this._indicator.icon_name = "network-wired-disconnected-symbolic";
+        this._indicator.show();
+
+        this._type = type.split("/").pop();
+
+        this._proxy = new ConnmanInterface.TechnologyProxy(type);
         this._menu = new TechnologyMenu(this._proxy, properties.Powered.deep_unpack());
 
         this.addMenuItem(this._menu);
@@ -135,7 +141,6 @@ const Technology = new Lang.Class({
     },
 
     update: function(properties) {
-        this.type = properties.Type.deep_unpack();
         if(properties.State)
             this.state = properties.State.deep_unpack();
         if(properties.Strength)
@@ -155,46 +160,80 @@ const Technology = new Lang.Class({
             this._menu.icon.icon_name = this.icon;
         if(this.state)
             this._menu.status.text = this.state;
+    },
+
+    destroy: function() {
+        this._indicator.destroy();
+        this.parent();
     }
 });
 
-/* menu with technologies */
+/* menu with technologies and services */
 const ConnmanMenu = new Lang.Class({
     Name: "ConnmanMenu",
     Extends: PopupMenu.PopupMenuSection,
 
-    _init: function() {
+    _init: function(addIndicator) {
         this.parent();
         this._technologies = {};
+        this._services = {};
+        this._addIndicator = addIndicator;
     },
 
     hide: function() {
-        this._menu.actor.hide();
+        this.actor.hide();
     },
 
     show: function() {
-        this._menu.actor.show();
+        this.actor.show();
     },
 
-
-    addTechnology: function(path, properties) {
-        if(this._technologies[path])
+    addTechnology: function(type, properties) {
+        if(this._technologies[type])
             return;
 
-        this._technologies[path] = new Technology(path, properties);
-        this.addMenuItem(this._technologies[path]);
+        this._technologies[type] = new Technology(this._addIndicator(),
+                type, properties);
+        this.addMenuItem(this._technologies[type]);
     },
 
-    removeTechnology: function(path) {
-        let technology = this._technologies[path];
+    removeTechnology: function(type) {
+        let technology = this._technologies[type];
         if(!technology)
             return;
         technology.destroy();
-        delete this._technologies[path];
+        delete this._technologies[type];
         /* FIXME: for some reason destroying the technology
          * leaves a hole, but for some reason this fixes it */
         this.addMenuItem(new PopupMenu.PopupMenuItem("Connman"), 0);
         this.firstMenuItem.destroy();
+    },
+
+    updateService: function(path, properties) {
+        log(path);
+        log(properties);
+        let type = properties.Type.deep_unpack();
+        let technology = this._technologies[type];
+        if(!technology)
+            return;
+        switch(type.split("/").pop()) {
+            case "ethernet":
+        }
+        if(!this._services[path]) {
+            this._services[path] = new Service(path, properties);
+            technology.addService(this._services[path]);
+        }
+        else
+            this._services[path].update(properties);
+    },
+
+    removeService: function(path) {
+        let type = properties.Type.deep_unpack();
+        let technology = this._technologies[type];
+        if(!technology)
+            return;
+        this._services[path].destroy();
+        delete this._services[path];
     },
 
     clear: function() {
@@ -210,16 +249,13 @@ const ConnmanApplet = new Lang.Class({
     _init: function() {
         this.parent();
 
-        this._indicator = this._addIndicator();
-        this._indicator.icon_name = "network-wired-symbolic";
-
-        this._menu = new ConnmanMenu();
+        this._menu = new ConnmanMenu(this._addIndicator.bind(this));
         this.menu.addMenuItem(this._menu);
+        this.menu.actor.show();
     },
 
     _connectEvent: function() {
         this.menu.actor.show();
-        this._indicator.show();
 
         this._manager = new ConnmanInterface.ManagerProxy();
         this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
@@ -231,6 +267,15 @@ const ConnmanApplet = new Lang.Class({
                 function(proxy, sender, [path, properties]) {
                     this._menu.removeTechnology(path);
                 }.bind(this));
+        this._psig = this._manager.connectSignal("PropertyChanged",
+                function(proxy, sender, [property, value]) {}.bind(this));
+        this._ssig = this._manager.connectSignal("ServicesChanged",
+                function(proxy, sender, [changed, removed]) {
+                    for each(let [path, properties] in changed)
+                        this._menu.updateService(path, properties);
+                    for each(let path in removed)
+                        this._menu.removeService(path);
+                }.bind(this));
 
         this._manager.GetTechnologiesRemote(function(result, exception) {
             if(!result || exception) {
@@ -241,15 +286,18 @@ const ConnmanApplet = new Lang.Class({
                 this._menu.addTechnology(path, properties);
             }
         }.bind(this));
+        this.indicators.show();
     },
 
     _disconnectEvent: function() {
         this._menu.removeAll();
         this.menu.actor.hide();
-        this._indicator.hide();
+        this.indicators.hide();
         if(this._manager) {
             this._manager.disconnectSignal(this._asig);
             this._manager.disconnectSignal(this._rsig);
+            this._manager.disconnectSignal(this._ssig);
+            this._manager.disconnectSignal(this._psig);
         }
         this._manager = null;
     },
