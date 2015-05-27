@@ -29,75 +29,14 @@ const Ext = ExtensionUtils.getCurrentExtension();
 const ConnmanAgent = Ext.imports.connmanAgent;
 const ConnmanInterface = Ext.imports.connmanInterface;
 
-function signalToIcon(value) {
-    if (value > 80)
-        return 'excellent';
-    if (value > 55)
-        return 'good';
-    if (value > 30)
-        return 'ok';
-    if (value > 5)
-        return 'weak';
-    return 'excellent';
-}
-
-function getIcon(type, strength) {
-    switch (type) {
-        case 'ethernet':
-            return 'network-wired-symbolic';
-        case 'cellular':
-            return 'network-cellular-signal-' + signalToIcon(strength) + '-symbolic';
-        case 'bluetooth':
-            return 'bluetooth-active-symbolic';
-        case 'wifi':
-            return 'network-wireless-signal-' + signalToIcon(strength) + '-symbolic';
-        case 'vpn':
-            return 'network-vpn-symbolic';
-        default:
-            return 'network-offline-symbolic';
-    }
-}
-
-function getAcquiringIcon(type){
-    switch (type) {
-        case 'wifi':
-            return 'network-wireless-acquiring-symbolic';
-        case 'cellular':
-            return 'network-cellular-acquiring-symbolic';
-        case 'ethernet':
-            return 'network-wired-acquiring-symbolic';
-        case 'vpn':
-            return 'network-vpn-acquiring-symbolic';
-        case 'bluetooth':
-            return 'bluetooth-active-symbolic';
-        default :
-            return 'network-wireless-acquiring-symbolic';
-    }
-}
-
-function getStatusIcon(type, state, strength) {
-    switch(state) {
-        case 'online':
-        case 'ready':
-            return getIcon(type, strength);
-        case 'configuration':
-        case 'association':
-            return getAcquiringIcon(type);
-        case 'disconnect':
-        case 'idle':
-            return 'network-offline-symbolic';
-        case 'failure':
-        default:
-            return 'network-error-symbolic';
-    }
-}
-
 const ConnectionItem = new Lang.Class({
     Name: 'ConnectionItem',
     Extends: PopupMenu.PopupSubMenuMenuItem,
 
     _init: function(type, proxy, indicator) {
         this.parent('', true);
+
+        this._properties = {};
 
         this._proxy = proxy;
 
@@ -124,9 +63,12 @@ const ConnectionItem = new Lang.Class({
 
         this.menu.addMenuItem(this._connectionSwitch);
         this.menu.addMenuItem(this._settings);
+        this.hide();
     },
 
     update: function(properties) {
+        for(let key in properties)
+            this._properties[key] = properties[key].deep_unpack();
         if(properties.State)
             this.state = properties.State.deep_unpack();
         if(this.state == 'idle')
@@ -135,6 +77,7 @@ const ConnectionItem = new Lang.Class({
             this._connectionSwitch.label.text = "Reconnect";
         else
             this._connectionSwitch.label.text = "Disconnect";
+        this.setIcon(this.getStatusIcon());
     },
 
     setIcon: function(iconName) {
@@ -145,6 +88,41 @@ const ConnectionItem = new Lang.Class({
     destroy: function() {
         this._indicator.destroy();
         this.parent();
+    },
+
+    getIcon: function() {
+        return 'network-wired-symbolic';
+    },
+
+    getAcquiringIcon: function() {
+        return 'network-wired-acquiring-symbolic';
+    },
+
+    getStatusIcon: function() {
+        switch(this.state) {
+        case 'online':
+        case 'ready':
+            return this.getIcon();
+        case 'configuration':
+        case 'association':
+            return this.getAcquiringIcon();
+        case 'disconnect':
+        case 'idle':
+            return 'network-offline-symbolic';
+        case 'failure':
+        default:
+            return 'network-error-symbolic';
+        }
+    },
+
+    show: function() {
+        this.actor.show();
+        this._indicator.show();
+    },
+
+    hide: function() {
+        this.actor.hide();
+        this._indicator.hide();
     }
 });
 
@@ -156,12 +134,58 @@ const EthernetItem = new Lang.Class({
         this.parent('ethernet', proxy, indicator);
         this.label.text = "Wired Connection";
         this._settings.label.text = "Wired Settings";
+        this.show();
+    },
+});
+
+const WirelessItem = new Lang.Class({
+    Name: "WirelessItem",
+    Extends: ConnectionItem,
+
+    _init: function(proxy, indicator) {
+        this.parent('wireless', proxy, indicator);
+    },
+
+    signalToIcon: function() {
+        let value = this._strength;
+        if (value > 80)
+            return 'excellent';
+        if (value > 55)
+            return 'good';
+        if (value > 30)
+            return 'ok';
+        if (value > 5)
+            return 'weak';
+        return 'none';
     },
 
     update: function(properties) {
         this.parent(properties);
-        this.setIcon(getStatusIcon('ethernet', this.state));
-        this._indicator.icon_name = getStatusIcon('ethernet', this.state);
+    },
+
+    getAcquiringIcon: function() {
+        return 'network-wireless-acquiring-symbolic';
+    },
+
+    getIcon: function() {
+        return 'network-wireless-signal-' + this.signalToIcon() + '-symbolic';
+    },
+});
+
+const BluetoothItem = new Lang.Class({
+    Name: "BluetoothItem",
+    Extends: ConnectionItem,
+
+    _init: function(proxy, indicator) {
+        this.parent('bluetooth', proxy, indicator);
+    },
+
+    getAcquiringIcon: function() {
+        return 'bluetooth-active-symbolic';
+    },
+
+    getIcon: function() {
+        return 'bluetooth-active-symbolic';
     }
 });
 
@@ -227,6 +251,10 @@ const ConnmanMenu = new Lang.Class({
             let service;
             if(type == "ethernet")
                 service = new EthernetItem(proxy, indicator);
+            else if(type == "wireless")
+                service = new WirelessItem(proxy, indicator);
+            else if(type == "bluetooth")
+                service = new BluetoothItem(proxy, indicator);
             else
                 service = new ConnectionItem(type, proxy, indicator);
 
