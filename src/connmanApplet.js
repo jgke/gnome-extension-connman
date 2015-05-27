@@ -140,7 +140,7 @@ const ConnectionItem = new Lang.Class({
 });
 
 const EthernetItem = new Lang.Class({
-    Name: "EthernetItem",
+    Name: 'EthernetItem',
     Extends: ConnectionItem,
 
     _init: function(proxy, indicator) {
@@ -152,13 +152,13 @@ const EthernetItem = new Lang.Class({
 
     update: function(properties) {
         this.parent(properties);
-        if(this._properties["Ethernet"]["Interface"])
-            this.status.text = this._properties["Ethernet"]["Interface"];
+        if(this._properties['Ethernet']['Interface'])
+            this.status.text = this._properties['Ethernet']['Interface'];
     },
 });
 
 const WirelessItem = new Lang.Class({
-    Name: "WirelessItem",
+    Name: 'WirelessItem',
     Extends: ConnectionItem,
 
     _init: function(proxy, indicator) {
@@ -180,6 +180,10 @@ const WirelessItem = new Lang.Class({
 
     update: function(properties) {
         this.parent(properties);
+        if(this.state == 'disconnect' || this.state == 'idle)
+            this.hide();
+        else
+            this.show();
     },
 
     getAcquiringIcon: function() {
@@ -192,7 +196,7 @@ const WirelessItem = new Lang.Class({
 });
 
 const BluetoothItem = new Lang.Class({
-    Name: "BluetoothItem",
+    Name: 'BluetoothItem',
     Extends: ConnectionItem,
 
     _init: function(proxy, indicator) {
@@ -268,11 +272,11 @@ const ConnmanMenu = new Lang.Class({
             let indicator = this._createIndicator();
 
             let service;
-            if(type == "ethernet")
+            if(type == 'ethernet')
                 service = new EthernetItem(proxy, indicator);
-            else if(type == "wireless")
+            else if(type == 'wireless')
                 service = new WirelessItem(proxy, indicator);
-            else if(type == "bluetooth")
+            else if(type == 'bluetooth')
                 service = new BluetoothItem(proxy, indicator);
             else
                 service = new ConnectionItem(type, proxy, indicator);
