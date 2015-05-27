@@ -67,8 +67,21 @@ const ConnectionItem = new Lang.Class({
     },
 
     update: function(properties) {
-        for(let key in properties)
-            this._properties[key] = properties[key].deep_unpack();
+        for(let key in properties) {
+            let newProperty = properties[key].deep_unpack();
+            if(newProperty instanceof Object &&
+                    !(newProperty instanceof Array)) {
+                if(!this._properties[key])
+                    this._properties[key] = {};
+                for(let innerKey in newProperty) {
+                    this._properties[key][innerKey] =
+                        newProperty[innerKey].deep_unpack();
+                }
+            }
+            else {
+                this._properties[key] = newProperty;
+            }
+        }
         if(properties.State)
             this.state = properties.State.deep_unpack();
         if(this.state == 'idle')
@@ -135,6 +148,12 @@ const EthernetItem = new Lang.Class({
         this.label.text = "Wired Connection";
         this._settings.label.text = "Wired Settings";
         this.show();
+    },
+
+    update: function(properties) {
+        this.parent(properties);
+        if(this._properties["Ethernet"]["Interface"])
+            this.status.text = this._properties["Ethernet"]["Interface"];
     },
 });
 
