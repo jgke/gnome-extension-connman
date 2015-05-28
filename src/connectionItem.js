@@ -171,10 +171,6 @@ const WirelessItem = new Lang.Class({
 
     update: function(properties) {
         this.parent(properties);
-        if(this.state == 'disconnect' || this.state == 'idle')
-            this.hide();
-        else
-            this.show();
     },
 
     getAcquiringIcon: function() {

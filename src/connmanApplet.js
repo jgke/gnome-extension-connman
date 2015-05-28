@@ -177,6 +177,10 @@ const ConnmanApplet = new Lang.Class({
                 function(proxy, sender, [changed, removed]) {
                     log('Services Changed');
                     for each(let [path, properties] in changed) {
+                        if(!Object.keys(properties)) {
+                            log("ignoring change with empty properties");
+                            continue;
+                        }
                         this._menu.updateService(path, properties);
                     }
                     for each(let path in removed) {
