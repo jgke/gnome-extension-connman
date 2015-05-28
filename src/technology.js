@@ -160,6 +160,15 @@ const BluetoothTechnology = new Lang.Class({
     },
 });
 
+const P2PTechnology = new Lang.Class({
+    Name: 'P2PTechnology',
+    Extends: Technology,
+
+    _init: function() {
+        this.parent('p2p');
+    },
+});
+
 function createTechnology(type) {
     switch(type) {
     case 'ethernet':
@@ -168,6 +177,8 @@ function createTechnology(type) {
         return new WirelessTechnology();
     case 'bluetooth':
         return new BluetoothTechnology();
+    case 'p2p':
+        return new P2PTechnology();
     default:
         throw 'tried to add unknown technology type ' + type;
     }
