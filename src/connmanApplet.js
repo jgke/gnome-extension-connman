@@ -88,7 +88,9 @@ const ConnmanMenu = new Lang.Class({
 
             let service = ConnectionItem.createItem(type, proxy, indicator);
             this._services[path] = service;
+            service.update(properties);
             this._technologies[type].addService(path, service);
+            return;
         }
         this._technologies[type].updateService(path, properties);
     },
