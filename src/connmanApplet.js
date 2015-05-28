@@ -29,6 +29,7 @@ const Ext = ExtensionUtils.getCurrentExtension();
 const ConnmanAgent = Ext.imports.connmanAgent;
 const ConnmanInterface = Ext.imports.connmanInterface;
 const ConnectionItem = Ext.imports.connectionItem;
+const Technology = Ext.imports.technology;
 
 /* menu with technologies and services */
 const ConnmanMenu = new Lang.Class({
@@ -54,7 +55,8 @@ const ConnmanMenu = new Lang.Class({
         log('adding technology ' + type);
         if(this._technologies[type])
             return;
-        this._technologies[type] = {};
+        this._technologies[type] = Technology.createTechnology(type);
+        this.addMenuItem(this._technologies[type]);
     },
 
     /* FIXME: for some reason destroying an item from the menu
@@ -79,22 +81,16 @@ const ConnmanMenu = new Lang.Class({
     updateService: function(path, properties) {
         log('updating service ' + path);
         let type = properties.Type.deep_unpack().split('/').pop();
-        if(type != 'ethernet') {
-            var technology = this._technologies[type];
-            if(!technology)
-                return;
-        }
 
         if(!this._services[path]) {
             let proxy = new ConnmanInterface.ServiceProxy(path);
             let indicator = this._createIndicator();
 
             let service = ConnectionItem.createItem(type, proxy, indicator);
-            this.addMenuItem(service);
             this._services[path] = service;
-            this._technologies[type][path] = service;
+            this._technologies[type].addService(path, service);
         }
-        this._services[path].update(properties);
+        this._technologies[type].updateService(path, properties);
     },
 
     removeService: function(path) {
@@ -109,10 +105,6 @@ const ConnmanMenu = new Lang.Class({
     },
 
     clear: function() {
-        for(let path in this._services) {
-            this._services[path].destroy();
-            delete this._services[path];
-        }
         for(let type in this._technologies) {
             this._technologies[type].destroy();
             delete this._technologies[type];
