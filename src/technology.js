@@ -70,13 +70,36 @@ const EthernetTechnology = new Lang.Class({
     }
 });
 
+const WirelessInterface = new Lang.Class({
+    Name: 'WirelessInterface',
+    Extends: PopupMenu.PopupSubMenuMenuItem,
+
+    _init: function(name) {
+        this.parent();
+        this.label.text = "Wireless Connection";
+        this.status.text = name;
+        this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Connect"));
+        this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Wireless Settings"));
+    },
+});
+
 const WirelessTechnology = new Lang.Class({
     Name: 'WirelessTechnology',
     Extends: Technology,
 
     _init: function() {
         this.parent('wireless');
+        this._interfaces = {};
     },
+
+    addService: function(id, service) {
+        this.parent(id, service);
+        let intf = service._properties["Ethernet"]["Interface"];
+        if(!this._interfaces[intf]) {
+            this._interfaces[intf] = new WirelessInterface(intf);
+            this.addMenuItem(this._interfaces[intf]);
+        }
+    }
 });
 
 const BluetoothTechnology = new Lang.Class({
