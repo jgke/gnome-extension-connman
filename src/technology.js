@@ -127,6 +127,7 @@ const WirelessInterface = new Lang.Class({
         if(this._indicator) {
             this.actor.show();
             this._indicator.show();
+            this._menu.icon.icon_name = this._indicator.icon.icon_name;
         }
     }
 });
@@ -147,7 +148,19 @@ const WirelessTechnology = new Lang.Class({
             this._interfaces[intf] = new WirelessInterface(intf);
             this.addMenuItem(this._interfaces[intf]);
         }
-        this._interfaces[intf]._services[id] = service;
+        this._interfaces[intf].addService(id, service);
+    },
+
+    updateService: function(id, properties) {
+        this.parent(id, properties);
+        let intf = this._services[id]._properties["Ethernet"]["Interface"];
+        this._interfaces[intf].updateService(id, properties);
+    },
+
+    removeService: function(id) {
+        this.parent(id);
+        let intf = this._services[id]._properties["Ethernet"]["Interface"];
+        this._interfaces[intf].removeService(id);
     }
 });
 

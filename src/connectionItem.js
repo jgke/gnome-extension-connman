@@ -158,7 +158,7 @@ const WirelessItem = new Lang.Class({
     },
 
     signalToIcon: function() {
-        let value = this._strength;
+        let value = this._properties['Strength'];
         if (value > 80)
             return 'excellent';
         if (value > 55)
