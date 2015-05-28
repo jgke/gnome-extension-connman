@@ -80,6 +80,7 @@ const WirelessInterface = new Lang.Class({
         this.status.text = name;
         this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Connect"));
         this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Wireless Settings"));
+        this.icon.icon_name = 'network-wireless-signal-excellent-symbolic';
     },
 });
 
@@ -88,7 +89,7 @@ const WirelessTechnology = new Lang.Class({
     Extends: Technology,
 
     _init: function() {
-        this.parent('wireless');
+        this.parent('wifi');
         this._interfaces = {};
     },
 
@@ -115,7 +116,7 @@ function createTechnology(type) {
     switch(type) {
     case 'ethernet':
         return new EthernetTechnology();
-    case 'wireless':
+    case 'wifi':
         return new WirelessTechnology();
     case 'bluetooth':
         return new BluetoothTechnology();

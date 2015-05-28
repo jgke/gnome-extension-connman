@@ -153,7 +153,7 @@ const WirelessItem = new Lang.Class({
     Extends: ConnectionItem,
 
     _init: function(proxy, indicator) {
-        this.parent('wireless', proxy, indicator);
+        this.parent('wifi', proxy, indicator);
     },
 
     signalToIcon: function() {
@@ -207,7 +207,7 @@ function createItem(type, proxy, indicator) {
     switch(type) {
     case 'ethernet':
         return new EthernetItem(proxy, indicator);
-    case 'wireless':
+    case 'wifi':
         return new WirelessItem(proxy, indicator);
     case 'bluetooth':
         return new BluetoothItem(proxy, indicator);
