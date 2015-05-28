@@ -127,7 +127,8 @@ const WirelessInterface = new Lang.Class({
         if(this._indicator) {
             this.actor.show();
             this._indicator.show();
-            this._menu.icon.icon_name = this._indicator.icon.icon_name;
+            if(this._indicator.icon)
+                this._menu.icon.icon_name = this._indicator.icon.icon_name;
         }
     }
 });
