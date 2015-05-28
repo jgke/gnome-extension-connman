@@ -23,6 +23,7 @@ const PopupMenu = imports.ui.popupMenu;
 const Technology = new Lang.Class({
     Name: 'Technology',
     Extends: PopupMenu.PopupMenuSection,
+    Abstract: true,
 
     _init: function(type) {
         this.parent();
@@ -168,6 +169,6 @@ function createTechnology(type) {
     case 'bluetooth':
         return new BluetoothTechnology();
     default:
-        return new Technology(type);
+        throw 'tried to add unknown technology type ' + type;
     }
 }

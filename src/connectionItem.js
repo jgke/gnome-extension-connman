@@ -23,6 +23,7 @@ const PopupMenu = imports.ui.popupMenu;
 const ConnectionItem = new Lang.Class({
     Name: 'ConnectionItem',
     Extends: PopupMenu.PopupSubMenuMenuItem,
+    Abstract: true,
 
     _init: function(type, proxy, indicator) {
         this.parent('', true);
@@ -208,6 +209,6 @@ function createItem(type, proxy, indicator) {
     case 'bluetooth':
         return new BluetoothItem(proxy, indicator);
     default:
-        return new ConnectionItem(type, proxy, indicator);
+        throw 'tried to create unknown service type ' + type;
     }
 }
