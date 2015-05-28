@@ -75,7 +75,7 @@ const WirelessInterface = new Lang.Class({
     Extends: PopupMenu.PopupSubMenuMenuItem,
 
     _init: function(name) {
-        this.parent();
+        this.parent('', true);
         this.label.text = "Wireless Connection";
         this.status.text = name;
         this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Connect"));
