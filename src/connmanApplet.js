@@ -39,7 +39,7 @@ const ConnmanMenu = new Lang.Class({
     _init: function(createIndicator) {
         this.parent();
         this._technologies = {};
-        this._services = {};
+        this._serviceTypes = {};
         this._createIndicator = createIndicator;
     },
 
@@ -80,7 +80,11 @@ const ConnmanMenu = new Lang.Class({
 
     updateService: function(path, properties) {
         log('updating service ' + path);
-        let type = properties.Type.deep_unpack().split('/').pop();
+        if(!this._serviceTypes[path])
+            var type = properties.Type.deep_unpack().split('/').pop();
+        else
+            var type = this._serviceTypes[path];
+        this._serviceTypes[path] = type;
 
         if(!this._services[path]) {
             let proxy = new ConnmanInterface.ServiceProxy(path);
@@ -177,10 +181,6 @@ const ConnmanApplet = new Lang.Class({
                 function(proxy, sender, [changed, removed]) {
                     log('Services Changed');
                     for each(let [path, properties] in changed) {
-                        if(!Object.keys(properties)) {
-                            log("ignoring change with empty properties");
-                            continue;
-                        }
                         this._menu.updateService(path, properties);
                     }
                     for each(let path in removed) {
