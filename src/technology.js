@@ -95,11 +95,11 @@ const WirelessInterface = new Lang.Class({
 
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
 
-        this._menu.label.text = "Wireless Connection";
-        this._menu.status.text = name;
+        this._menu.label.text = "Wireless";
+        this._menu.status.text = "idle";
         this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Connect"));
         this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Wireless Settings"));
-        this._menu.icon.icon_name = 'network-wireless-signal-excellent-symbolic';
+        this._menu.icon.icon_name = 'network-offline-symbolic';
         this.addMenuItem(this._menu);
     },
 
