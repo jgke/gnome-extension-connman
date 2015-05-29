@@ -18,7 +18,57 @@
 
 const Lang = imports.lang;
 
+const Clutter = imports.gi.Clutter;
+const Gtk = imports.gi.Gtk;
+const St = imports.gi.St;
+
 const PopupMenu = imports.ui.popupMenu;
+const ModalDialog = imports.ui.modalDialog;
+
+const ServiceChooser = new Lang.Class({
+    Name: 'ServiceChooser',
+    Extends: ModalDialog.ModalDialog,
+
+    _init: function(services) {
+        this.parent();
+        let headline = new St.BoxLayout();
+        let icon = new St.Icon({ icon_name: 'network-wireless-signal-excellent-symbolic' });
+        let titleBox = new St.BoxLayout({ vertical: true });
+        let title = new St.Label({ text: "Connect to..." });
+
+        titleBox.add(title);
+
+        headline.add(icon);
+        headline.add(titleBox);
+
+        this.contentLayout.add(headline);
+
+        this._stack = new St.Widget({ layout_manager: new Clutter.BinLayout() });
+        this._itemBox = new St.BoxLayout({ vertical: true });
+        this._scrollView = new St.ScrollView();
+        this._scrollView.set_x_expand(true);
+        this._scrollView.set_y_expand(true);
+        this._scrollView.set_policy(Gtk.PolicyType.NEVER,
+                Gtk.PolicyType.AUTOMATIC);
+        this._scrollView.add_actor(this._itemBox);
+        this._stack.add_child(this._scrollView);
+
+        this.contentLayout.add(this._stack, { expand: true });
+
+        for(let id in services)
+            this._itemBox.add_child(services[id].actor);
+
+        this._cancelButton = this.addButton({ action: this.close.bind(this),
+            label: "Cancel",
+            key: Clutter.Escape });
+
+        this.open();
+    },
+
+    choose: function() {
+
+    }
+});
 
 const Service = new Lang.Class({
     Name: 'Service',

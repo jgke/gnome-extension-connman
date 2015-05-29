@@ -20,6 +20,10 @@ const Lang = imports.lang;
 
 const PopupMenu = imports.ui.popupMenu;
 
+const ExtensionUtils = imports.misc.extensionUtils;
+const Ext = ExtensionUtils.getCurrentExtension();
+const Service = Ext.imports.service;
+
 const Technology = new Lang.Class({
     Name: 'Technology',
     Extends: PopupMenu.PopupMenuSection,
@@ -97,7 +101,14 @@ const WirelessInterface = new Lang.Class({
 
         this._menu.label.text = "Wireless";
         this._menu.status.text = "idle";
-        this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Connect"));
+        this._connectionSwitch = new PopupMenu.PopupMenuItem("Connect");
+        this._connectionSwitch.connect('activate', function() {
+            new Service.ServiceChooser(Object.keys(this._services).map(function(key) {
+                return this._services[key];
+            }.bind(this)));
+        }.bind(this));
+        this._menu.menu.addMenuItem(this._connectionSwitch);
+        this._menu.menu.connect
         this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Wireless Settings"));
         this._menu.icon.icon_name = 'network-offline-symbolic';
         this.addMenuItem(this._menu);
