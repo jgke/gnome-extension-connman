@@ -33,6 +33,7 @@ const Technology = new Lang.Class({
 
     addService: function(id, service) {
         this._services[id] = service;
+        this.addMenuItem(service);
         this.updateIcon();
     },
 
@@ -64,9 +65,13 @@ const Technology = new Lang.Class({
             this._indicator = this._services[Object.keys(this._services)[0]];
             for(let path in this._services) {
                 let state = this._services[path]._properties['State'];
-                if(state != 'idle' && state != 'failure') {
+                if(state != 'idle')
                     this._indicator = this._services[path]._indicator;
-                }
+            }
+            for(let path in this._services) {
+                let state = this._services[path]._properties['State'];
+                if(state != 'failure')
+                    this._indicator = this._services[path]._indicator;
             }
         }
     }
@@ -79,11 +84,6 @@ const EthernetTechnology = new Lang.Class({
     _init: function() {
         this.parent('ethernet');
     },
-
-    addService: function(id, service) {
-        this.parent(id, service);
-        this.addMenuItem(service);
-    }
 });
 
 const WirelessInterface = new Lang.Class({
@@ -105,32 +105,41 @@ const WirelessInterface = new Lang.Class({
 
     addService: function(id, service) {
         this.parent(id, service);
+        this.update(id);
         this.updateIcon();
     },
 
     updateService: function(id, properties) {
         this.parent(id, properties);
+        this.update(id);
         this.updateIcon();
     },
 
     removeService: function(id) {
+        if(this._services[id]._properties["State"] != "idle") {
+            this._services[id].hide();
+            this._menu.actor.show();
+            this._service = null;
+        }
         this.parent(id);
+        this.update(id);
         this.updateIcon();
     },
 
-    updateIcon: function() {
-        if(this._indicator) {
-            this.actor.hide();
-            this._indicator.hide();
+    update: function(id) {
+        let service = this._services[id];
+        if(service) {
+            if(service._properties["State"] == "idle" && service.actor.visible) {
+                service.hide();
+                this._menu.actor.show();
+            }
+            else if (service._properties["State"] != 'idle') {
+                this._menu.actor.hide();
+                service.show();
+            }
         }
-        this.parent();
-        if(this._indicator) {
-            this.actor.show();
-            this._indicator.show();
-            if(this._indicator.icon)
-                this._menu.icon.icon_name = this._indicator.icon.icon_name;
-        }
-    }
+        this.updateIcon();
+    },
 });
 
 const WirelessTechnology = new Lang.Class({
