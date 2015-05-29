@@ -28,7 +28,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
 const ConnmanAgent = Ext.imports.connmanAgent;
 const ConnmanInterface = Ext.imports.connmanInterface;
-const ConnectionItem = Ext.imports.connectionItem;
+const Service = Ext.imports.service;
 const Technology = Ext.imports.technology;
 
 /* menu with technologies and services */
@@ -90,7 +90,7 @@ const ConnmanMenu = new Lang.Class({
             let proxy = new ConnmanInterface.ServiceProxy(path);
             let indicator = this._createIndicator();
 
-            let service = ConnectionItem.createItem(type, proxy, indicator);
+            let service = Service.createService(type, proxy, indicator);
             this._services[path] = service;
             service.update(properties);
             this._technologies[type].addService(path, service);

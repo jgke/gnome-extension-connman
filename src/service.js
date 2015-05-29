@@ -20,8 +20,8 @@ const Lang = imports.lang;
 
 const PopupMenu = imports.ui.popupMenu;
 
-const ConnectionItem = new Lang.Class({
-    Name: 'ConnectionItem',
+const Service = new Lang.Class({
+    Name: 'Service',
     Extends: PopupMenu.PopupSubMenuMenuItem,
     Abstract: true,
 
@@ -131,9 +131,9 @@ const ConnectionItem = new Lang.Class({
     }
 });
 
-const EthernetItem = new Lang.Class({
-    Name: 'EthernetItem',
-    Extends: ConnectionItem,
+const EthernetService = new Lang.Class({
+    Name: 'EthernetService',
+    Extends: Service,
 
     _init: function(proxy, indicator) {
         this.parent('ethernet', proxy, indicator);
@@ -149,9 +149,9 @@ const EthernetItem = new Lang.Class({
     },
 });
 
-const WirelessItem = new Lang.Class({
-    Name: 'WirelessItem',
-    Extends: ConnectionItem,
+const WirelessService = new Lang.Class({
+    Name: 'WirelessService',
+    Extends: Service,
 
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
@@ -183,9 +183,9 @@ const WirelessItem = new Lang.Class({
     },
 });
 
-const BluetoothItem = new Lang.Class({
-    Name: 'BluetoothItem',
-    Extends: ConnectionItem,
+const BluetoothService = new Lang.Class({
+    Name: 'BluetoothService',
+    Extends: Service,
 
     _init: function(proxy, indicator) {
         this.parent('bluetooth', proxy, indicator);
@@ -200,14 +200,14 @@ const BluetoothItem = new Lang.Class({
     }
 });
 
-function createItem(type, proxy, indicator) {
+function createService(type, proxy, indicator) {
     switch(type) {
     case 'ethernet':
-        return new EthernetItem(proxy, indicator);
+        return new EthernetService(proxy, indicator);
     case 'wifi':
-        return new WirelessItem(proxy, indicator);
+        return new WirelessService(proxy, indicator);
     case 'bluetooth':
-        return new BluetoothItem(proxy, indicator);
+        return new BluetoothService(proxy, indicator);
     default:
         throw 'tried to create unknown service type ' + type;
     }
