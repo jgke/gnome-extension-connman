@@ -50,10 +50,14 @@ const Service = new Lang.Class({
                     this.update(obj);
                 }.bind(this));
 
+        this.state = "";
+
         this._indicator = indicator;
         this._indicator.show();
         this.label.text = "Connection";
         this._settings = new PopupMenu.PopupMenuItem("Settings");
+
+        this.status.text = this.state;
 
         this.menu.addMenuItem(this._connectionSwitch);
         this.menu.addMenuItem(this._settings);
@@ -84,6 +88,9 @@ const Service = new Lang.Class({
             this._connectionSwitch.label.text = "Reconnect";
         else
             this._connectionSwitch.label.text = "Disconnect";
+        if(this._properties['Name'])
+            this.label.text = this._properties['Name'];
+        this.status.text = this.state;
         this.setIcon(this.getStatusIcon());
     },
 
@@ -143,12 +150,6 @@ const EthernetService = new Lang.Class({
         this._settings.label.text = "Wired Settings";
         this.show();
     },
-
-    update: function(properties) {
-        this.parent(properties);
-        if(this._properties['Ethernet']['Interface'])
-            this.status.text = this._properties['Ethernet']['Interface'];
-    },
 });
 
 const WirelessService = new Lang.Class({
@@ -172,12 +173,6 @@ const WirelessService = new Lang.Class({
         if (value > 5)
             return 'weak';
         return 'none';
-    },
-
-    update: function(properties) {
-        this.parent(properties);
-        if(this._properties['Name'])
-            this.label.text = this._properties['Name'];
     },
 
     getAcquiringIcon: function() {
