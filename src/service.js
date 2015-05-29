@@ -158,6 +158,7 @@ const WirelessService = new Lang.Class({
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
         this.label.text = "Wireless Connection";
+        this._settings.label.text = "Wireless Settings";
     },
 
     signalToIcon: function() {
@@ -175,8 +176,8 @@ const WirelessService = new Lang.Class({
 
     update: function(properties) {
         this.parent(properties);
-        if(this._properties["Name"])
-            this.label.text = this._properties["Name"];
+        if(this._properties['Name'])
+            this.label.text = this._properties['Name'];
     },
 
     getAcquiringIcon: function() {

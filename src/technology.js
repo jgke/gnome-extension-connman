@@ -116,7 +116,7 @@ const WirelessInterface = new Lang.Class({
     },
 
     removeService: function(id) {
-        if(this._services[id]._properties["State"] != "idle") {
+        if(this._services[id]._properties['State'] != 'idle') {
             this._services[id].hide();
             this._menu.actor.show();
             this._service = null;
@@ -129,11 +129,11 @@ const WirelessInterface = new Lang.Class({
     update: function(id) {
         let service = this._services[id];
         if(service) {
-            if(service._properties["State"] == "idle" && service.actor.visible) {
+            if(service._properties['State'] == 'idle' && service.actor.visible) {
                 service.hide();
                 this._menu.actor.show();
             }
-            else if (service._properties["State"] != 'idle') {
+            else if (service._properties['State'] != 'idle') {
                 this._menu.actor.hide();
                 service.show();
             }
@@ -153,7 +153,7 @@ const WirelessTechnology = new Lang.Class({
 
     addService: function(id, service) {
         this.parent(id, service);
-        let intf = service._properties["Ethernet"]["Interface"];
+        let intf = service._properties['Ethernet']['Interface'];
         if(!this._interfaces[intf]) {
             this._interfaces[intf] = new WirelessInterface(intf);
             this.addMenuItem(this._interfaces[intf]);
@@ -163,13 +163,13 @@ const WirelessTechnology = new Lang.Class({
 
     updateService: function(id, properties) {
         this.parent(id, properties);
-        let intf = this._services[id]._properties["Ethernet"]["Interface"];
+        let intf = this._services[id]._properties['Ethernet']['Interface'];
         this._interfaces[intf].updateService(id, properties);
     },
 
     removeService: function(id) {
         this.parent(id);
-        let intf = this._services[id]._properties["Ethernet"]["Interface"];
+        let intf = this._services[id]._properties['Ethernet']['Interface'];
         this._interfaces[intf].removeService(id);
     }
 });
