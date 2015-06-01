@@ -23,16 +23,24 @@ const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
 const Service = Ext.imports.service;
+const Logger = Ext.imports.logger;
 
 const Technology = new Lang.Class({
     Name: 'Technology',
     Extends: PopupMenu.PopupMenuSection,
     Abstract: true,
 
-    _init: function(type) {
+    _init: function(type, proxy) {
         this.parent();
         this._type = type;
         this._services = {}
+
+        this._proxy = proxy;
+        this._sig = this._proxy.connectSignal('PropertyChanged',
+                function(proxy, sender, [name, value]) {
+                    Logger.logDebug("Technology " + this._type + " property " +
+                            name + " changed: " + value.deep_unpack());
+                }.bind(this));
     },
 
     addService: function(id, service) {
@@ -59,13 +67,14 @@ const Technology = new Lang.Class({
     },
 
     destroy: function() {
-        for(path in this._services)
+        for(let path in this._services)
             this._services[path].destroy();
+        this._proxy.disconnectSignal(this._sig);
         this.parent();
     },
 
     updateIcon: function() {
-        if(this._services[Object.keys(this._services)[0]]) {
+        if(Object.keys(this._services)) {
             this._indicator = this._services[Object.keys(this._services)[0]];
             for(let path in this._services) {
                 let state = this._services[path]._properties['State'];
@@ -74,7 +83,7 @@ const Technology = new Lang.Class({
             }
             for(let path in this._services) {
                 let state = this._services[path]._properties['State'];
-                if(state != 'failure')
+                if(state != 'idle' && state != 'failure')
                     this._indicator = this._services[path]._indicator;
             }
         }
@@ -85,8 +94,8 @@ const EthernetTechnology = new Lang.Class({
     Name: 'EthernetTechnology',
     Extends: Technology,
 
-    _init: function() {
-        this.parent('ethernet');
+    _init: function(proxy) {
+        this.parent('ethernet', proxy);
     },
 });
 
@@ -94,8 +103,8 @@ const WirelessInterface = new Lang.Class({
     Name: 'WirelessInterface',
     Extends: Technology,
 
-    _init: function(name) {
-        this.parent('wifi');
+    _init: function(name, proxy) {
+        this.parent('wifi', proxy);
 
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
 
@@ -105,10 +114,11 @@ const WirelessInterface = new Lang.Class({
         this._connectionSwitch.connect('activate', function() {
             new Service.ServiceChooser(Object.keys(this._services).map(function(key) {
                 return this._services[key];
-            }.bind(this)));
+            }.bind(this)), function(service) {
+                service.buttonEvent();
+            });
         }.bind(this));
         this._menu.menu.addMenuItem(this._connectionSwitch);
-        this._menu.menu.connect
         this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Wireless Settings"));
         this._menu.icon.icon_name = 'network-offline-symbolic';
         this.addMenuItem(this._menu);
@@ -157,8 +167,8 @@ const WirelessTechnology = new Lang.Class({
     Name: 'WirelessTechnology',
     Extends: Technology,
 
-    _init: function() {
-        this.parent('wifi');
+    _init: function(proxy) {
+        this.parent('wifi', proxy);
         this._interfaces = {};
     },
 
@@ -166,7 +176,8 @@ const WirelessTechnology = new Lang.Class({
         this.parent(id, service);
         let intf = service._properties['Ethernet']['Interface'];
         if(!this._interfaces[intf]) {
-            this._interfaces[intf] = new WirelessInterface(intf);
+            Logger.logDebug("Adding interface " + intf);
+            this._interfaces[intf] = new WirelessInterface(intf, this._proxy);
             this.addMenuItem(this._interfaces[intf]);
         }
         this._interfaces[intf].addService(id, service);
@@ -175,6 +186,9 @@ const WirelessTechnology = new Lang.Class({
     updateService: function(id, properties) {
         this.parent(id, properties);
         let intf = this._services[id]._properties['Ethernet']['Interface'];
+        if(!this._interfaces[intf]) {
+            Logger.logError("Tried to update nonexisting wifi interface " + intf + "!");
+        }
         this._interfaces[intf].updateService(id, properties);
     },
 
@@ -189,8 +203,8 @@ const BluetoothTechnology = new Lang.Class({
     Name: 'BluetoothTechnology',
     Extends: Technology,
 
-    _init: function() {
-        this.parent('bluetooth');
+    _init: function(proxy) {
+        this.parent('bluetooth', proxy);
     },
 });
 
@@ -198,21 +212,21 @@ const P2PTechnology = new Lang.Class({
     Name: 'P2PTechnology',
     Extends: Technology,
 
-    _init: function() {
-        this.parent('p2p');
+    _init: function(proxy) {
+        this.parent('p2p', proxy);
     },
 });
 
-function createTechnology(type) {
+function createTechnology(type, proxy) {
     switch(type) {
     case 'ethernet':
-        return new EthernetTechnology();
+        return new EthernetTechnology(proxy);
     case 'wifi':
-        return new WirelessTechnology();
+        return new WirelessTechnology(proxy);
     case 'bluetooth':
-        return new BluetoothTechnology();
+        return new BluetoothTechnology(proxy);
     case 'p2p':
-        return new P2PTechnology();
+        return new P2PTechnology(proxy);
     default:
         throw 'tried to add unknown technology type ' + type;
     }

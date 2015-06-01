@@ -1,5 +1,5 @@
 FILES=extension.js connmanApplet.js connmanAgent.js connmanInterface.js \
-	technology.js service.js metadata.json
+	logger.js technology.js service.js metadata.json stylesheet.css
 PREFIX=~/.local/share/
 PATH=gnome-shell/extensions/ConnmanApplet@jaakko.hannikainen.intel.com
 

@@ -18,14 +18,33 @@
 
 const Lang = imports.lang;
 
-const Agent = new Lang.Class({
-    Name: 'Agent',
+var enabled = true;
+var logLevel = 4;
+var infoEnabled = true;
 
-    _init: function() {
+function logMessage(msg) {
+    log(msg);
+}
 
-    },
+function logError(error) {
+    logMessage("ERROR: " + error);
+}
 
-    destroy: function() {
+function logException(exception) {
+    logMessage("Exception: " + exception + ": " + exception.stack);
+}
 
-    }
-});
+function logWarning(error) {
+    if(loglevel > 1)
+        logMessage("WARNING: " + error);
+}
+
+function logInfo(msg) {
+    if(logLevel > 2)
+        logMessage("INFO: " + msg);
+}
+
+function logDebug(msg) {
+    if(logLevel > 3)
+        logMessage("DEBUG: " + msg);
+}

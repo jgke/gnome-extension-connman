@@ -25,11 +25,36 @@ const St = imports.gi.St;
 const PopupMenu = imports.ui.popupMenu;
 const ModalDialog = imports.ui.modalDialog;
 
+const DialogServiceItem = new Lang.Class({
+    Name: 'DialogServiceItem',
+
+    _init: function(name, icon, service, callback) {
+        this.actor = new St.BoxLayout({ can_focus: true,
+            reactive: true });
+        this.actor.connect('key-focus-in', function() {
+            callback(service);
+        }.bind(this));
+        let action = new Clutter.ClickAction();
+        action.connect('clicked', function() {
+            this.actor.grab_key_focus();
+        }.bind(this));
+        this.actor.add_action(action);
+
+        this._label = new St.Label({ text: name,
+            style_class: 'nm-dialog-item'});
+        this.actor.label_actor = this._label;
+        this._icon = new St.Icon({ style_class: 'nm-dialog-icon' });
+        this._icon.icon_name = icon.icon_name;
+        this.actor.add(this._icon);
+        this.actor.add(this._label);
+    },
+});
+
 const ServiceChooser = new Lang.Class({
     Name: 'ServiceChooser',
     Extends: ModalDialog.ModalDialog,
 
-    _init: function(services) {
+    _init: function(services, callback) {
         this.parent();
         let headline = new St.BoxLayout();
         let icon = new St.Icon({ icon_name: 'network-wireless-signal-excellent-symbolic' });
@@ -44,7 +69,8 @@ const ServiceChooser = new Lang.Class({
         this.contentLayout.add(headline);
 
         this._stack = new St.Widget({ layout_manager: new Clutter.BinLayout() });
-        this._itemBox = new St.BoxLayout({ vertical: true });
+        this._itemBox = new St.BoxLayout({ vertical: true,
+            style_class: 'cm-dialog-box' });
         this._scrollView = new St.ScrollView();
         this._scrollView.set_x_expand(true);
         this._scrollView.set_y_expand(true);
@@ -55,18 +81,34 @@ const ServiceChooser = new Lang.Class({
 
         this.contentLayout.add(this._stack, { expand: true });
 
-        for(let id in services)
-            this._itemBox.add_child(services[id].actor);
+        for(let id in services) {
+            let service = services[id];
+            let name = service.label.text;
+            let icon = service.icon;
+            let item = new DialogServiceItem(name, icon, service, function(service) {
+                this._selected = service;
+            }.bind(this));
+            this._itemBox.add_child(item.actor);
+        }
 
         this._cancelButton = this.addButton({ action: this.close.bind(this),
             label: "Cancel",
             key: Clutter.Escape });
 
+        this._connectButton = this.addButton({ action: this.buttonEvent.bind(this),
+            label: "Connect",
+            key: Clutter.Enter });
+
+        this._callback = callback;
+
         this.open();
     },
 
-    choose: function() {
-
+    buttonEvent: function() {
+        if(!this._selected)
+            return;
+        this.close();
+        this._callback(this._selected);
     }
 });
 
@@ -86,14 +128,9 @@ const Service = new Lang.Class({
 
         this._connected = true;
         this._connectionSwitch = new PopupMenu.PopupMenuItem("Connect");
-        this._connectionSwitch.connect('activate', function() {
-            if(this.state == 'idle' || this.state == 'failure')
-                this._proxy.ConnectRemote();
-            else
-                this._proxy.DisconnectRemote();
-        }.bind(this));
+        this._connectionSwitch.connect('activate', this.buttonEvent.bind(this));
 
-        this._proxy.connectSignal('PropertyChanged',
+        this._sig = this._proxy.connectSignal('PropertyChanged',
                 function(proxy, sender, [name, value]) {
                     let obj = {};
                     obj[name] = value;
@@ -112,6 +149,13 @@ const Service = new Lang.Class({
         this.menu.addMenuItem(this._connectionSwitch);
         this.menu.addMenuItem(this._settings);
         this.hide();
+    },
+
+    buttonEvent: function() {
+        if(this.state == 'idle' || this.state == 'failure')
+            this._proxy.ConnectRemote();
+        else
+            this._proxy.DisconnectRemote();
     },
 
     update: function(properties) {
@@ -151,6 +195,7 @@ const Service = new Lang.Class({
 
     destroy: function() {
         this._indicator.destroy();
+        this._proxy.disconnectSignal(this._sig);
         this.parent();
     },
 
