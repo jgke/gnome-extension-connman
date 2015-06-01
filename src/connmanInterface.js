@@ -116,7 +116,6 @@ const _AGENT_INTERFACE= '<node>\
 const _ManagerProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_MANAGER_INTERFACE);
 const _TechnologyProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_TECHNOLOGY_INTERFACE);
 const _ServiceProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_SERVICE_INTERFACE);
-const _AgentProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_AGENT_INTERFACE);
 
 function ManagerProxy() {
     return new _ManagerProxyWrapper(Gio.DBus.system, BUS_NAME, MANAGER_PATH);
@@ -130,6 +129,12 @@ function ServiceProxy(path) {
     return new _ServiceProxyWrapper(Gio.DBus.system, BUS_NAME, path);
 }
 
-function AgentProxy() {
-    return new _AgentProxyWrapper(Gio.DBus.system, BUS_NAME, AGENT_PATH);
+function addAgentImplementation(agent) {
+    let dbusImpl = Gio.DBusExportedObject.wrapJSObject(_AGENT_INTERFACE, agent);
+    dbusImpl.export(Gio.DBus.system, AGENT_PATH);
+    return dbusImpl;
+}
+
+function removeAgentImplementation(dbusImpl) {
+    dbusImpl.unexport(Gio.DBus.system, AGENT_PATH);
 }

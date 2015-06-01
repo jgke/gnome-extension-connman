@@ -18,14 +18,33 @@
 
 const Lang = imports.lang;
 
+const ExtensionUtils = imports.misc.extensionUtils;
+const Ext = ExtensionUtils.getCurrentExtension();
+const ConnmanInterface = Ext.imports.connmanInterface;
+
 const Agent = new Lang.Class({
     Name: 'Agent',
 
     _init: function() {
+	this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
+    },
 
+    Release: function() {
+    },
+
+    ReportErrorAsync: function(params, invocation) {
+    },
+
+    RequestBrowser: function(service, url) {
+    },
+
+    RequestInputAsync: function(params, invocation) {
+    },
+
+    CancelAsync: function(params, invocation) {
     },
 
     destroy: function() {
-
+        ConnmanInterface.removeAgentImplementation(this._dbusImpl);
     }
 });
