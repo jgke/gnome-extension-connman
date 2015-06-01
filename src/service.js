@@ -17,10 +17,13 @@
  */
 
 const Lang = imports.lang;
+const Signals = imports.signals;
 
 const Clutter = imports.gi.Clutter;
 const Gtk = imports.gi.Gtk;
 const St = imports.gi.St;
+
+const Util = imports.misc.util;
 
 const PopupMenu = imports.ui.popupMenu;
 const ModalDialog = imports.ui.modalDialog;
@@ -28,11 +31,15 @@ const ModalDialog = imports.ui.modalDialog;
 const DialogServiceItem = new Lang.Class({
     Name: 'DialogServiceItem',
 
-    _init: function(name, icon, service, callback) {
-        this.actor = new St.BoxLayout({ can_focus: true,
+    _init: function(service, callback) {
+        let name = service.label.text;
+        let icon = service.getIcon();
+        this.service = service;
+        this.actor = new St.BoxLayout({ style_class: 'nm-dialog-item',
+            can_focus: true,
             reactive: true });
         this.actor.connect('key-focus-in', function() {
-            callback(service);
+            callback(this);
         }.bind(this));
         let action = new Clutter.ClickAction();
         action.connect('clicked', function() {
@@ -40,11 +47,10 @@ const DialogServiceItem = new Lang.Class({
         }.bind(this));
         this.actor.add_action(action);
 
-        this._label = new St.Label({ text: name,
-            style_class: 'nm-dialog-item'});
+        this._label = new St.Label({ text: name });
         this.actor.label_actor = this._label;
         this._icon = new St.Icon({ style_class: 'nm-dialog-icon' });
-        this._icon.icon_name = icon.icon_name;
+        this._icon.icon_name = icon;
         this.actor.add(this._icon);
         this.actor.add(this._label);
     },
@@ -55,23 +61,26 @@ const ServiceChooser = new Lang.Class({
     Extends: ModalDialog.ModalDialog,
 
     _init: function(services, callback) {
-        this.parent();
-        let headline = new St.BoxLayout();
-        let icon = new St.Icon({ icon_name: 'network-wireless-signal-excellent-symbolic' });
+        this.parent({ styleClass: 'nm-dialog' });
+        let headline = new St.BoxLayout({ style_class: 'nm-dialog-header-hbox' });
+        let icon = new St.Icon({ style_class: 'nm-dialog-header-icon',
+            icon_name: 'network-wireless-signal-excellent-symbolic' });
         let titleBox = new St.BoxLayout({ vertical: true });
-        let title = new St.Label({ text: "Connect to..." });
+        let title = new St.Label({ style_class: 'nm-dialog-header',
+            text: "Connect to..." });
 
         titleBox.add(title);
 
         headline.add(icon);
         headline.add(titleBox);
 
+        this.contentLayout.style_class = 'nm-dialog-content';
         this.contentLayout.add(headline);
 
         this._stack = new St.Widget({ layout_manager: new Clutter.BinLayout() });
         this._itemBox = new St.BoxLayout({ vertical: true,
-            style_class: 'cm-dialog-box' });
-        this._scrollView = new St.ScrollView();
+            style_class: 'nm-dialog-box' });
+        this._scrollView = new St.ScrollView({ style_class: 'nm-dialog-scroll-view'} );
         this._scrollView.set_x_expand(true);
         this._scrollView.set_y_expand(true);
         this._scrollView.set_policy(Gtk.PolicyType.NEVER,
@@ -83,10 +92,14 @@ const ServiceChooser = new Lang.Class({
 
         for(let id in services) {
             let service = services[id];
-            let name = service.label.text;
-            let icon = service.icon;
-            let item = new DialogServiceItem(name, icon, service, function(service) {
+            let item = new DialogServiceItem(service, function(service) {
+                if(this._selected)
+                    this._selected.actor.remove_style_pseudo_class('selected');
+                Util.ensureActorVisibleInScrollView(this._scrollView, service.actor);
                 this._selected = service;
+                this._selected.actor.add_style_pseudo_class('selected');
+                this._connectButton.reactive = true;
+                this._connectButton.can_focus = true;
             }.bind(this));
             this._itemBox.add_child(item.actor);
         }
@@ -98,6 +111,8 @@ const ServiceChooser = new Lang.Class({
         this._connectButton = this.addButton({ action: this.buttonEvent.bind(this),
             label: "Connect",
             key: Clutter.Enter });
+        this._connectButton.reactive = false;
+        this._connectButton.can_focus = false;
 
         this._callback = callback;
 
@@ -108,7 +123,7 @@ const ServiceChooser = new Lang.Class({
         if(!this._selected)
             return;
         this.close();
-        this._callback(this._selected);
+        this._callback(this._selected.service);
     }
 });
 
