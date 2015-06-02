@@ -34,6 +34,7 @@ const DialogServiceItem = new Lang.Class({
     _init: function(service, callback) {
         let name = service.label.text;
         let icon = service.getIcon();
+        let securityIcon = service.securityIcon ? service.securityIcon() : "";
         this.service = service;
         this.actor = new St.BoxLayout({ style_class: 'nm-dialog-item',
             can_focus: true,
@@ -49,10 +50,15 @@ const DialogServiceItem = new Lang.Class({
 
         this._label = new St.Label({ text: name });
         this.actor.label_actor = this._label;
+        this._icons = new St.BoxLayout({ style_class: 'nm-dialog-icons' });
         this._icon = new St.Icon({ style_class: 'nm-dialog-icon' });
+        this._securityIcon = new St.Icon({ style_class: 'nm-dialog-icon' });
         this._icon.icon_name = icon;
-        this.actor.add(this._icon);
-        this.actor.add(this._label);
+        this._securityIcon.icon_name = securityIcon;
+        this._icons.add_actor(this._securityIcon);
+        this._icons.add_actor(this._icon);
+        this.actor.add(this._label, { x_align: St.Align.START });
+        this.actor.add(this._icons, { expand: true, x_fill: false, x_align: St.Align.END });
     },
 });
 
@@ -268,6 +274,20 @@ const WirelessService = new Lang.Class({
         this.parent('wifi', proxy, indicator);
         this.label.text = "Wireless Connection";
         this._settings.label.text = "Wireless Settings";
+    },
+
+    securityIcon: function() {
+        let security = this._properties['Security'][0];
+        if(!security || security == 'none')
+            return '';
+        switch(security) {
+            case 'ieee8021x':
+                return 'security-high-symbolic';
+            case 'wep':
+                return 'security-low-symbolic';
+            default:
+                return 'security-medium-symbolic';
+        }
     },
 
     signalToIcon: function() {
