@@ -114,7 +114,9 @@ const WirelessInterface = new Lang.Class({
         this._connectionSwitch.connect('activate', function() {
             new Service.ServiceChooser(Object.keys(this._services).map(function(key) {
                 return this._services[key];
-            }.bind(this)), function(service) {
+            }.bind(this)).filter(function(service) {
+                return service._properties["Name"];
+            }), function(service) {
                 service.buttonEvent();
             });
         }.bind(this));
