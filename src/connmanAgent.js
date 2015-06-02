@@ -32,6 +32,39 @@ const ConnmanInterface = Ext.imports.connmanInterface;
 const Logger = Ext.imports.logger;
 const Service = Ext.imports.service;
 
+const DialogField = new Lang.Class({
+    Name: 'DialogField',
+
+    _init: function(label) {
+        this.addLabel(label);
+        this.addEntry();
+    },
+
+    addLabel: function(label) {
+        this.label = new St.Label(
+                { style_class: 'prompt-dialog-password-label', text: label,
+                    x_align: Clutter.ActorAlign.START,
+                    y_align: Clutter.ActorAlign.CENTER });
+        this.label.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
+    },
+
+    addEntry: function() {
+        this.entry = new St.Entry(
+                { style_class: 'prompt-dialog-password-entry',
+                    can_focus: true, reactive: true, x_expand: true });
+        ShellEntry.addContextMenu(this.entry, { isPassword: true });
+        this.entry.clutter_text.set_password_char('\u25cf');
+    },
+
+    getValue: function() {
+        return this.entry.get_text();
+    },
+
+    valid: function() {
+        return true;
+    }
+});
+
 const Dialog = new Lang.Class({
     Name: 'Dialog',
     Extends: ModalDialog.ModalDialog,
@@ -49,7 +82,7 @@ const Dialog = new Lang.Class({
                     vertical: true });
         let subjectLabel = new St.Label(
                 { style_class: 'prompt-dialog-headline headline',
-                    text: "Authentication required by wireless network" });
+                    text: "Authentication required by network connection" });
 
         this.contentLayout.add(mainContentBox, { x_fill: true, y_fill: true });
         mainContentBox.add(icon,
@@ -67,19 +100,9 @@ const Dialog = new Lang.Class({
                 { style_class: 'network-dialog-secret-table',
                     layout_manager: layout });
         layout.hookup_style(secretTable);
-        let label = new St.Label(
-                { style_class: 'prompt-dialog-password-label',
-                    text: "Passphrase",
-                    x_align: Clutter.ActorAlign.START,
-                    y_align: Clutter.ActorAlign.CENTER });
-        label.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
-        this.entry = new St.Entry(
-                { style_class: 'prompt-dialog-password-entry',
-                    can_focus: true, reactive: true, x_expand: true });
-        ShellEntry.addContextMenu(this.entry, { isPassword: true });
-        layout.attach(label, 0, 0, 1, 1);
-        layout.attach(this.entry, 1, 0, 1, 1);
-        this.entry.clutter_text.set_password_char('\u25cf');
+        this.field = new DialogField("Passphrase");
+        layout.attach(this.field.label, 0, 0, 1, 1);
+        layout.attach(this.field.entry, 1, 0, 1, 1);
         messageBox.add(secretTable);
 
         this._okButton = { label: "Connect",
@@ -96,7 +119,7 @@ const Dialog = new Lang.Class({
 
     _onOk: function() {
         this.close();
-        this._callback({ Passphrase: this.entry.get_text() });
+        this._callback({ Passphrase: this.field.getValue() });
     },
 
     _onCancel: function() {
