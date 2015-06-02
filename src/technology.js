@@ -67,9 +67,18 @@ const Technology = new Lang.Class({
     },
 
     destroy: function() {
-        for(let path in this._services)
-            this._services[path].destroy();
-        this._proxy.disconnectSignal(this._sig);
+        for(let path in this._services) {
+            try {
+                this.removeService(path);
+            }
+            catch(error) {}
+        }
+        try {
+            this._proxy.disconnectSignal(this._sig);
+        }
+        catch(error) {
+            Logger.logException(error, "Failed to disconnect service proxy");
+        }
         this.parent();
     },
 
@@ -115,7 +124,7 @@ const WirelessInterface = new Lang.Class({
             new Service.ServiceChooser(Object.keys(this._services).map(function(key) {
                 return this._services[key];
             }.bind(this)).filter(function(service) {
-                return service._properties["Name"];
+                return service._properties["Name"] && service._properties["Name"].length;
             }), function(service) {
                 service.buttonEvent();
             });
@@ -198,6 +207,12 @@ const WirelessTechnology = new Lang.Class({
         this.parent(id);
         let intf = this._services[id]._properties['Ethernet']['Interface'];
         this._interfaces[intf].removeService(id);
+    },
+
+    destroy: function() {
+        for(let intf in this._interfaces)
+            this._interfaces[intf].destroy();
+        this.parent();
     }
 });
 

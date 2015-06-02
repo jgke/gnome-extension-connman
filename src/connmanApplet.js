@@ -82,6 +82,10 @@ const ConnmanMenu = new Lang.Class({
         this.fixMenu();
     },
 
+    getService: function(path) {
+        return this._services[path];
+    },
+
     updateService: function(path, properties) {
         Logger.logDebug('Updating service ' + path);
         if(!this._serviceTypes[path]) {
@@ -118,8 +122,13 @@ const ConnmanMenu = new Lang.Class({
 
     clear: function() {
         for(let type in this._technologies) {
-            this._technologies[type].destroy();
-            delete this._technologies[type];
+            try {
+                this._technologies[type].destroy();
+                delete this._technologies[type];
+            }
+            catch(error) {
+                Logger.logException(error, "Failed to clear technology " + type);
+            }
         }
         this._services = {};
         this._technologies = {};
@@ -172,7 +181,7 @@ const ConnmanApplet = new Lang.Class({
         this.menu.actor.show();
 
         this._manager = new ConnmanInterface.ManagerProxy();
-        this._agent = new ConnmanAgent.Agent();
+        this._agent = new ConnmanAgent.Agent(this._menu.getService.bind(this._menu));
 
         this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
         this._asig = this._manager.connectSignal('TechnologyAdded',
@@ -215,7 +224,7 @@ const ConnmanApplet = new Lang.Class({
 
     _disconnectEvent: function() {
         Logger.logInfo('Disconnected from Connman');
-        this._menu.removeAll();
+        this._menu.clear();
         this.menu.actor.hide();
         this.indicators.hide();
         let signals = [this._asig, this._rsig, this._ssig, this._psig];
@@ -232,6 +241,7 @@ const ConnmanApplet = new Lang.Class({
             }
         }
         this._manager = null;
+        Logger.logDebug("Destroying agent");
         if(this._agent)
             this._agent.destroy();
         this._agent = null;

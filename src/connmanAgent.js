@@ -18,33 +18,145 @@
 
 const Lang = imports.lang;
 
+const Clutter = imports.gi.Clutter;
+const GLib = imports.gi.GLib;
+const St = imports.gi.St;
+const Pango = imports.gi.Pango;
+
+const ModalDialog = imports.ui.modalDialog;
+const ShellEntry = imports.ui.shellEntry;
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
 const ConnmanInterface = Ext.imports.connmanInterface;
+const Logger = Ext.imports.logger;
+const Service = Ext.imports.service;
+
+const Dialog = new Lang.Class({
+    Name: 'Dialog',
+    Extends: ModalDialog.ModalDialog,
+
+    _init: function(service, fields, callback) {
+        this.parent({ styleClass: 'prompt-dialog' });
+        this._service = service;
+        this._fields = fields;
+        this._callback = callback;
+        let mainContentBox = new St.BoxLayout(
+                { style_class: 'prompt-dialog-main-layout', vertical: false});
+        let icon = new St.Icon({ icon_name: 'dialog-password-symbolic' });
+        let messageBox = new St.BoxLayout(
+                { style_class: 'prompt-dialog-message-layout',
+                    vertical: true });
+        let subjectLabel = new St.Label(
+                { style_class: 'prompt-dialog-headline headline',
+                    text: "Authentication required by wireless network" });
+
+        this.contentLayout.add(mainContentBox, { x_fill: true, y_fill: true });
+        mainContentBox.add(icon,
+                { x_fill: true, y_fill: true,
+                    x_align: St.Align.END, y_align: St.Align.START });
+        mainContentBox.add(messageBox, { y_align: St.Align.START });
+        messageBox.add(subjectLabel,
+                { x_fill: true, y_fill: false, y_align: St.Align.START });
+
+        this.contentLayout.add(mainContentBox, {x_fill: true, y_fill: true });
+
+        let layout = new Clutter.GridLayout(
+                { orientation: Clutter.Orientation.VERTICAL });
+        let secretTable = new St.Widget(
+                { style_class: 'network-dialog-secret-table',
+                    layout_manager: layout });
+        layout.hookup_style(secretTable);
+        let label = new St.Label(
+                { style_class: 'prompt-dialog-password-label',
+                    text: "Passphrase",
+                    x_align: Clutter.ActorAlign.START,
+                    y_align: Clutter.ActorAlign.CENTER });
+        label.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
+        this.entry = new St.Entry(
+                { style_class: 'prompt-dialog-password-entry',
+                    can_focus: true, reactive: true, x_expand: true });
+        ShellEntry.addContextMenu(this.entry, { isPassword: true });
+        layout.attach(label, 0, 0, 1, 1);
+        layout.attach(this.entry, 1, 0, 1, 1);
+        this.entry.clutter_text.set_password_char('\u25cf');
+        messageBox.add(secretTable);
+
+        this._okButton = { label: "Connect",
+            action: this._onOk.bind(this),
+            default: true
+        };
+        this._cancelButton = { label: "Cancel",
+            action: this._onCancel.bind(this),
+            key: Clutter.KEY_Escape
+        };
+        this.setButtons([this._cancelButton, this._okButton]);
+        this.open();
+    },
+
+    _onOk: function() {
+        this.close();
+        this._callback({ Passphrase: this.entry.get_text() });
+    },
+
+    _onCancel: function() {
+        this.close();
+        this._callback();
+    }
+});
 
 const Agent = new Lang.Class({
     Name: 'Agent',
 
-    _init: function() {
+    _init: function(getService) {
 	this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
+        this.getService = getService;
     },
 
     Release: function() {
+        this.destroy();
     },
 
-    ReportErrorAsync: function(params, invocation) {
+    ReportErrorAsync: function([service, error], invocation) {
+        Logger.logDebug("Service reported error: " + error);
     },
 
     RequestBrowser: function(service, url) {
+        Logger.logDebug("Requested browser");
     },
 
-    RequestInputAsync: function(params, invocation) {
+    RequestInputAsync: function([service, fields], invocation) {
+        Logger.logDebug("Requested password");
+        service = this.getService(service);
+        if(!service) {
+            Logger.logError("Asked for a password for a nonexistant service");
+            invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
+                   'Canceled the connect');
+            return;
+        }
+        this._dialog = new Dialog(service, fields, function(fields) {
+            if(!fields) {
+                invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
+                        'Canceled the connect');
+                return;
+            }
+            Object.keys(fields).map(function(key) {
+                fields[key] = GLib.Variant.new('s', fields[key]);
+            });
+            invocation.return_value(GLib.Variant.new('(a{sv})', [fields]));
+        }.bind(this));
     },
 
-    CancelAsync: function(params, invocation) {
+    Cancel: function(params, invocation) {
+        Logger.logDebug("Password dialog canceled");
+        this._dialog.cancel();
+        this._dialog = null;
     },
 
     destroy: function() {
+        if(this._dialog)
+            this._dialog.cancel();
+        this._dialog = null;
         ConnmanInterface.removeAgentImplementation(this._dbusImpl);
     }
 });

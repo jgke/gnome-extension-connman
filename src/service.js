@@ -111,8 +111,8 @@ const ServiceChooser = new Lang.Class({
         this._connectButton = this.addButton({ action: this.buttonEvent.bind(this),
             label: "Connect",
             key: Clutter.Enter });
-        this._connectButton.reactive = false;
-        this._connectButton.can_focus = false;
+        this._connectButton.reactive = true;
+        this._connectButton.can_focus = true;
 
         this._callback = callback;
 
@@ -120,10 +120,8 @@ const ServiceChooser = new Lang.Class({
     },
 
     buttonEvent: function() {
-        if(!this._selected)
-            return;
         this.close();
-        this._callback(this._selected.service);
+        this._callback(this._selected && this._selected.service);
     }
 });
 

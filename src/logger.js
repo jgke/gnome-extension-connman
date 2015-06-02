@@ -30,7 +30,9 @@ function logError(error) {
     logMessage("ERROR: " + error);
 }
 
-function logException(exception) {
+function logException(exception, msg) {
+    if(msg)
+        logMessage("Exception: " + msg);
     logMessage("Exception: " + exception + ": " + exception.stack);
 }
 
