@@ -33,6 +33,8 @@ const DialogServiceItem = new Lang.Class({
 
     _init: function(service, callback) {
         let name = service.label.text;
+        if(!name)
+            return;
         let icon = service.getIcon();
         let securityIcon = service.securityIcon ? service.securityIcon() : "";
         this.service = service;
