@@ -41,7 +41,6 @@ const ConnmanMenu = new Lang.Class({
         this.parent();
         this._technologies = {};
         this._serviceTypes = {};
-        this._services = {};
         this._createIndicator = createIndicator;
     },
 
@@ -84,30 +83,29 @@ const ConnmanMenu = new Lang.Class({
     },
 
     getService: function(path) {
-        return this._services[path];
+        if(!this._serviceTypes[path])
+            return null;
+        if(!this._technologies[this._serviceTypes[path]])
+            return null;
+        return this._technologies[this._serviceTypes[path]].getService(path);
     },
 
     updateService: function(path, properties) {
-        Logger.logDebug('Updating service ' + path);
-        if(!this._serviceTypes[path]) {
-            var type = properties.Type.deep_unpack().split('/').pop();
-        }
-        else
+        if(this._serviceTypes[path]) {
+            Logger.logDebug('Updating service ' + path);
             var type = this._serviceTypes[path];
-        this._serviceTypes[path] = type;
-
-        if(!this._services[path]) {
-            Logger.logDebug('Adding service ' + path);
-            let proxy = new ConnmanInterface.ServiceProxy(path);
-            let indicator = this._createIndicator();
-
-            let service = Service.createService(type, proxy, indicator);
-            this._services[path] = service;
-            service.update(properties);
-            this._technologies[type].addService(path, service);
+            this._technologies[type].updateService(path, properties);
             return;
         }
-        this._technologies[type].updateService(path, properties);
+        Logger.logDebug('Adding service ' + path);
+        var type = properties.Type.deep_unpack().split('/').pop();
+        this._serviceTypes[path] = type;
+        let proxy = new ConnmanInterface.ServiceProxy(path);
+        let indicator = this._createIndicator();
+
+        let service = Service.createService(type, proxy, indicator);
+        service.update(properties);
+        this._technologies[type].addService(path, service);
     },
 
     removeService: function(path) {
@@ -122,7 +120,6 @@ const ConnmanMenu = new Lang.Class({
             return;
         }
         this._technologies[this._serviceTypes[path]].removeService(path);
-        delete this._services[path];
         delete this._serviceTypes[path];
         this.fixMenu();
     },
@@ -137,7 +134,7 @@ const ConnmanMenu = new Lang.Class({
                 Logger.logException(error, "Failed to clear technology " + type);
             }
         }
-        this._services = {};
+        this._serviceTypes = {};
         this._technologies = {};
     }
 });

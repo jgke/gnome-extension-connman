@@ -49,6 +49,10 @@ const Technology = new Lang.Class({
         this.updateIcon();
     },
 
+    getService: function(id) {
+        return this._services[id];
+    },
+
     updateService: function(id, properties) {
         if(!this._services[id])
             return false;
@@ -187,6 +191,13 @@ const WirelessTechnology = new Lang.Class({
             this.addMenuItem(this._interfaces[intf]);
         }
         this._interfaces[intf].addService(id, service);
+    },
+
+    getService: function(id) {
+        let intf = this._serviceInterfaces[id];
+        if(!intf)
+            return null;
+        return this._interfaces[intf].getService(id);
     },
 
     updateService: function(id, properties) {
