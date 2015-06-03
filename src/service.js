@@ -325,6 +325,7 @@ const BluetoothService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('bluetooth', proxy, indicator);
+        this.show();
     },
 
     getAcquiringIcon: function() {
