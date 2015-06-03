@@ -90,16 +90,11 @@ const ConnmanMenu = new Lang.Class({
         return this._technologies[this._serviceTypes[path]].getService(path);
     },
 
-    updateService: function(path, properties) {
-        if(this._serviceTypes[path]) {
-            Logger.logDebug('Updating service ' + path);
-            var type = this._serviceTypes[path];
-            this._technologies[type].updateService(path, properties);
-            return;
-        }
+    addService: function(path, properties) {
         Logger.logDebug('Adding service ' + path);
         var type = properties.Type.deep_unpack().split('/').pop();
         this._serviceTypes[path] = type;
+
         let proxy = new ConnmanInterface.ServiceProxy(path);
         let indicator = this._createIndicator();
 
@@ -108,8 +103,18 @@ const ConnmanMenu = new Lang.Class({
         this._technologies[type].addService(path, service);
     },
 
+    updateService: function(path, properties) {
+        if(this._serviceTypes[path]) {
+            Logger.logDebug('Updating service ' + path);
+            var type = this._serviceTypes[path];
+            this._technologies[type].updateService(path, properties);
+            return;
+        }
+        else
+            this.addService(path, properties);
+    },
+
     removeService: function(path) {
-        Logger.logDebug('Removing service ' + path);
         if(!this._serviceTypes[path]) {
             Logger.logInfo('Tried to remove unknown service ' + path);
             return;
@@ -119,6 +124,7 @@ const ConnmanMenu = new Lang.Class({
             delete this._technologies[this._serviceTypes[path]];
             return;
         }
+        Logger.logDebug('Removing service ' + path);
         this._technologies[this._serviceTypes[path]].removeService(path);
         delete this._serviceTypes[path];
         this.fixMenu();
@@ -210,12 +216,10 @@ const ConnmanApplet = new Lang.Class({
                 function(proxy, sender, [changed, removed]) {
                     Logger.logDebug('Services Changed');
                     try {
-                        for each(let [path, properties] in changed) {
+                        for each(let [path, properties] in changed)
                             this._menu.updateService(path, properties);
-                        }
-                        for each(let path in removed) {
+                        for each(let path in removed)
                             this._menu.removeService(path);
-                        }
                     }
                     catch(error) {
                         Logger.logException(error);
@@ -240,12 +244,11 @@ const ConnmanApplet = new Lang.Class({
                     this._manager.disconnectSignal(signals[signalId]);
                 }
                 catch(error) {
-                    Logger.logError("Failed to disconnect signal: " + error);
+                    Logger.logException(error, "Failed to disconnect signal");
                 }
             }
         }
         this._manager = null;
-        Logger.logDebug("Destroying agent");
         if(this._agent)
             this._agent.destroy();
         this._agent = null;
@@ -264,14 +267,14 @@ const ConnmanApplet = new Lang.Class({
 
     disable: function() {
         Logger.logInfo("Disabling Connman applet");
+        this._menu.clear();
         this.menu.actor.hide();
         this._indicator.hide();
-        if(this._watch) {
+        if(this._watch)
             Gio.DBus.system.unwatch_name(this._watch);
-            this._watch = null;
-        }
         if(this._agent)
             this._agent.destroy();
         this._agent = null;
+        this._watch = null;
     },
 });
