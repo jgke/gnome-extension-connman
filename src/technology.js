@@ -74,7 +74,8 @@ const Technology = new Lang.Class({
             catch(error) {}
         }
         try {
-            this._proxy.disconnectSignal(this._sig);
+            if(this._proxy)
+                this._proxy.disconnectSignal(this._sig);
         }
         catch(error) {
             Logger.logException(error, "Failed to disconnect service proxy");
@@ -135,18 +136,6 @@ const WirelessInterface = new Lang.Class({
         this.addMenuItem(this._menu);
     },
 
-    addService: function(id, service) {
-        this.parent(id, service);
-        this.update(id);
-        this.updateIcon();
-    },
-
-    updateService: function(id, properties) {
-        this.parent(id, properties);
-        this.update(id);
-        this.updateIcon();
-    },
-
     removeService: function(id) {
         if(this._services[id]._properties['State'] != 'idle') {
             this._services[id].hide();
@@ -172,6 +161,11 @@ const WirelessInterface = new Lang.Class({
         }
         this.updateIcon();
     },
+
+    destroy: function() {
+        this._proxy = null;
+        this.parent();
+    }
 });
 
 const WirelessTechnology = new Lang.Class({
@@ -180,12 +174,13 @@ const WirelessTechnology = new Lang.Class({
 
     _init: function(proxy) {
         this.parent('wifi', proxy);
+        this._serviceInterfaces = {};
         this._interfaces = {};
     },
 
     addService: function(id, service) {
-        this.parent(id, service);
         let intf = service._properties['Ethernet']['Interface'];
+        this._serviceInterfaces[id] = intf;
         if(!this._interfaces[intf]) {
             Logger.logDebug("Adding interface " + intf);
             this._interfaces[intf] = new WirelessInterface(intf, this._proxy);
@@ -195,8 +190,7 @@ const WirelessTechnology = new Lang.Class({
     },
 
     updateService: function(id, properties) {
-        this.parent(id, properties);
-        let intf = this._services[id]._properties['Ethernet']['Interface'];
+        let intf = this._serviceInterfaces[id];
         if(!this._interfaces[intf]) {
             Logger.logError("Tried to update nonexisting wifi interface " + intf + "!");
         }
@@ -204,8 +198,7 @@ const WirelessTechnology = new Lang.Class({
     },
 
     removeService: function(id) {
-        this.parent(id);
-        let intf = this._services[id]._properties['Ethernet']['Interface'];
+        let intf = this._serviceInterfaces[id];
         this._interfaces[intf].removeService(id);
     },
 
