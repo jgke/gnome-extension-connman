@@ -56,6 +56,10 @@ const DialogField = new Lang.Class({
         this.entry.clutter_text.set_password_char('\u25cf');
     },
 
+    getLabel: function() {
+        return this.label.text;
+    },
+
     getValue: function() {
         return this.entry.get_text();
     },
@@ -72,7 +76,7 @@ const Dialog = new Lang.Class({
     _init: function(service, fields, callback) {
         this.parent({ styleClass: 'prompt-dialog' });
         this._service = service;
-        this._fields = fields;
+        this._fields = [];
         this._callback = callback;
         let mainContentBox = new St.BoxLayout(
                 { style_class: 'prompt-dialog-main-layout', vertical: false});
@@ -100,9 +104,16 @@ const Dialog = new Lang.Class({
                 { style_class: 'network-dialog-secret-table',
                     layout_manager: layout });
         layout.hookup_style(secretTable);
-        this.field = new DialogField("Passphrase");
-        layout.attach(this.field.label, 0, 0, 1, 1);
-        layout.attach(this.field.entry, 1, 0, 1, 1);
+        let pos = 0;
+        for(let i = 0; i < fields.length; i++) {
+            if(fields[i][1]['Requirement'] == 'mandatory') {
+                let field = new DialogField(fields[i][0]);
+                layout.attach(field.label, 0, pos, 1, 1);
+                layout.attach(field.entry, 1, pos, 1, 1);
+                this._fields[i] = field;
+                pos++;
+            }
+        }
         messageBox.add(secretTable);
 
         this._okButton = { label: "Connect",
@@ -119,7 +130,14 @@ const Dialog = new Lang.Class({
 
     _onOk: function() {
         this.close();
-        this._callback({ Passphrase: this.field.getValue() });
+        if(!this._fields.reduce(function(a, b) { return a && b.valid() }, true)) {
+            return;
+        }
+        let values = {};
+        Object.keys(this._fields).map(function(key) {
+            values[this._fields[key].getLabel()] = this._fields[key].getValue();
+        }.bind(this));
+        this._callback(values);
     },
 
     _onCancel: function() {
@@ -142,6 +160,8 @@ const Agent = new Lang.Class({
 
     ReportErrorAsync: function([service, error], invocation) {
         Logger.logDebug("Service reported error: " + error);
+        invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
+                'Canceled the connect');
     },
 
     RequestBrowser: function(service, url) {
@@ -157,7 +177,13 @@ const Agent = new Lang.Class({
                    'Canceled the connect');
             return;
         }
-        this._dialog = new Dialog(service, fields, function(fields) {
+        this._dialog = new Dialog(service, Object.keys(fields).map(function(key) {
+            fields[key] = fields[key].deep_unpack();
+            Object.keys(fields[key]).map(function(innerKey) {
+                fields[key][innerKey] = fields[key][innerKey].deep_unpack();
+            });
+            return [key, fields[key]];
+        }), function(fields) {
             if(!fields) {
                 invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
                         'Canceled the connect');
