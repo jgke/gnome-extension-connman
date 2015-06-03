@@ -46,6 +46,7 @@ const Technology = new Lang.Class({
     addService: function(id, service) {
         this._services[id] = service;
         this.addMenuItem(service);
+        this.serviceUpdated(id);
         this.updateIcon();
     },
 
@@ -57,6 +58,7 @@ const Technology = new Lang.Class({
         if(!this._services[id])
             return false;
         this._services[id].update(properties);
+        this.serviceUpdated(id);
         this.updateIcon();
         return true;
     },
@@ -66,6 +68,7 @@ const Technology = new Lang.Class({
             return false;
         this._services[id].destroy();
         delete this._services[id];
+        this.serviceUpdated(id);
         this.updateIcon();
         return true;
     },
@@ -86,6 +89,8 @@ const Technology = new Lang.Class({
         }
         this.parent();
     },
+
+    serviceUpdated: function(id) {},
 
     updateIcon: function() {
         if(Object.keys(this._services)) {
@@ -147,11 +152,12 @@ const WirelessInterface = new Lang.Class({
             this._service = null;
         }
         this.parent(id);
-        this.update(id);
+        this.serviceUpdated(id);
         this.updateIcon();
     },
 
-    update: function(id) {
+    serviceUpdated: function(id) {
+        this.parent();
         let service = this._services[id];
         if(service) {
             if(service._properties['State'] == 'idle' && service.actor.visible) {
