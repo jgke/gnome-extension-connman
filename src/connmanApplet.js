@@ -55,7 +55,7 @@ const ConnmanMenu = new Lang.Class({
 
     addTechnology: function(path, properties) {
         let type = path.split('/').pop();
-        Logger.logDebug('Adding technology ' + type);
+        Logger.logInfo('Adding technology ' + type);
         if(this._technologies[type])
             return;
         let proxy = new ConnmanInterface.TechnologyProxy(path);
@@ -72,7 +72,7 @@ const ConnmanMenu = new Lang.Class({
 
     removeTechnology: function(path) {
         let type = path.split('/').pop();
-        Logger.logInfo('removing technology ' + type);
+        Logger.logInfo('Removing technology ' + type);
         let technology = this._technologies[type];
         if(!technology) {
             Logger.logInfo('Tried to remove unknown technology ' + type);
@@ -159,7 +159,7 @@ const ConnmanApplet = new Lang.Class({
         Logger.logInfo("Updating all services");
         this._manager.GetServicesRemote(function(result, exception) {
             if(!result || exception) {
-                Logger.logError('error fetching services: ' + exception);
+                Logger.logError('Error fetching services: ' + exception);
                 return;
             }
             let services = result[0];
@@ -173,7 +173,7 @@ const ConnmanApplet = new Lang.Class({
         this._menu.clear();
         this._manager.GetTechnologiesRemote(function(result, exception) {
             if(!result || exception) {
-                Logger.logError('error fetching technologies: ' + exception);
+                Logger.logError('Error fetching technologies: ' + exception);
                 return;
             }
             let technologies = result[0];

@@ -192,7 +192,7 @@ const WirelessTechnology = new Lang.Class({
     updateService: function(id, properties) {
         let intf = this._serviceInterfaces[id];
         if(!this._interfaces[intf]) {
-            Logger.logError("Tried to update nonexisting wifi interface " + intf + "!");
+            Logger.logError("Tried to update nonexisting wifi interface " + intf);
         }
         this._interfaces[intf].updateService(id, properties);
     },

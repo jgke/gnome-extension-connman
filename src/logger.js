@@ -19,11 +19,11 @@
 const Lang = imports.lang;
 
 var enabled = true;
-var logLevel = 4;
+var logLevel = 3;
 var infoEnabled = true;
 
 function logMessage(msg) {
-    log(msg);
+    log("Connman-applet: " + msg);
 }
 
 function logError(error) {
