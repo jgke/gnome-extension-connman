@@ -41,6 +41,7 @@ const ConnmanMenu = new Lang.Class({
         this.parent();
         this._technologies = {};
         this._serviceTypes = {};
+        this._services = {};
         this._createIndicator = createIndicator;
     },
 
@@ -111,12 +112,18 @@ const ConnmanMenu = new Lang.Class({
 
     removeService: function(path) {
         Logger.logDebug('Removing service ' + path);
-        if(!this._services[path]) {
+        if(!this._serviceTypes[path]) {
             Logger.logInfo('Tried to remove unknown service ' + path);
             return;
         }
-        this._services[path].destroy();
+        if(!this._technologies[this._serviceTypes[path]]) {
+            // technology already deleted
+            delete this._technologies[this._serviceTypes[path]];
+            return;
+        }
+        this._technologies[this._serviceTypes[path]].removeService(path);
         delete this._services[path];
+        delete this._serviceTypes[path];
         this.fixMenu();
     },
 

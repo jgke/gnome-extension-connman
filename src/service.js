@@ -216,7 +216,12 @@ const Service = new Lang.Class({
 
     destroy: function() {
         this._indicator.destroy();
-        this._proxy.disconnectSignal(this._sig);
+        try {
+            this._proxy.disconnectSignal(this._sig);
+        }
+        catch(error) {
+            Logger.logException(error, "Failed to disconnect service proxy");
+        }
         this.parent();
     },
 
