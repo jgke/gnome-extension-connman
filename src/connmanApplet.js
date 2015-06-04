@@ -269,7 +269,6 @@ const ConnmanApplet = new Lang.Class({
         Logger.logInfo("Disabling Connman applet");
         this._menu.clear();
         this.menu.actor.hide();
-        this._indicator.hide();
         if(this._watch)
             Gio.DBus.system.unwatch_name(this._watch);
         if(this._agent)
