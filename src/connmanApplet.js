@@ -58,7 +58,13 @@ const ConnmanMenu = new Lang.Class({
         if(this._technologies[type])
             return;
         let proxy = new ConnmanInterface.TechnologyProxy(path);
-        this._technologies[type] = Technology.createTechnology(type, proxy);
+        try {
+            this._technologies[type] = Technology.createTechnology(type, proxy);
+        }
+        catch(error) {
+            Logger.logException(error, "Failed to add technology");
+            return;
+        }
         this.addMenuItem(this._technologies[type]);
     },
 
