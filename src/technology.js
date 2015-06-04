@@ -25,6 +25,9 @@ const Ext = ExtensionUtils.getCurrentExtension();
 const Service = Ext.imports.service;
 const Logger = Ext.imports.logger;
 
+const Gettext = imports.gettext.domain('gnome-extension-connman');
+const _ = Gettext.gettext;
+
 const Technology = new Lang.Class({
     Name: 'Technology',
     Extends: PopupMenu.PopupMenuSection,
@@ -127,9 +130,9 @@ const WirelessInterface = new Lang.Class({
 
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
 
-        this._menu.label.text = "Wireless";
-        this._menu.status.text = "idle";
-        this._connectionSwitch = new PopupMenu.PopupMenuItem("Connect");
+        this._menu.label.text = _("Wireless");
+        this._menu.status.text = _("idle");
+        this._connectionSwitch = new PopupMenu.PopupMenuItem(_("Connect"));
         this._connectionSwitch.connect('activate', function() {
             new Service.ServiceChooser(Object.keys(this._services).map(function(key) {
                 return this._services[key];
@@ -140,7 +143,7 @@ const WirelessInterface = new Lang.Class({
             });
         }.bind(this));
         this._menu.menu.addMenuItem(this._connectionSwitch);
-        this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem("Wireless Settings"));
+        this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem(_("Wireless Settings")));
         this._menu.icon.icon_name = 'network-offline-symbolic';
         this.addMenuItem(this._menu);
     },

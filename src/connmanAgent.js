@@ -32,6 +32,9 @@ const ConnmanInterface = Ext.imports.connmanInterface;
 const Logger = Ext.imports.logger;
 const Service = Ext.imports.service;
 
+const Gettext = imports.gettext.domain('gnome-extension-connman');
+const _ = Gettext.gettext;
+
 const DialogField = new Lang.Class({
     Name: 'DialogField',
 
@@ -86,7 +89,7 @@ const Dialog = new Lang.Class({
                     vertical: true });
         let subjectLabel = new St.Label(
                 { style_class: 'prompt-dialog-headline headline',
-                    text: "Authentication required by network connection" });
+                    text: _("Authentication required by network connection") });
 
         this.contentLayout.add(mainContentBox, { x_fill: true, y_fill: true });
         mainContentBox.add(icon,
@@ -116,11 +119,11 @@ const Dialog = new Lang.Class({
         }
         messageBox.add(secretTable);
 
-        this._okButton = { label: "Connect",
+        this._okButton = { label: _("Connect"),
             action: this._onOk.bind(this),
             default: true
         };
-        this._cancelButton = { label: "Cancel",
+        this._cancelButton = { label: _("Cancel"),
             action: this._onCancel.bind(this),
             key: Clutter.KEY_Escape
         };

@@ -22,7 +22,7 @@ var enabled = true;
 var logLevel = 4;
 var infoEnabled = true;
 
-function logMessage(msg) {
+function logMessage(msg) {
     log('Connman-applet: ' + msg);
 }
 

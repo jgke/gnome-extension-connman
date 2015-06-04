@@ -28,6 +28,9 @@ const Util = imports.misc.util;
 const PopupMenu = imports.ui.popupMenu;
 const ModalDialog = imports.ui.modalDialog;
 
+const Gettext = imports.gettext.domain('gnome-extension-connman');
+const _ = Gettext.gettext;
+
 const DialogServiceItem = new Lang.Class({
     Name: 'DialogServiceItem',
 
@@ -69,13 +72,13 @@ const ServiceChooser = new Lang.Class({
     Extends: ModalDialog.ModalDialog,
 
     _init: function(services, callback) {
-        this.parent({ styleClass: 'nm-dialog' });
+        this.parent({ styleClass: 'nm-dialog' });
         let headline = new St.BoxLayout({ style_class: 'nm-dialog-header-hbox' });
         let icon = new St.Icon({ style_class: 'nm-dialog-header-icon',
             icon_name: 'network-wireless-signal-excellent-symbolic' });
         let titleBox = new St.BoxLayout({ vertical: true });
         let title = new St.Label({ style_class: 'nm-dialog-header',
-            text: "Connect to..." });
+            text: _("Connect to...") });
 
         titleBox.add(title);
 
@@ -88,7 +91,7 @@ const ServiceChooser = new Lang.Class({
         this._stack = new St.Widget({ layout_manager: new Clutter.BinLayout() });
         this._itemBox = new St.BoxLayout({ vertical: true,
             style_class: 'nm-dialog-box' });
-        this._scrollView = new St.ScrollView({ style_class: 'nm-dialog-scroll-view'} );
+        this._scrollView = new St.ScrollView({ style_class: 'nm-dialog-scroll-view'} );
         this._scrollView.set_x_expand(true);
         this._scrollView.set_y_expand(true);
         this._scrollView.set_policy(Gtk.PolicyType.NEVER,
@@ -148,7 +151,7 @@ const Service = new Lang.Class({
         this._proxy = proxy;
 
         this._connected = true;
-        this._connectionSwitch = new PopupMenu.PopupMenuItem("Connect");
+        this._connectionSwitch = new PopupMenu.PopupMenuItem(_("Connect"));
         this._connectionSwitch.connect('activate', this.buttonEvent.bind(this));
 
         this._sig = this._proxy.connectSignal('PropertyChanged',
@@ -162,8 +165,8 @@ const Service = new Lang.Class({
 
         this._indicator = indicator;
         this._indicator.show();
-        this.label.text = "Connection";
-        this._settings = new PopupMenu.PopupMenuItem("Settings");
+        this.label.text = _("Connection");
+        this._settings = new PopupMenu.PopupMenuItem(_("Settings"));
 
         this.status.text = this.state;
 
@@ -198,11 +201,11 @@ const Service = new Lang.Class({
         if(properties.State)
             this.state = properties.State.deep_unpack();
         if(this.state == 'idle')
-            this._connectionSwitch.label.text = "Connect";
+            this._connectionSwitch.label.text = _("Connect");
         else if(this.state == 'failure')
-            this._connectionSwitch.label.text = "Reconnect";
+            this._connectionSwitch.label.text = _("Reconnect");
         else
-            this._connectionSwitch.label.text = "Disconnect";
+            this._connectionSwitch.label.text = _("Disconnect");
         if(this._properties['Name'])
             this.label.text = this._properties['Name'];
         this.status.text = this.state;
@@ -267,8 +270,8 @@ const EthernetService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('ethernet', proxy, indicator);
-        this.label.text = "Wired Connection";
-        this._settings.label.text = "Wired Settings";
+        this.label.text = _("Wired Connection");
+        this._settings.label.text = _("Wired Settings");
         this.show();
     },
 });
@@ -279,8 +282,8 @@ const WirelessService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
-        this.label.text = "Wireless Connection";
-        this._settings.label.text = "Wireless Settings";
+        this.label.text = _("Wireless Connection");
+        this._settings.label.text = _("Wireless Settings");
     },
 
     securityIcon: function() {
