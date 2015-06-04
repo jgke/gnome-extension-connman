@@ -39,7 +39,7 @@ const DialogServiceItem = new Lang.Class({
         if(!name)
             return;
         let icon = service.getIcon();
-        let securityIcon = service.securityIcon ? service.securityIcon() : ''
+        let securityIcon = service.securityIcon ? service.securityIcon() : '';
         this.service = service;
         this.actor = new St.BoxLayout({ style_class: 'nm-dialog-item',
             can_focus: true,
