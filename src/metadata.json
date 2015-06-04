@@ -1,6 +1,0 @@
-{
-    "shell-version": ["3.14.4"],
-    "uuid": "ConnmanApplet@jaakko.hannikainen.intel.com",
-    "name": "Connman Applet",
-    "description": "Replace NetworkManager applet with Connman applet"
-}
