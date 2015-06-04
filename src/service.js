@@ -361,6 +361,24 @@ const BluetoothService = new Lang.Class({
     }
 });
 
+const CellularService = new Lang.Class({
+    Name: 'CellularService',
+    Extends: Service,
+
+    _init: function(proxy, indicator) {
+        this.parent('cellular', proxy, indicator);
+        this.show();
+    },
+
+    getAcquiringIcon: function() {
+        return 'network-cellular-acquiring-symbolic';
+    },
+
+    getIcon: function() {
+        return 'network-cellular-connected-symbolic';
+    }
+});
+
 function createService(type, proxy, indicator) {
     switch(type) {
     case 'ethernet':
@@ -369,6 +387,8 @@ function createService(type, proxy, indicator) {
         return new WirelessService(proxy, indicator);
     case 'bluetooth':
         return new BluetoothService(proxy, indicator);
+    case 'cellular':
+        return new CellularService(proxy, indicator);
     default:
         throw 'tried to create unknown service type ' + type;
     }

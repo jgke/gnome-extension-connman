@@ -247,6 +247,15 @@ const P2PTechnology = new Lang.Class({
     },
 });
 
+const CellularTechnology = new Lang.Class({
+    Name: 'CellularTechnology',
+    Extends: Technology,
+
+    _init: function(proxy) {
+        this.parent('cellular', proxy);
+    },
+});
+
 function createTechnology(type, proxy) {
     switch(type) {
     case 'ethernet':
@@ -257,6 +266,8 @@ function createTechnology(type, proxy) {
         return new BluetoothTechnology(proxy);
     case 'p2p':
         return new P2PTechnology(proxy);
+    case 'cellular':
+        return new CellularTechnology(proxy);
     default:
         throw 'tried to add unknown technology type ' + type;
     }
