@@ -159,22 +159,22 @@ const Agent = new Lang.Class({
     },
 
     ReportErrorAsync: function([service, error], invocation) {
-        Logger.logDebug("Service reported error: " + error);
+        Logger.logDebug('Service reported error: ' + error);
         invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
-                'Canceled the connect');
+                'User canceled password dialog');
     },
 
     RequestBrowser: function(service, url) {
-        Logger.logDebug("Requested browser");
+        Logger.logDebug('Requested browser');
     },
 
     RequestInputAsync: function([service, fields], invocation) {
-        Logger.logDebug("Requested password");
+        Logger.logDebug('Requested password');
         service = this.getService(service);
         if(!service) {
-            Logger.logError("Asked for a password for a nonexistant service");
+            Logger.logError('Asked for a password for a nonexistant service');
             invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
-                   'Canceled the connect');
+                   'Connman asked for a password without service');
             return;
         }
         this._dialog = new Dialog(service, Object.keys(fields).map(function(key) {
@@ -186,7 +186,7 @@ const Agent = new Lang.Class({
         }), function(fields) {
             if(!fields) {
                 invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
-                        'Canceled the connect');
+                        'User canceled password dialog');
                 return;
             }
             Object.keys(fields).map(function(key) {
@@ -197,7 +197,7 @@ const Agent = new Lang.Class({
     },
 
     Cancel: function(params, invocation) {
-        Logger.logDebug("Password dialog canceled");
+        Logger.logDebug('Password dialog canceled');
         this._dialog.cancel();
         this._dialog = null;
     },

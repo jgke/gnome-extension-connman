@@ -23,30 +23,30 @@ var logLevel = 4;
 var infoEnabled = true;
 
 function logMessage(msg) {
-    log("Connman-applet: " + msg);
+    log('Connman-applet: ' + msg);
 }
 
 function logError(error) {
-    logMessage("ERROR: " + error);
+    logMessage('ERROR: ' + error);
 }
 
 function logException(exception, msg) {
     if(msg)
-        logMessage("Exception: " + msg);
-    logMessage("Exception: " + exception + ": " + exception.stack);
+        logMessage('Exception: ' + msg);
+    logMessage('Exception: ' + exception + ': ' + exception.stack);
 }
 
 function logWarning(error) {
     if(loglevel > 1)
-        logMessage("WARNING: " + error);
+        logMessage('WARNING: ' + error);
 }
 
 function logInfo(msg) {
     if(logLevel > 2)
-        logMessage("INFO: " + msg);
+        logMessage('INFO: ' + msg);
 }
 
 function logDebug(msg) {
     if(logLevel > 3)
-        logMessage("DEBUG: " + msg);
+        logMessage('DEBUG: ' + msg);
 }

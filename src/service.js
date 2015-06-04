@@ -36,7 +36,7 @@ const DialogServiceItem = new Lang.Class({
         if(!name)
             return;
         let icon = service.getIcon();
-        let securityIcon = service.securityIcon ? service.securityIcon() : "";
+        let securityIcon = service.securityIcon ? service.securityIcon() : ''
         this.service = service;
         this.actor = new St.BoxLayout({ style_class: 'nm-dialog-item',
             can_focus: true,
@@ -113,11 +113,11 @@ const ServiceChooser = new Lang.Class({
         }
 
         this._cancelButton = this.addButton({ action: this.close.bind(this),
-            label: "Cancel",
+            label: 'Cancel',
             key: Clutter.Escape });
 
         this._connectButton = this.addButton({ action: this.buttonEvent.bind(this),
-            label: "Connect",
+            label: 'Connect',
             key: Clutter.Enter });
         this._connectButton.reactive = true;
         this._connectButton.can_focus = true;
@@ -158,7 +158,7 @@ const Service = new Lang.Class({
                     this.update(obj);
                 }.bind(this));
 
-        this.state = "";
+        this.state = ''
 
         this._indicator = indicator;
         this._indicator.show();
@@ -220,7 +220,7 @@ const Service = new Lang.Class({
             this._proxy.disconnectSignal(this._sig);
         }
         catch(error) {
-            Logger.logException(error, "Failed to disconnect service proxy");
+            Logger.logException(error, 'Failed to disconnect service proxy');
         }
         this.parent();
     },

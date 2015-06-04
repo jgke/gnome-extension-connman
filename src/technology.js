@@ -38,8 +38,8 @@ const Technology = new Lang.Class({
         this._proxy = proxy;
         this._sig = this._proxy.connectSignal('PropertyChanged',
                 function(proxy, sender, [name, value]) {
-                    Logger.logDebug("Technology " + this._type + " property " +
-                            name + " changed: " + value.deep_unpack());
+                    Logger.logDebug('Technology ' + this._type + ' property ' +
+                            name + ' changed: ' + value.deep_unpack());
                 }.bind(this));
     },
 
@@ -85,7 +85,7 @@ const Technology = new Lang.Class({
                 this._proxy.disconnectSignal(this._sig);
         }
         catch(error) {
-            Logger.logException(error, "Failed to disconnect service proxy");
+            Logger.logException(error, 'Failed to disconnect service proxy');
         }
         this.parent();
     },
@@ -134,7 +134,7 @@ const WirelessInterface = new Lang.Class({
             new Service.ServiceChooser(Object.keys(this._services).map(function(key) {
                 return this._services[key];
             }.bind(this)).filter(function(service) {
-                return service._properties["Name"] && service._properties["Name"].length;
+                return service._properties['Name'] && service._properties['Name'].length;
             }), function(service) {
                 service.buttonEvent();
             });
@@ -192,7 +192,7 @@ const WirelessTechnology = new Lang.Class({
         let intf = service._properties['Ethernet']['Interface'];
         this._serviceInterfaces[id] = intf;
         if(!this._interfaces[intf]) {
-            Logger.logDebug("Adding interface " + intf);
+            Logger.logDebug('Adding interface ' + intf);
             this._interfaces[intf] = new WirelessInterface(intf, this._proxy);
             this.addMenuItem(this._interfaces[intf]);
         }
@@ -209,7 +209,7 @@ const WirelessTechnology = new Lang.Class({
     updateService: function(id, properties) {
         let intf = this._serviceInterfaces[id];
         if(!this._interfaces[intf]) {
-            Logger.logError("Tried to update nonexisting wifi interface " + intf);
+            Logger.logError('Tried to update nonexisting wifi interface ' + intf);
         }
         this._interfaces[intf].updateService(id, properties);
     },

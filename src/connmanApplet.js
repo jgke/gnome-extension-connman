@@ -62,7 +62,7 @@ const ConnmanMenu = new Lang.Class({
             this._technologies[type] = Technology.createTechnology(type, proxy);
         }
         catch(error) {
-            Logger.logException(error, "Failed to add technology");
+            Logger.logException(error, 'Failed to add technology');
             return;
         }
         this.addMenuItem(this._technologies[type]);
@@ -143,7 +143,7 @@ const ConnmanMenu = new Lang.Class({
                 delete this._technologies[type];
             }
             catch(error) {
-                Logger.logException(error, "Failed to clear technology " + type);
+                Logger.logException(error, 'Failed to clear technology ' + type);
             }
         }
         this._serviceTypes = {};
@@ -165,7 +165,7 @@ const ConnmanApplet = new Lang.Class({
     },
 
     _updateAllServices: function() {
-        Logger.logInfo("Updating all services");
+        Logger.logInfo('Updating all services');
         this._manager.GetServicesRemote(function(result, exception) {
             if(!result || exception) {
                 Logger.logError('Error fetching services: ' + exception);
@@ -178,7 +178,7 @@ const ConnmanApplet = new Lang.Class({
     },
 
     _updateAllTechnologies: function() {
-        Logger.logInfo("Updating all technologies");
+        Logger.logInfo('Updating all technologies');
         this._menu.clear();
         this._manager.GetTechnologiesRemote(function(result, exception) {
             if(!result || exception) {
@@ -215,8 +215,8 @@ const ConnmanApplet = new Lang.Class({
                 }.bind(this));
         this._psig = this._manager.connectSignal('PropertyChanged',
                 function(proxy, sender, [property, value]) {
-                    Logger.logDebug("Global property " + property +
-                            " changed: " + value.deep_unpack());
+                    Logger.logDebug('Global property ' + property +
+                            ' changed: ' + value.deep_unpack());
                 }.bind(this));
         this._ssig = this._manager.connectSignal('ServicesChanged',
                 function(proxy, sender, [changed, removed]) {
@@ -243,14 +243,14 @@ const ConnmanApplet = new Lang.Class({
         this.indicators.hide();
         let signals = [this._asig, this._rsig, this._ssig, this._psig];
         if(this._manager) {
-            Logger.logDebug("Disconnecting signals");
+            Logger.logDebug('Disconnecting signals');
             for(let signalId in signals) {
                 try {
-                    Logger.logDebug("Disconnecting signal " + signals[signalId]);
+                    Logger.logDebug('Disconnecting signal ' + signals[signalId]);
                     this._manager.disconnectSignal(signals[signalId]);
                 }
                 catch(error) {
-                    Logger.logException(error, "Failed to disconnect signal");
+                    Logger.logException(error, 'Failed to disconnect signal');
                 }
             }
         }
@@ -261,7 +261,7 @@ const ConnmanApplet = new Lang.Class({
     },
 
     enable: function() {
-        Logger.logInfo("Enabling Connman applet");
+        Logger.logInfo('Enabling Connman applet');
         if(!this._watch) {
             this._watch = Gio.DBus.system.watch_name(ConnmanInterface.BUS_NAME,
                     Gio.BusNameWatcherFlags.NONE,
@@ -272,7 +272,7 @@ const ConnmanApplet = new Lang.Class({
     },
 
     disable: function() {
-        Logger.logInfo("Disabling Connman applet");
+        Logger.logInfo('Disabling Connman applet');
         this._menu.clear();
         this.menu.actor.hide();
         if(this._watch)
