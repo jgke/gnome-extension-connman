@@ -131,7 +131,7 @@ const WirelessInterface = new Lang.Class({
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
 
         this._menu.label.text = _("Wireless");
-        this._menu.status.text = _("idle");
+        this._menu.status.text = _("Idle");
         this._connectionSwitch = new PopupMenu.PopupMenuItem(_("Connect"));
         this._connectionSwitch.connect('activate', function() {
             new Service.ServiceChooser(Object.keys(this._services).map(function(key) {

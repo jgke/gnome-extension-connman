@@ -1,0 +1,95 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-06-04 14:40+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/connmanAgent.js:92
+msgid "Authentication required by network connection"
+msgstr ""
+
+#: src/connmanAgent.js:122 src/service.js:154 src/service.js:204
+#: src/technology.js:135
+msgid "Connect"
+msgstr ""
+
+#: src/connmanAgent.js:126
+msgid "Cancel"
+msgstr ""
+
+#: src/service.js:81
+msgid "Connect to..."
+msgstr ""
+
+#: src/service.js:168
+msgid "Connection"
+msgstr ""
+
+#: src/service.js:169
+msgid "Settings"
+msgstr ""
+
+#: src/service.js:206
+msgid "Reconnect"
+msgstr ""
+
+#: src/service.js:208 src/service.js:228
+msgid "Disconnect"
+msgstr ""
+
+#: src/service.js:218 src/technology.js:134
+msgid "Idle"
+msgstr ""
+
+#: src/service.js:220
+msgid "Failure"
+msgstr ""
+
+#: src/service.js:222
+msgid "Association"
+msgstr ""
+
+#: src/service.js:224
+msgid "Configuration"
+msgstr ""
+
+#: src/service.js:226
+msgid "Ready"
+msgstr ""
+
+#: src/service.js:230
+msgid "Online"
+msgstr ""
+
+#: src/service.js:294
+msgid "Wired Connection"
+msgstr ""
+
+#: src/service.js:295
+msgid "Wired Settings"
+msgstr ""
+
+#: src/service.js:306
+msgid "Wireless Connection"
+msgstr ""
+
+#: src/service.js:307 src/technology.js:146
+msgid "Wireless Settings"
+msgstr ""
+
+#: src/technology.js:133
+msgid "Wireless"
+msgstr ""

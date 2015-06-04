@@ -116,11 +116,11 @@ const ServiceChooser = new Lang.Class({
         }
 
         this._cancelButton = this.addButton({ action: this.close.bind(this),
-            label: 'Cancel',
+            label: "Cancel",
             key: Clutter.Escape });
 
         this._connectButton = this.addButton({ action: this.buttonEvent.bind(this),
-            label: 'Connect',
+            label: "Connect",
             key: Clutter.Enter });
         this._connectButton.reactive = true;
         this._connectButton.can_focus = true;
@@ -208,8 +208,29 @@ const Service = new Lang.Class({
             this._connectionSwitch.label.text = _("Disconnect");
         if(this._properties['Name'])
             this.label.text = this._properties['Name'];
-        this.status.text = this.state;
+        this.status.text = this.getStateString();
         this.setIcon(this.getStatusIcon());
+    },
+
+    getStateString: function() {
+        switch(this.state) {
+            case 'idle':
+                return _("Idle");
+            case 'failure':
+                return _("Failure");
+            case 'association':
+                return _("Association");
+            case 'configuration':
+                return _("Configuration");
+            case 'ready':
+                return _("Ready");
+            case 'disconnect':
+                return _("Disconnect");
+            case 'online':
+                return _("Online");
+            default:
+                return this.state;
+        }
     },
 
     setIcon: function(iconName) {
