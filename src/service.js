@@ -291,10 +291,19 @@ const EthernetService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('ethernet', proxy, indicator);
-        this.label.text = _("Wired Connection");
+        this.label.text = _("Wired");
         this._settings.label.text = _("Wired Settings");
         this.show();
     },
+
+    update: function(properties) {
+        this.parent(properties);
+        if(this._properties['Name'] == 'Wired') {
+            /* ensure translated name */
+            this._properties['Name'] = _("Wired");
+            this.label.text = _("Wired");
+        }
+    }
 });
 
 const WirelessService = new Lang.Class({
@@ -303,7 +312,7 @@ const WirelessService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
-        this.label.text = _("Wireless Connection");
+        this.label.text = _("Wireless");
         this._settings.label.text = _("Wireless Settings");
     },
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-04 14:40+0300\n"
+"POT-Creation-Date: 2015-06-05 11:23+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -74,22 +74,18 @@ msgstr ""
 msgid "Online"
 msgstr ""
 
-#: src/service.js:294
-msgid "Wired Connection"
+#: src/service.js:294 src/service.js:303 src/service.js:304
+msgid "Wired"
 msgstr ""
 
 #: src/service.js:295
 msgid "Wired Settings"
 msgstr ""
 
-#: src/service.js:306
-msgid "Wireless Connection"
-msgstr ""
-
-#: src/service.js:307 src/technology.js:146
-msgid "Wireless Settings"
-msgstr ""
-
-#: src/technology.js:133
+#: src/service.js:315 src/technology.js:133
 msgid "Wireless"
+msgstr ""
+
+#: src/service.js:316 src/technology.js:146
+msgid "Wireless Settings"
 msgstr ""

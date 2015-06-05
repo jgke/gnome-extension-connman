@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-extension-connman 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-04 14:38+0300\n"
+"POT-Creation-Date: 2015-06-05 11:23+0300\n"
 "PO-Revision-Date: 2015-06-04 14:18+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -75,22 +75,18 @@ msgstr "Valmis"
 msgid "Online"
 msgstr "Verkossa"
 
-#: src/service.js:294
-msgid "Wired Connection"
-msgstr "Kiinteä yhteys"
+#: src/service.js:294 src/service.js:303 src/service.js:304
+msgid "Wired"
+msgstr "Kiinteä"
 
 #: src/service.js:295
 msgid "Wired Settings"
-msgstr "Verkkoasetukset"
+msgstr "Kiinteän verkon asetukset"
 
-#: src/service.js:306
-msgid "Wireless Connection"
-msgstr "Langaton yhteys"
-
-#: src/service.js:307 src/technology.js:146
-msgid "Wireless Settings"
-msgstr "Langattoman verkon asetukset"
-
-#: src/technology.js:133
+#: src/service.js:315 src/technology.js:133
 msgid "Wireless"
 msgstr "Langaton"
+
+#: src/service.js:316 src/technology.js:146
+msgid "Wireless Settings"
+msgstr "Langattoman verkon asetukset"
