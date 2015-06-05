@@ -358,7 +358,24 @@ const BluetoothService = new Lang.Class({
 
     getIcon: function() {
         return 'bluetooth-active-symbolic';
-    }
+    },
+
+    getStatusIcon: function() {
+        switch(this.state) {
+        case 'online':
+        case 'ready':
+            return this.getIcon();
+        case 'configuration':
+        case 'association':
+            return this.getAcquiringIcon();
+        case 'disconnect':
+        case 'idle':
+            return 'bluetooth-disabled-symbolic';
+        case 'failure':
+        default:
+            return 'bluetooth-disabled-symbolic';
+        }
+    },
 });
 
 const CellularService = new Lang.Class({
