@@ -37,11 +37,10 @@ const ConnmanMenu = new Lang.Class({
     Name: 'ConnmanMenu',
     Extends: PopupMenu.PopupMenuSection,
 
-    _init: function(createIndicator) {
+    _init: function() {
         this.parent();
         this._technologies = {};
         this._serviceTypes = {};
-        this._createIndicator = createIndicator;
     },
 
     hide: function() {
@@ -96,14 +95,12 @@ const ConnmanMenu = new Lang.Class({
         return this._technologies[this._serviceTypes[path]].getService(path);
     },
 
-    addService: function(path, properties) {
+    addService: function(path, properties, indicator) {
         Logger.logDebug('Adding service ' + path);
         var type = properties.Type.deep_unpack().split('/').pop();
         this._serviceTypes[path] = type;
 
         let proxy = new ConnmanInterface.ServiceProxy(path);
-        let indicator = this._createIndicator();
-
         let service = Service.createService(type, proxy, indicator);
         service.update(properties);
         this._technologies[type].addService(path, service);
@@ -159,9 +156,16 @@ const ConnmanApplet = new Lang.Class({
     _init: function() {
         this.parent();
 
-        this._menu = new ConnmanMenu(this._addIndicator.bind(this));
+        this._menu = new ConnmanMenu();
         this.menu.addMenuItem(this._menu);
         this.menu.actor.show();
+    },
+
+    _updateService: function(path, properties) {
+        if(this._menu.getService(path))
+            this._menu.updateService(path, properties);
+        else
+            this._menu.addService(path, properties, this._addIndicator());
     },
 
     _updateAllServices: function() {
@@ -173,7 +177,8 @@ const ConnmanApplet = new Lang.Class({
             }
             let services = result[0];
             for each(let [path, properties] in services)
-                this._menu.updateService(path, properties);
+                this._updateService(path, properties);
+
         }.bind(this));
     },
 
@@ -220,10 +225,9 @@ const ConnmanApplet = new Lang.Class({
                 }.bind(this));
         this._ssig = this._manager.connectSignal('ServicesChanged',
                 function(proxy, sender, [changed, removed]) {
-                    Logger.logDebug('Services Changed');
                     try {
                         for each(let [path, properties] in changed)
-                            this._menu.updateService(path, properties);
+                            this._updateService(path, properties);
                         for each(let path in removed)
                             this._menu.removeService(path);
                     }
@@ -265,9 +269,8 @@ const ConnmanApplet = new Lang.Class({
         if(!this._watch) {
             this._watch = Gio.DBus.system.watch_name(ConnmanInterface.BUS_NAME,
                     Gio.BusNameWatcherFlags.NONE,
-                    function() { return this._connectEvent() }.bind(this),
-                    function() { return this._disconnectEvent() }.bind(this));
-
+                    this._connectEvent().bind(this),
+                    this._disconnectEvent().bind(this));
         }
     },
 

@@ -38,6 +38,5 @@ function enable() {
 }
 
 function disable() {
-    menu.menu.box.remove_actor(applet.menu.actor);
     applet.disable()
 }

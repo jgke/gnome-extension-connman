@@ -137,7 +137,7 @@ const WirelessInterface = new Lang.Class({
             new Service.ServiceChooser(Object.keys(this._services).map(function(key) {
                 return this._services[key];
             }.bind(this)).filter(function(service) {
-                return service._properties['Name'] && service._properties['Name'].length;
+                return service._properties['Name'];
             }), function(service) {
                 service.buttonEvent();
             });

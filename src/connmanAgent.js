@@ -133,9 +133,8 @@ const Dialog = new Lang.Class({
 
     _onOk: function() {
         this.close();
-        if(!this._fields.reduce(function(a, b) { return a && b.valid() }, true)) {
+        if(!this._fields.reduce(function(a, b) { return a && b.valid() }, true))
             return;
-        }
         let values = {};
         Object.keys(this._fields).map(function(key) {
             values[this._fields[key].getLabel()] = this._fields[key].getValue();
