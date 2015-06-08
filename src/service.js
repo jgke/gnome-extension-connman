@@ -212,6 +212,19 @@ const Service = new Lang.Class({
         this.setIcon(this.getStatusIcon());
     },
 
+    signalToIcon: function() {
+        let value = this._properties['Strength'];
+        if (value > 80)
+            return 'excellent';
+        if (value > 55)
+            return 'good';
+        if (value > 30)
+            return 'ok';
+        if (value > 5)
+            return 'weak';
+        return 'none';
+    },
+
     getStateString: function() {
         switch(this.state) {
             case 'idle':
@@ -330,19 +343,6 @@ const WirelessService = new Lang.Class({
         }
     },
 
-    signalToIcon: function() {
-        let value = this._properties['Strength'];
-        if (value > 80)
-            return 'excellent';
-        if (value > 55)
-            return 'good';
-        if (value > 30)
-            return 'ok';
-        if (value > 5)
-            return 'weak';
-        return 'none';
-    },
-
     getAcquiringIcon: function() {
         return 'network-wireless-acquiring-symbolic';
     },
@@ -401,7 +401,7 @@ const CellularService = new Lang.Class({
     },
 
     getIcon: function() {
-        return 'network-cellular-connected-symbolic';
+        return 'network-cellular-signal-' + this.signalToIcon() + '-symbolic';
     }
 });
 
