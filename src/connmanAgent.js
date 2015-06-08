@@ -148,11 +148,10 @@ const Dialog = new Lang.Class({
     }
 });
 
-const Agent = new Lang.Class({
-    Name: 'Agent',
+const AbstractAgent = new Lang.Class({
+    Name: 'AbstractAgent',
 
     _init: function(getService) {
-	this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
         this.getService = getService;
     },
 
@@ -162,12 +161,6 @@ const Agent = new Lang.Class({
 
     ReportErrorAsync: function([service, error], invocation) {
         Logger.logDebug('Service reported error: ' + error);
-        invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
-                'User canceled password dialog');
-    },
-
-    RequestBrowser: function(service, url) {
-        Logger.logDebug('Requested browser');
     },
 
     RequestInputAsync: function([service, fields], invocation) {
@@ -175,7 +168,7 @@ const Agent = new Lang.Class({
         service = this.getService(service);
         if(!service) {
             Logger.logError('Asked for a password for a nonexistant service');
-            invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
+            invocation.return_dbus_error(this._canceledError,
                    'Connman asked for a password without service');
             return;
         }
@@ -187,7 +180,7 @@ const Agent = new Lang.Class({
             return [key, fields[key]];
         }), function(fields) {
             if(!fields) {
-                invocation.return_dbus_error('net.connman.Agent.Error.Canceled',
+                invocation.return_dbus_error(this._canceledError,
                         'User canceled password dialog');
                 return;
             }
@@ -208,6 +201,41 @@ const Agent = new Lang.Class({
         if(this._dialog)
             this._dialog.cancel();
         this._dialog = null;
-        ConnmanInterface.removeAgentImplementation(this._dbusImpl);
     }
+});
+
+const Agent = new Lang.Class({
+    Name: 'Agent',
+    Extends: AbstractAgent,
+
+    _init: function(getService) {
+        this.parent(getService);
+	this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
+        this._canceledError = 'net.connman.Agent.Error.Canceled';
+    },
+
+    RequestBrowser: function(service, url) {
+        Logger.logDebug('Requested browser');
+    },
+
+    destroy: function() {
+        this.parent();
+        ConnmanInterface.removeAgentImplementation(this._dbusImpl);
+    },
+});
+
+const VPNAgent = new Lang.Class({
+    Name: 'VPNAgent',
+    Extends: AbstractAgent,
+
+    _init: function(getService) {
+        this.parent(getService);
+	this._dbusImpl = ConnmanInterface.addVPNAgentImplementation(this);
+        this._canceledError = 'net.connman.vpn.Agent.Error.Canceled';
+    },
+
+    destroy: function() {
+        this.parent();
+        ConnmanInterface.removeVPNAgentImplementation(this._dbusImpl);
+    },
 });

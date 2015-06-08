@@ -21,6 +21,7 @@ const Gio = imports.gi.Gio;
 const BUS_NAME = 'net.connman';
 const MANAGER_PATH = '/';
 const AGENT_PATH = '/net/connman/agent';
+const VPN_AGENT_PATH = '/net/connman/vpn/agent';
 
 const _MANAGER_INTERFACE = '<node>\
 <interface name="net.connman.Manager">\
@@ -113,9 +114,53 @@ const _AGENT_INTERFACE= '<node>\
 </interface>\
 </node>';
 
+const _VPN_MANAGER_INTERFACE = '<node>\
+<interface name="net.connman.Manager">\
+    <method name="Create">\
+        <arg name="settings" type="a{sv}" direction="in"/>\
+    </method>\
+    <method name="Remove">\
+        <arg name="vpn" type="o" direction="in"/>\
+    </method>\
+    <method name="GetConnections">\
+        <arg name="connections" type="a(oa{sv})" direction="out"/>\
+    </method>\
+    <method name="RegisterAgent">\
+        <arg name="path" type="o" direction="in"/>\
+    </method>\
+    <method name="UnregisterAgent">\
+        <arg name="path" type="o" direction="in"/>\
+    </method>\
+    <signal name="ConnectionAdded">\
+        <arg name="path" type="o"/>\
+        <arg name="properties" type="a{sv}"/>\
+    </signal>\
+    <signal name="ConnectionRemoved">\
+        <arg name="path" type="o"/>\
+    </signal>\
+</interface>\
+</node>';
+
+const _VPN_AGENT_INTERFACE= '<node>\
+<interface name="net.connman.vpn.Agent">\
+    <method name="Release"></method>\
+    <method name="ReportError">\
+        <arg name="service" type="o" direction="in"/>\
+        <arg name="error" type="s" direction="in"/>\
+    </method>\
+    <method name="RequestInput">\
+        <arg name="service" type="o" direction="in"/>\
+        <arg name="fields" type="a{sv}" direction="in"/>\
+        <arg name="values" type="a{sv}" direction="out"/>\
+    </method>\
+    <method name="Cancel"></method>\
+</interface>\
+</node>';
+
 const _ManagerProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_MANAGER_INTERFACE);
 const _TechnologyProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_TECHNOLOGY_INTERFACE);
 const _ServiceProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_SERVICE_INTERFACE);
+const _VPNManagerProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_VPN_MANAGER_INTERFACE);
 
 function ManagerProxy() {
     return new _ManagerProxyWrapper(Gio.DBus.system, BUS_NAME, MANAGER_PATH);
@@ -137,4 +182,14 @@ function addAgentImplementation(agent) {
 
 function removeAgentImplementation(dbusImpl) {
     dbusImpl.unexport(Gio.DBus.system, AGENT_PATH);
+}
+
+function addVPNAgentImplementation(agent) {
+    let dbusImpl = Gio.DBusExportedObject.wrapJSObject(_VPN_AGENT_INTERFACE, agent);
+    dbusImpl.export(Gio.DBus.system, VPN_AGENT_PATH);
+    return dbusImpl;
+}
+
+function removeVPNAgentImplementation(dbusImpl) {
+    dbusImpl.unexport(Gio.DBus.system, VPN_AGENT_PATH);
 }

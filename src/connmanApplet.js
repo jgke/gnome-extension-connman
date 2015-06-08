@@ -206,6 +206,7 @@ const ConnmanApplet = new Lang.Class({
 
         this._manager = new ConnmanInterface.ManagerProxy();
         this._agent = new ConnmanAgent.Agent(this._menu.getService.bind(this._menu));
+        this._vpnAgent = new ConnmanAgent.VPNAgent(this._menu.getService.bind(this._menu));
 
         this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
         this._asig = this._manager.connectSignal('TechnologyAdded',
@@ -264,7 +265,10 @@ const ConnmanApplet = new Lang.Class({
         this._manager = null;
         if(this._agent)
             this._agent.destroy();
+        if(this._vpnAgent)
+            this._vpnAgent.destroy();
         this._agent = null;
+        this.vpnAgent = null;
     },
 
     enable: function() {
@@ -287,7 +291,10 @@ const ConnmanApplet = new Lang.Class({
             Gio.DBus.system.unwatch_name(this._watch);
         if(this._agent)
             this._agent.destroy();
+        if(this._vpnAgent)
+            this._vpnAgent.destroy();
         this._agent = null;
+        this._vpnAgent = null;
         this._watch = null;
     },
 });
