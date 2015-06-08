@@ -84,7 +84,7 @@ const Dialog = new Lang.Class({
         let icon = new St.Icon({ icon_name: 'dialog-password-symbolic' });
         let messageBox = new St.BoxLayout(
                 { style_class: 'prompt-dialog-message-layout',
-                    vertical: true });
+                    vertical: true, x_expand: true });
         let subjectLabel = new St.Label(
                 { style_class: 'prompt-dialog-headline headline',
                     text: _("Authentication required by network connection") });
