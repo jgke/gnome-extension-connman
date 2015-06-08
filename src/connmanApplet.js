@@ -126,13 +126,10 @@ const ConnmanMenu = new Lang.Class({
             Logger.logInfo('Tried to remove unknown service ' + path);
             return;
         }
-        if(!this._technologies[this._serviceTypes[path]]) {
-            // technology already deleted
-            delete this._technologies[this._serviceTypes[path]];
-            return;
+        if(this._technologies[this._serviceTypes[path]]) {
+            Logger.logDebug('Removing service ' + path);
+            this._technologies[this._serviceTypes[path]].removeService(path);
         }
-        Logger.logDebug('Removing service ' + path);
-        this._technologies[this._serviceTypes[path]].removeService(path);
         delete this._serviceTypes[path];
         this.fixMenu();
     },
