@@ -19,6 +19,7 @@
 const Gio = imports.gi.Gio;
 
 const BUS_NAME = 'net.connman';
+const VPN_BUS_NAME = 'net.connman.vpn';
 const MANAGER_PATH = '/';
 const AGENT_PATH = '/net/connman/agent';
 const VPN_AGENT_PATH = '/net/connman/vpn/agent';
@@ -115,7 +116,7 @@ const _AGENT_INTERFACE= '<node>\
 </node>';
 
 const _VPN_MANAGER_INTERFACE = '<node>\
-<interface name="net.connman.Manager">\
+<interface name="net.connman.vpn.Manager">\
     <method name="Create">\
         <arg name="settings" type="a{sv}" direction="in"/>\
     </method>\
@@ -164,6 +165,10 @@ const _VPNManagerProxyWrapper = Gio.DBusProxy.makeProxyWrapper(_VPN_MANAGER_INTE
 
 function ManagerProxy() {
     return new _ManagerProxyWrapper(Gio.DBus.system, BUS_NAME, MANAGER_PATH);
+}
+
+function VPNManagerProxy() {
+    return new _VPNManagerProxyWrapper(Gio.DBus.system, VPN_BUS_NAME, MANAGER_PATH);
 }
 
 function TechnologyProxy(path) {

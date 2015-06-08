@@ -88,6 +88,7 @@ const ConnmanMenu = new Lang.Class({
     },
 
     getService: function(path) {
+        log(path);
         if(!this._serviceTypes[path])
             return null;
         if(!this._technologies[this._serviceTypes[path]])
@@ -205,10 +206,12 @@ const ConnmanApplet = new Lang.Class({
         this.menu.actor.show();
 
         this._manager = new ConnmanInterface.ManagerProxy();
-        this._agent = new ConnmanAgent.Agent(this._menu.getService.bind(this._menu));
-        this._vpnAgent = new ConnmanAgent.VPNAgent(this._menu.getService.bind(this._menu));
+        this._vpnManager = new ConnmanInterface.VPNManagerProxy();
+        this._agent = new ConnmanAgent.Agent();
+        this._vpnAgent = new ConnmanAgent.VPNAgent();
 
         this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
+        this._vpnManager.RegisterAgentRemote(ConnmanInterface.VPN_AGENT_PATH);
         this._asig = this._manager.connectSignal('TechnologyAdded',
                 function(proxy, sender, [path, properties]) {
                     try {
@@ -263,6 +266,7 @@ const ConnmanApplet = new Lang.Class({
             }
         }
         this._manager = null;
+        this._vpnManager = null;
         if(this._agent)
             this._agent.destroy();
         if(this._vpnAgent)

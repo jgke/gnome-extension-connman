@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-05 11:23+0300\n"
+"POT-Creation-Date: 2015-06-08 13:26+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,8 +21,8 @@ msgstr ""
 msgid "Authentication required by network connection"
 msgstr ""
 
-#: src/connmanAgent.js:122 src/service.js:154 src/service.js:204
-#: src/technology.js:135
+#: src/connmanAgent.js:122 src/service.js:194 src/service.js:244
+#: src/technology.js:138
 msgid "Connect"
 msgstr ""
 
@@ -30,62 +30,66 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/service.js:81
+#: src/service.js:84
 msgid "Connect to..."
 msgstr ""
 
-#: src/service.js:168
+#: src/service.js:208
 msgid "Connection"
 msgstr ""
 
-#: src/service.js:169
+#: src/service.js:209
 msgid "Settings"
 msgstr ""
 
-#: src/service.js:206
+#: src/service.js:246
 msgid "Reconnect"
 msgstr ""
 
-#: src/service.js:208 src/service.js:228
+#: src/service.js:248
 msgid "Disconnect"
 msgstr ""
 
-#: src/service.js:218 src/technology.js:134
+#: src/service.js:271 src/technology.js:137
 msgid "Idle"
 msgstr ""
 
-#: src/service.js:220
+#: src/service.js:273
 msgid "Failure"
 msgstr ""
 
-#: src/service.js:222
+#: src/service.js:275
 msgid "Association"
 msgstr ""
 
-#: src/service.js:224
+#: src/service.js:277
 msgid "Configuration"
 msgstr ""
 
-#: src/service.js:226
+#: src/service.js:279
 msgid "Ready"
 msgstr ""
 
-#: src/service.js:230
+#: src/service.js:281
+msgid "Disconnected"
+msgstr ""
+
+#: src/service.js:283
 msgid "Online"
 msgstr ""
 
-#: src/service.js:294 src/service.js:303 src/service.js:304
+#: src/service.js:347 src/service.js:356 src/service.js:357
 msgid "Wired"
 msgstr ""
 
-#: src/service.js:295
+#: src/service.js:348
 msgid "Wired Settings"
 msgstr ""
 
-#: src/service.js:315 src/technology.js:133
+#: src/service.js:368 src/technology.js:136
 msgid "Wireless"
 msgstr ""
 
-#: src/service.js:316 src/technology.js:146
+#: src/service.js:369 src/technology.js:150
 msgid "Wireless Settings"
 msgstr ""

@@ -278,7 +278,7 @@ const Service = new Lang.Class({
             case 'ready':
                 return _("Ready");
             case 'disconnect':
-                return _("Disconnect");
+                return _("Disconnected");
             case 'online':
                 return _("Online");
             default:

@@ -30,7 +30,6 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
 const ConnmanInterface = Ext.imports.connmanInterface;
 const Logger = Ext.imports.logger;
-const Service = Ext.imports.service;
 
 const Gettext = imports.gettext.domain('gnome-extension-connman');
 const _ = Gettext.gettext;
@@ -76,9 +75,8 @@ const Dialog = new Lang.Class({
     Name: 'Dialog',
     Extends: ModalDialog.ModalDialog,
 
-    _init: function(service, fields, callback) {
+    _init: function(fields, callback) {
         this.parent({ styleClass: 'prompt-dialog' });
-        this._service = service;
         this._fields = [];
         this._callback = callback;
         let mainContentBox = new St.BoxLayout(
@@ -151,8 +149,7 @@ const Dialog = new Lang.Class({
 const AbstractAgent = new Lang.Class({
     Name: 'AbstractAgent',
 
-    _init: function(getService) {
-        this.getService = getService;
+    _init: function() {
     },
 
     Release: function() {
@@ -165,14 +162,7 @@ const AbstractAgent = new Lang.Class({
 
     RequestInputAsync: function([service, fields], invocation) {
         Logger.logDebug('Requested password');
-        service = this.getService(service);
-        if(!service) {
-            Logger.logError('Asked for a password for a nonexistant service');
-            invocation.return_dbus_error(this._canceledError,
-                   'Connman asked for a password without service');
-            return;
-        }
-        this._dialog = new Dialog(service, Object.keys(fields).map(function(key) {
+        this._dialog = new Dialog(Object.keys(fields).map(function(key) {
             fields[key] = fields[key].deep_unpack();
             Object.keys(fields[key]).map(function(innerKey) {
                 fields[key][innerKey] = fields[key][innerKey].deep_unpack();
@@ -208,8 +198,7 @@ const Agent = new Lang.Class({
     Name: 'Agent',
     Extends: AbstractAgent,
 
-    _init: function(getService) {
-        this.parent(getService);
+    _init: function() {
 	this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
         this._canceledError = 'net.connman.Agent.Error.Canceled';
     },
@@ -228,8 +217,7 @@ const VPNAgent = new Lang.Class({
     Name: 'VPNAgent',
     Extends: AbstractAgent,
 
-    _init: function(getService) {
-        this.parent(getService);
+    _init: function() {
 	this._dbusImpl = ConnmanInterface.addVPNAgentImplementation(this);
         this._canceledError = 'net.connman.vpn.Agent.Error.Canceled';
     },
