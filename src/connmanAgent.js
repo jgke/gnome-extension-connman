@@ -183,13 +183,13 @@ const AbstractAgent = new Lang.Class({
 
     Cancel: function(params, invocation) {
         Logger.logDebug('Password dialog canceled');
-        this._dialog.cancel();
+        this._dialog._onCancel();
         this._dialog = null;
     },
 
     destroy: function() {
         if(this._dialog)
-            this._dialog.cancel();
+            this._dialog._onCancel();
         this._dialog = null;
     }
 });

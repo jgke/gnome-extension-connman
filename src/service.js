@@ -216,7 +216,7 @@ const Service = new Lang.Class({
     },
 
     buttonEvent: function() {
-        if(this.state == 'idle' || this.state == 'failure')
+        if(this.state == 'idle' || this.state == 'failure' || this.state == 'disconnect')
             this._proxy.ConnectRemote();
         else
             this._proxy.DisconnectRemote();
@@ -240,7 +240,7 @@ const Service = new Lang.Class({
         }
         if(properties.State)
             this.state = properties.State.deep_unpack();
-        if(this.state == 'idle')
+        if(this.state == 'idle' || this.state == 'disconnect')
             this._connectionSwitch.label.text = _("Connect");
         else if(this.state == 'failure')
             this._connectionSwitch.label.text = _("Reconnect");
