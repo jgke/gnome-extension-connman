@@ -37,6 +37,7 @@ const Technology = new Lang.Class({
         this.parent();
         this._type = type;
         this._services = {}
+        this._dialog = null;
 
         this._proxy = proxy;
         if(this._proxy)
@@ -49,6 +50,7 @@ const Technology = new Lang.Class({
 
     addService: function(id, service) {
         this._services[id] = service;
+        service.id = id;
         this.addMenuItem(service);
         this.serviceUpdated(id);
         this.updateIcon();
@@ -135,18 +137,31 @@ const WirelessInterface = new Lang.Class({
         this._menu.status.text = _("Idle");
         this._connectionSwitch = new PopupMenu.PopupMenuItem(_("Connect"));
         this._connectionSwitch.connect('activate', function() {
-            new Service.ServiceChooser(Object.keys(this._services).map(function(key) {
-                return this._services[key];
-            }.bind(this)).filter(function(service) {
-                return service._properties['Name'];
-            }), function(service) {
-                service.buttonEvent();
-            });
+            this._dialog = new Service.ServiceChooser(this._proxy,
+                    Object.keys(this._services).map(function(key) {
+                        return this._services[key];
+                    }.bind(this)).filter(function(service) {
+                        return service._properties['Name'];
+                    }), function(service) {
+                        service.buttonEvent();
+                    });
         }.bind(this));
         this._menu.menu.addMenuItem(this._connectionSwitch);
         this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem(_("Wireless Settings")));
         this._menu.icon.icon_name = 'network-offline-symbolic';
         this.addMenuItem(this._menu);
+    },
+
+    addService: function(id, service) {
+        this.parent(id, service);
+        if(this._dialog)
+            this._dialog.addService(service);
+    },
+
+    updateService: function(id, properties) {
+        this.parent(id, properties);
+        if(this._dialog)
+            this._dialog.updateService(this._services[id]);
     },
 
     removeService: function(id) {
@@ -158,6 +173,8 @@ const WirelessInterface = new Lang.Class({
         this.parent(id);
         this.serviceUpdated(id);
         this.updateIcon();
+        if(this._dialog)
+            this._dialog.removeService(id);
     },
 
     serviceUpdated: function(id) {

@@ -17,6 +17,7 @@
  */
 
 const Lang = imports.lang;
+const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 
 const Clutter = imports.gi.Clutter;
@@ -71,8 +72,10 @@ const ServiceChooser = new Lang.Class({
     Name: 'ServiceChooser',
     Extends: ModalDialog.ModalDialog,
 
-    _init: function(services, callback) {
+    _init: function(proxy, services, callback) {
         this.parent({ styleClass: 'nm-dialog' });
+        this._proxy = proxy;
+        this._services = {};
         let headline = new St.BoxLayout({ style_class: 'nm-dialog-header-hbox' });
         let icon = new St.Icon({ style_class: 'nm-dialog-header-icon',
             icon_name: 'network-wireless-signal-excellent-symbolic' });
@@ -101,19 +104,15 @@ const ServiceChooser = new Lang.Class({
 
         this.contentLayout.add(this._stack, { expand: true });
 
-        for(let id in services) {
-            let service = services[id];
-            let item = new DialogServiceItem(service, function(service) {
-                if(this._selected)
-                    this._selected.actor.remove_style_pseudo_class('selected');
-                Util.ensureActorVisibleInScrollView(this._scrollView, service.actor);
-                this._selected = service;
-                this._selected.actor.add_style_pseudo_class('selected');
-                this._connectButton.reactive = true;
-                this._connectButton.can_focus = true;
-            }.bind(this));
-            this._itemBox.add_child(item.actor);
-        }
+        for(let id in services)
+            this.addService(services[id]);
+        this.scanRemote();
+        this._closed = false;
+        this._timeout = Mainloop.timeout_add_seconds(15, function() {
+            this.scanRemote();
+            log(this._closed);
+            return !this._closed;
+        }.bind(this));
 
         this._cancelButton = this.addButton({ action: this.close.bind(this),
             label: "Cancel",
@@ -130,9 +129,50 @@ const ServiceChooser = new Lang.Class({
         this.open();
     },
 
+    scanRemote: function() {
+        log("Scanning remote");
+        this._proxy.ScanRemote();
+    },
+
+    selectedEvent: function(service) {
+        if(this._selected)
+            this._selected.actor.remove_style_pseudo_class('selected');
+        Util.ensureActorVisibleInScrollView(this._scrollView, service.actor);
+        this._selected = service;
+        this._selected.actor.add_style_pseudo_class('selected');
+        this._connectButton.reactive = true;
+        this._connectButton.can_focus = true;
+    },
+
+    close: function() {
+        this.parent();
+        this._closed = true;
+        Mainloop.source_remove(this._timeout);
+    },
+
     buttonEvent: function() {
         this.close();
         this._callback(this._selected && this._selected.service);
+    },
+
+    addService: function(service) {
+        let item = new DialogServiceItem(service, this.selectedEvent.bind(this));
+        this._itemBox.add_child(item.actor);
+        this._services[service.id] = item;
+    },
+
+    updateService: function(service) {
+        if(!this._services[service.id])
+            this.addService(service);
+        else
+            this._services[service.id]._label.text = service.label.text;
+    },
+
+    removeService: function(id) {
+        if(this._services[id]) {
+            this._services[id].actor.destroy();
+            delete this._services[id];
+        }
     }
 });
 
