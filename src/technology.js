@@ -39,11 +39,12 @@ const Technology = new Lang.Class({
         this._services = {}
 
         this._proxy = proxy;
-        this._sig = this._proxy.connectSignal('PropertyChanged',
-                function(proxy, sender, [name, value]) {
-                    Logger.logDebug('Technology ' + this._type + ' property ' +
-                            name + ' changed: ' + value.deep_unpack());
-                }.bind(this));
+        if(this._proxy)
+            this._sig = this._proxy.connectSignal('PropertyChanged',
+                    function(proxy, sender, [name, value]) {
+                        Logger.logDebug('Technology ' + this._type + ' property ' +
+                                name + ' changed: ' + value.deep_unpack());
+                    }.bind(this));
     },
 
     addService: function(id, service) {
@@ -256,6 +257,15 @@ const CellularTechnology = new Lang.Class({
     },
 });
 
+const VPNTechnology = new Lang.Class({
+    Name: 'VPNTechnology',
+    Extends: Technology,
+
+    _init: function(proxy) {
+        this.parent('vpn', proxy);
+    },
+});
+
 function createTechnology(type, proxy) {
     switch(type) {
     case 'ethernet':
@@ -268,6 +278,8 @@ function createTechnology(type, proxy) {
         return new P2PTechnology(proxy);
     case 'cellular':
         return new CellularTechnology(proxy);
+    case 'vpn':
+        return new VPNTechnology(proxy);
     default:
         throw 'tried to add unknown technology type ' + type;
     }

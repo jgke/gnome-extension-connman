@@ -97,7 +97,11 @@ const ConnmanMenu = new Lang.Class({
 
     addService: function(path, properties, indicator) {
         Logger.logDebug('Adding service ' + path);
-        var type = properties.Type.deep_unpack().split('/').pop();
+        let type;
+        if(properties.Type)
+            type = properties.Type.deep_unpack().split('/').pop();
+        else
+            type = path.split('/').pop().split('_')[0];
         this._serviceTypes[path] = type;
 
         let proxy = new ConnmanInterface.ServiceProxy(path);
@@ -193,6 +197,8 @@ const ConnmanApplet = new Lang.Class({
             let technologies = result[0];
             for each(let [path, properties] in technologies)
                 this._menu.addTechnology(path, properties);
+            this._menu._technologies['vpn'] = Technology.createTechnology('vpn');
+            this._menu.addMenuItem(this._menu._technologies['vpn']);
             this._updateAllServices();
         }.bind(this));
     },
@@ -269,14 +275,16 @@ const ConnmanApplet = new Lang.Class({
         if(!this._watch) {
             this._watch = Gio.DBus.system.watch_name(ConnmanInterface.BUS_NAME,
                     Gio.BusNameWatcherFlags.NONE,
-                    this._connectEvent().bind(this),
-                    this._disconnectEvent().bind(this));
+                    this._connectEvent.bind(this),
+                    this._disconnectEvent.bind(this));
         }
     },
 
     disable: function() {
         Logger.logInfo('Disabling Connman applet');
+        this._disconnectEvent();
         this._menu.clear();
+        this.indicators.hide();
         this.menu.actor.hide();
         if(this._watch)
             Gio.DBus.system.unwatch_name(this._watch);

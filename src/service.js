@@ -405,6 +405,24 @@ const CellularService = new Lang.Class({
     }
 });
 
+const VPNService = new Lang.Class({
+    Name: 'VPNService',
+    Extends: Service,
+
+    _init: function(proxy, indicator) {
+        this.parent('vpn', proxy, indicator);
+        this.show();
+    },
+
+    getAcquiringIcon: function() {
+        return 'network-vpn-acquiring-symbolic';
+    },
+
+    getIcon: function() {
+        return 'network-vpn-symbolic';
+    }
+});
+
 function createService(type, proxy, indicator) {
     switch(type) {
     case 'ethernet':
@@ -415,6 +433,8 @@ function createService(type, proxy, indicator) {
         return new BluetoothService(proxy, indicator);
     case 'cellular':
         return new CellularService(proxy, indicator);
+    case 'vpn':
+        return new VPNService(proxy, indicator);
     default:
         throw 'tried to create unknown service type ' + type;
     }
