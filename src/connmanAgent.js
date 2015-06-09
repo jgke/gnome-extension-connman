@@ -105,15 +105,11 @@ const Dialog = new Lang.Class({
                 { style_class: 'network-dialog-secret-table',
                     layout_manager: layout });
         layout.hookup_style(secretTable);
-        let pos = 0;
         for(let i = 0; i < fields.length; i++) {
-            if(fields[i][1]['Requirement'] == 'mandatory') {
-                let field = new DialogField(fields[i][0]);
-                layout.attach(field.label, 0, pos, 1, 1);
-                layout.attach(field.entry, 1, pos, 1, 1);
-                this._fields[i] = field;
-                pos++;
-            }
+            let field = fields[i];
+            layout.attach(field.label, 0, i, 1, 1);
+            layout.attach(field.entry, 1, i, 1, 1);
+            this._fields[i] = field;
         }
         messageBox.add(secretTable);
 
@@ -163,13 +159,20 @@ const AbstractAgent = new Lang.Class({
 
     RequestInputAsync: function([service, fields], invocation) {
         Logger.logDebug('Requested password');
-        this._dialog = new Dialog(Object.keys(fields).map(function(key) {
-            fields[key] = fields[key].deep_unpack();
-            Object.keys(fields[key]).map(function(innerKey) {
-                fields[key][innerKey] = fields[key][innerKey].deep_unpack();
+        let fields = Object.keys(fields)
+            .map(function(key) {
+                fields[key] = fields[key].deep_unpack();
+                Object.keys(fields[key]).map(function(innerKey) {
+                    fields[key][innerKey] = fields[key][innerKey].deep_unpack();
+                });
+                return [key, fields[key]];
             });
-            return [key, fields[key]];
-        }), function(fields) {
+        let dialogFields = [];
+        for(let i = 0; i < fields.length; i++)
+            if(fields[i][1]['Requirement'] == 'mandatory')
+                dialogFields.push(new DialogField(fields[i][0]));
+
+        let callback = function(fields) {
             if(!fields) {
                 invocation.return_dbus_error(this._canceledError,
                         'User canceled password dialog');
@@ -179,7 +182,8 @@ const AbstractAgent = new Lang.Class({
                 fields[key] = GLib.Variant.new('s', fields[key]);
             });
             invocation.return_value(GLib.Variant.new('(a{sv})', [fields]));
-        }.bind(this));
+        }.bind(this);
+        this._dialog = new Dialog(dialogFields, callback);
     },
 
     Cancel: function(params, invocation) {
