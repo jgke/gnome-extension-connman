@@ -158,6 +158,7 @@ const AbstractAgent = new Lang.Class({
 
     ReportErrorAsync: function([service, error], invocation) {
         Logger.logDebug('Service reported error: ' + error);
+        invocation.return_dbus_error(this._retryError, '');
     },
 
     RequestInputAsync: function([service, fields], invocation) {
@@ -201,6 +202,7 @@ const Agent = new Lang.Class({
     _init: function() {
 	this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
         this._canceledError = 'net.connman.Agent.Error.Canceled';
+        this._retryError = 'net.connman.Agent.Error.Retry';
     },
 
     RequestBrowser: function(service, url) {
@@ -220,6 +222,7 @@ const VPNAgent = new Lang.Class({
     _init: function() {
 	this._dbusImpl = ConnmanInterface.addVPNAgentImplementation(this);
         this._canceledError = 'net.connman.vpn.Agent.Error.Canceled';
+        this._retryError = 'net.connman.vpn.Agent.Error.Retry';
     },
 
     destroy: function() {

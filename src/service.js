@@ -110,7 +110,6 @@ const ServiceChooser = new Lang.Class({
         this._closed = false;
         this._timeout = Mainloop.timeout_add_seconds(15, function() {
             this.scanRemote();
-            log(this._closed);
             return !this._closed;
         }.bind(this));
 
@@ -130,7 +129,6 @@ const ServiceChooser = new Lang.Class({
     },
 
     scanRemote: function() {
-        log("Scanning remote");
         this._proxy.ScanRemote();
     },
 

@@ -88,7 +88,6 @@ const ConnmanMenu = new Lang.Class({
     },
 
     getService: function(path) {
-        log(path);
         if(!this._serviceTypes[path])
             return null;
         if(!this._technologies[this._serviceTypes[path]])
