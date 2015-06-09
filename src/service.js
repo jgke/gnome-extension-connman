@@ -211,7 +211,7 @@ const Service = new Lang.Class({
         this.status.text = this.state;
 
         this.menu.addMenuItem(this._connectionSwitch);
-        this.menu.addMenuItem(this._settings);
+        //this.menu.addMenuItem(this._settings);
         this.hide();
     },
 

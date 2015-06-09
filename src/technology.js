@@ -147,7 +147,7 @@ const WirelessInterface = new Lang.Class({
                     });
         }.bind(this));
         this._menu.menu.addMenuItem(this._connectionSwitch);
-        this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem(_("Wireless Settings")));
+        //this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem(_("Wireless Settings")));
         this._menu.icon.icon_name = 'network-offline-symbolic';
         this.addMenuItem(this._menu);
     },
