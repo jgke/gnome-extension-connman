@@ -1,5 +1,5 @@
 # Change these to modify how installation is performed
-extensionurl = git://github.com/connectivity/gnome-extension-connman.git
+extensionurl = git://github.com/jgke/gnome-extension-connman.git
 topextensiondir = $(datadir)/gnome-shell/extensions
 extensiondir = $(topextensiondir)/$(uuid)
 uuid = gnome-extension-connman@jaakko.hannikainen.intel.com
