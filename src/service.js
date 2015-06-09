@@ -146,6 +146,8 @@ const ServiceChooser = new Lang.Class({
         this.parent();
         this._closed = true;
         Mainloop.source_remove(this._timeout);
+        this.destroy();
+        this._callback();
     },
 
     buttonEvent: function() {
@@ -160,6 +162,8 @@ const ServiceChooser = new Lang.Class({
     },
 
     updateService: function(service) {
+        if(this._closed)
+            return;
         if(!this._services[service.id])
             this.addService(service);
         else
