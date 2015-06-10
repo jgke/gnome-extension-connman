@@ -71,6 +71,11 @@ const DialogServiceItem = new Lang.Class({
         });
         this._icon.icon_name = icon;
         this._securityIcon.icon_name = securityIcon;
+        if(service._properties['Favorite'])
+            this._icons.add_actor(new St.Icon({
+                style_class: 'cm-dialog-icon',
+                icon_name: 'object-select-symbolic'
+            }));
         this._icons.add_actor(this._securityIcon);
         this._icons.add_actor(this._icon);
         this.actor.add(this._label, {
@@ -82,6 +87,18 @@ const DialogServiceItem = new Lang.Class({
             x_align: St.Align.END
         });
     },
+
+    enable: function() {
+        this.actor.can_focus = true;
+        this.actor.reactive = true;
+        this.actor.remove_style_pseudo_class('passive');
+    },
+
+    disable: function() {
+        this.actor.can_focus = false;
+        this.actor.reactive = false;
+        this.actor.add_style_pseudo_class('passive');
+    }
 });
 
 const ServiceChooser = new Lang.Class({
@@ -198,6 +215,10 @@ const ServiceChooser = new Lang.Class({
     },
 
     addService: function(service) {
+        if(this._services[service.id]) {
+            this._services[service.id].enable();
+            return;
+        }
         let item = new DialogServiceItem(service, this.selectedEvent.bind(this));
         this._itemBox.add_child(item.actor);
         this._services[service.id] = item;
@@ -213,10 +234,8 @@ const ServiceChooser = new Lang.Class({
     },
 
     removeService: function(id) {
-        if(this._services[id]) {
-            this._services[id].actor.destroy();
-            delete this._services[id];
-        }
+        if(this._services[id])
+            this._services[id].disable();
     }
 });
 

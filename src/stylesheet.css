@@ -68,6 +68,9 @@
   background-color: #215d9c;
   color: #ffffff; }
 
+.cm-dialog-item:passive {
+    color: #606060; }
+
 .cm-dialog-icons {
   spacing: .5em; }
 
