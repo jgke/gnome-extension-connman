@@ -1,0 +1,84 @@
+/* Password or Authentication Dialog */
+.cm-prompt-dialog {
+  width: 500px;
+  border: 3px solid rgba(238, 238, 236, 0.2); }
+
+.cm-prompt-dialog-main-layout {
+  spacing: 24px;
+  padding: 10px; }
+
+.cm-prompt-dialog-message-layout {
+  spacing: 16px; }
+
+.cm-prompt-dialog-headline {
+  font-weight: bold;
+  color: #b2b2a9; }
+
+.cm-prompt-dialog-description:rtl {
+  text-align: right; }
+
+.cm-prompt-dialog-password-box {
+  spacing: 1em;
+  padding-bottom: 1em; }
+
+.cm-prompt-dialog-error-label {
+  font-size: 10pt;
+  color: #cc0000;
+  padding-bottom: 8px; }
+
+.cm-prompt-dialog-info-label {
+  font-size: 10pt;
+  padding-bottom: 8px; }
+
+.cm-hidden {
+  color: transparent; }
+
+.cm-prompt-dialog-null-label {
+  font-size: 10pt;
+  padding-bottom: 8px; }
+
+/* NETWORK DIALOGS */
+.cm-dialog {
+  max-height: 500px;
+  min-height: 450px;
+  min-width: 470px; }
+
+.cm-dialog-content {
+  spacing: 20px; }
+
+.cm-dialog-header-hbox {
+  spacing: 10px; }
+
+.cm-dialog-header-icon {
+  icon-size: 32px; }
+
+.cm-dialog-scroll-view {
+  border: 2px solid #1c1f1f; }
+
+.cm-dialog-header {
+  font-weight: bold; }
+
+.cm-dialog-item {
+  font-size: 110%;
+  border-bottom: 1px solid #1c1f1f;
+  padding: 12px;
+  spacing: 20px; }
+
+.cm-dialog-item:selected {
+  background-color: #215d9c;
+  color: #ffffff; }
+
+.cm-dialog-icons {
+  spacing: .5em; }
+
+.cm-dialog-icon {
+  icon-size: 16px; }
+
+/* Network Agent Dialog */
+.cm-network-dialog-secret-table {
+  spacing-rows: 15px;
+  spacing-columns: 1em; }
+
+.cm-keyring-dialog-control-table {
+  spacing-rows: 15px;
+  spacing-columns: 1em; }

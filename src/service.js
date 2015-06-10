@@ -43,7 +43,7 @@ const DialogServiceItem = new Lang.Class({
         let securityIcon = service.securityIcon ? service.securityIcon() : '';
         this.service = service;
         this.actor = new St.BoxLayout({
-            style_class: 'nm-dialog-item',
+            style_class: 'cm-dialog-item',
             can_focus: true,
             reactive: true
         });
@@ -61,13 +61,13 @@ const DialogServiceItem = new Lang.Class({
         });
         this.actor.label_actor = this._label;
         this._icons = new St.BoxLayout({
-            style_class: 'nm-dialog-icons'
+            style_class: 'cm-dialog-icons'
         });
         this._icon = new St.Icon({
-            style_class: 'nm-dialog-icon'
+            style_class: 'cm-dialog-icon'
         });
         this._securityIcon = new St.Icon({
-            style_class: 'nm-dialog-icon'
+            style_class: 'cm-dialog-icon'
         });
         this._icon.icon_name = icon;
         this._securityIcon.icon_name = securityIcon;
@@ -90,22 +90,22 @@ const ServiceChooser = new Lang.Class({
 
     _init: function(proxy, services, callback) {
         this.parent({
-            styleClass: 'nm-dialog'
+            styleClass: 'cm-dialog'
         });
         this._proxy = proxy;
         this._services = {};
         let headline = new St.BoxLayout({
-            style_class: 'nm-dialog-header-hbox'
+            style_class: 'cm-dialog-header-hbox'
         });
         let icon = new St.Icon({
-            style_class: 'nm-dialog-header-icon',
+            style_class: 'cm-dialog-header-icon',
             icon_name: 'network-wireless-signal-excellent-symbolic'
         });
         let titleBox = new St.BoxLayout({
             vertical: true
         });
         let title = new St.Label({
-            style_class: 'nm-dialog-header',
+            style_class: 'cm-dialog-header',
             text: _("Connect to...")
         });
 
@@ -114,7 +114,7 @@ const ServiceChooser = new Lang.Class({
         headline.add(icon);
         headline.add(titleBox);
 
-        this.contentLayout.style_class = 'nm-dialog-content';
+        this.contentLayout.style_class = 'cm-dialog-content';
         this.contentLayout.add(headline);
 
         this._stack = new St.Widget({
@@ -122,10 +122,10 @@ const ServiceChooser = new Lang.Class({
         });
         this._itemBox = new St.BoxLayout({
             vertical: true,
-            style_class: 'nm-dialog-box'
+            style_class: 'cm-dialog-box'
         });
         this._scrollView = new St.ScrollView({
-            style_class: 'nm-dialog-scroll-view'
+            style_class: 'cm-dialog-scroll-view'
         });
         this._scrollView.set_x_expand(true);
         this._scrollView.set_y_expand(true);

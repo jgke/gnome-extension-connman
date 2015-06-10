@@ -44,7 +44,7 @@ const DialogField = new Lang.Class({
 
     addLabel: function(label) {
         this.label = new St.Label({
-            style_class: 'prompt-dialog-password-label',
+            style_class: 'cm-prompt-dialog-password-label',
             text: label,
             x_align: Clutter.ActorAlign.START,
             y_align: Clutter.ActorAlign.CENTER
@@ -54,7 +54,7 @@ const DialogField = new Lang.Class({
 
     addEntry: function() {
         this.entry = new St.Entry({
-            style_class: 'prompt-dialog-password-entry',
+            style_class: 'cm-prompt-dialog-password-entry',
             can_focus: true,
             reactive: true,
             x_expand: true
@@ -84,24 +84,24 @@ const Dialog = new Lang.Class({
 
     _init: function(fields, callback) {
         this.parent({
-            styleClass: 'prompt-dialog'
+            styleClass: 'cm-prompt-dialog'
         });
         this._fields = [];
         this._callback = callback;
         let mainContentBox = new St.BoxLayout({
-            style_class: 'prompt-dialog-main-layout',
+            style_class: 'cm-prompt-dialog-main-layout',
             vertical: false
         });
         let icon = new St.Icon({
             icon_name: 'dialog-password-symbolic'
         });
         let messageBox = new St.BoxLayout({
-            style_class: 'prompt-dialog-message-layout',
+            style_class: 'cm-prompt-dialog-message-layout',
             vertical: true,
             x_expand: true
         });
         let subjectLabel = new St.Label({
-            style_class: 'prompt-dialog-headline headline',
+            style_class: 'cm-prompt-dialog-headline headline',
             text: _("Authentication required by network connection")
         });
 
@@ -133,7 +133,7 @@ const Dialog = new Lang.Class({
             orientation: Clutter.Orientation.VERTICAL
         });
         let secretTable = new St.Widget({
-            style_class: 'network-dialog-secret-table',
+            style_class: 'cm-network-dialog-secret-table',
             layout_manager: layout
         });
         layout.hookup_style(secretTable);
