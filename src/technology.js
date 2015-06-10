@@ -42,10 +42,10 @@ const Technology = new Lang.Class({
         this._proxy = proxy;
         if(this._proxy)
             this._sig = this._proxy.connectSignal('PropertyChanged',
-                    function(proxy, sender, [name, value]) {
-                        Logger.logDebug('Technology ' + this._type + ' property ' +
-                                name + ' changed: ' + value.deep_unpack());
-                    }.bind(this));
+                function(proxy, sender, [name, value]) {
+                    Logger.logDebug('Technology ' + this._type + ' property ' +
+                        name + ' changed: ' + value.deep_unpack());
+                }.bind(this));
     },
 
     addService: function(id, service) {
@@ -83,14 +83,12 @@ const Technology = new Lang.Class({
         for(let path in this._services) {
             try {
                 this.removeService(path);
-            }
-            catch(error) {}
+            } catch(error) {}
         }
         try {
             if(this._proxy)
                 this._proxy.disconnectSignal(this._sig);
-        }
-        catch(error) {
+        } catch(error) {
             Logger.logException(error, 'Failed to disconnect service proxy');
         }
         this.parent();
@@ -143,7 +141,7 @@ const WirelessInterface = new Lang.Class({
 
     _createConnectionMenuItem: function() {
         let connectionItem = new PopupMenu.PopupMenuItem(
-                _("Select wireless network"));
+            _("Select wireless network"));
         connectionItem.connect('activate', this.selectWifi.bind(this));
         return connectionItem;
     },
@@ -163,7 +161,7 @@ const WirelessInterface = new Lang.Class({
                 Logger.logInfo('User canceled wifi dialog');
         }
         this._dialog = new Service.ServiceChooser(this._proxy,
-                services, callback);
+            services, callback);
     },
 
     addService: function(id, service) {
@@ -199,8 +197,7 @@ const WirelessInterface = new Lang.Class({
             if(service._properties['State'] == 'idle' && service.actor.visible) {
                 service.hide();
                 this._menu.actor.show();
-            }
-            else if (service._properties['State'] != 'idle') {
+            } else if(service._properties['State'] != 'idle') {
                 this._menu.actor.hide();
                 service.show();
             }

@@ -95,7 +95,7 @@ const _SERVICE_INTERFACE = '<node>\
 </interface>\
 </node>';
 
-const _AGENT_INTERFACE= '<node>\
+const _AGENT_INTERFACE = '<node>\
 <interface name="net.connman.Agent">\
     <method name="Release"></method>\
     <method name="ReportError">\
@@ -142,7 +142,7 @@ const _VPN_MANAGER_INTERFACE = '<node>\
 </interface>\
 </node>';
 
-const _VPN_AGENT_INTERFACE= '<node>\
+const _VPN_AGENT_INTERFACE = '<node>\
 <interface name="net.connman.vpn.Agent">\
     <method name="Release"></method>\
     <method name="ReportError">\

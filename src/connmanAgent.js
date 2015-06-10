@@ -43,18 +43,25 @@ const DialogField = new Lang.Class({
     },
 
     addLabel: function(label) {
-        this.label = new St.Label(
-                { style_class: 'prompt-dialog-password-label', text: label,
-                    x_align: Clutter.ActorAlign.START,
-                    y_align: Clutter.ActorAlign.CENTER });
+        this.label = new St.Label({
+            style_class: 'prompt-dialog-password-label',
+            text: label,
+            x_align: Clutter.ActorAlign.START,
+            y_align: Clutter.ActorAlign.CENTER
+        });
         this.label.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
     },
 
     addEntry: function() {
-        this.entry = new St.Entry(
-                { style_class: 'prompt-dialog-password-entry',
-                    can_focus: true, reactive: true, x_expand: true });
-        ShellEntry.addContextMenu(this.entry, { isPassword: true });
+        this.entry = new St.Entry({
+            style_class: 'prompt-dialog-password-entry',
+            can_focus: true,
+            reactive: true,
+            x_expand: true
+        });
+        ShellEntry.addContextMenu(this.entry, {
+            isPassword: true
+        });
         this.entry.clutter_text.set_password_char('\u25cf');
     },
 
@@ -76,34 +83,59 @@ const Dialog = new Lang.Class({
     Extends: ModalDialog.ModalDialog,
 
     _init: function(fields, callback) {
-        this.parent({ styleClass: 'prompt-dialog' });
+        this.parent({
+            styleClass: 'prompt-dialog'
+        });
         this._fields = [];
         this._callback = callback;
-        let mainContentBox = new St.BoxLayout(
-                { style_class: 'prompt-dialog-main-layout', vertical: false});
-        let icon = new St.Icon({ icon_name: 'dialog-password-symbolic' });
-        let messageBox = new St.BoxLayout(
-                { style_class: 'prompt-dialog-message-layout',
-                    vertical: true, x_expand: true });
-        let subjectLabel = new St.Label(
-                { style_class: 'prompt-dialog-headline headline',
-                    text: _("Authentication required by network connection") });
+        let mainContentBox = new St.BoxLayout({
+            style_class: 'prompt-dialog-main-layout',
+            vertical: false
+        });
+        let icon = new St.Icon({
+            icon_name: 'dialog-password-symbolic'
+        });
+        let messageBox = new St.BoxLayout({
+            style_class: 'prompt-dialog-message-layout',
+            vertical: true,
+            x_expand: true
+        });
+        let subjectLabel = new St.Label({
+            style_class: 'prompt-dialog-headline headline',
+            text: _("Authentication required by network connection")
+        });
 
-        this.contentLayout.add(mainContentBox, { x_fill: true, y_fill: true });
-        mainContentBox.add(icon,
-                { x_fill: true, y_fill: true,
-                    x_align: St.Align.END, y_align: St.Align.START });
-        mainContentBox.add(messageBox, { y_align: St.Align.START });
-        messageBox.add(subjectLabel,
-                { x_fill: true, y_fill: false, y_align: St.Align.START });
+        this.contentLayout.add(mainContentBox, {
+            x_fill: true,
+            y_fill: true
+        });
+        mainContentBox.add(icon, {
+            x_fill: true,
+            y_fill: true,
+            x_align: St.Align.END,
+            y_align: St.Align.START
+        });
+        mainContentBox.add(messageBox, {
+            y_align: St.Align.START
+        });
+        messageBox.add(subjectLabel, {
+            x_fill: true,
+            y_fill: false,
+            y_align: St.Align.START
+        });
 
-        this.contentLayout.add(mainContentBox, {x_fill: true, y_fill: true });
+        this.contentLayout.add(mainContentBox, {
+            x_fill: true,
+            y_fill: true
+        });
 
-        let layout = new Clutter.GridLayout(
-                { orientation: Clutter.Orientation.VERTICAL });
-        let secretTable = new St.Widget(
-                { style_class: 'network-dialog-secret-table',
-                    layout_manager: layout });
+        let layout = new Clutter.GridLayout({
+            orientation: Clutter.Orientation.VERTICAL
+        });
+        let secretTable = new St.Widget({
+            style_class: 'network-dialog-secret-table',
+            layout_manager: layout
+        });
         layout.hookup_style(secretTable);
         for(let i = 0; i < fields.length; i++) {
             let field = fields[i];
@@ -113,11 +145,13 @@ const Dialog = new Lang.Class({
         }
         messageBox.add(secretTable);
 
-        this._okButton = { label: _("Connect"),
+        this._okButton = {
+            label: _("Connect"),
             action: this._onOk.bind(this),
             default: true
         };
-        this._cancelButton = { label: _("Cancel"),
+        this._cancelButton = {
+            label: _("Cancel"),
             action: this._onCancel.bind(this),
             key: Clutter.KEY_Escape
         };
@@ -127,7 +161,9 @@ const Dialog = new Lang.Class({
 
     _onOk: function() {
         this.close();
-        if(!this._fields.reduce(function(a, b) { return a && b.valid() }, true))
+        if(!this._fields.reduce(function(a, b) {
+                return a && b.valid()
+            }, true))
             return;
         let values = {};
         Object.keys(this._fields).map(function(key) {
@@ -145,8 +181,7 @@ const Dialog = new Lang.Class({
 const AbstractAgent = new Lang.Class({
     Name: 'AbstractAgent',
 
-    _init: function() {
-    },
+    _init: function() {},
 
     Release: function() {
         this.destroy();
@@ -175,7 +210,7 @@ const AbstractAgent = new Lang.Class({
         let callback = function(fields) {
             if(!fields) {
                 invocation.return_dbus_error(this._canceledError,
-                        'User canceled password dialog');
+                    'User canceled password dialog');
                 return;
             }
             Object.keys(fields).map(function(key) {
@@ -204,7 +239,7 @@ const Agent = new Lang.Class({
     Extends: AbstractAgent,
 
     _init: function() {
-	this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
+        this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
         this._canceledError = 'net.connman.Agent.Error.Canceled';
         this._retryError = 'net.connman.Agent.Error.Retry';
     },
@@ -224,7 +259,7 @@ const VPNAgent = new Lang.Class({
     Extends: AbstractAgent,
 
     _init: function() {
-	this._dbusImpl = ConnmanInterface.addVPNAgentImplementation(this);
+        this._dbusImpl = ConnmanInterface.addVPNAgentImplementation(this);
         this._canceledError = 'net.connman.vpn.Agent.Error.Canceled';
         this._retryError = 'net.connman.vpn.Agent.Error.Retry';
     },

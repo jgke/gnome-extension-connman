@@ -42,9 +42,11 @@ const DialogServiceItem = new Lang.Class({
         let icon = service.getIcon();
         let securityIcon = service.securityIcon ? service.securityIcon() : '';
         this.service = service;
-        this.actor = new St.BoxLayout({ style_class: 'nm-dialog-item',
+        this.actor = new St.BoxLayout({
+            style_class: 'nm-dialog-item',
             can_focus: true,
-            reactive: true });
+            reactive: true
+        });
         this.actor.connect('key-focus-in', function() {
             callback(this);
         }.bind(this));
@@ -54,17 +56,31 @@ const DialogServiceItem = new Lang.Class({
         }.bind(this));
         this.actor.add_action(action);
 
-        this._label = new St.Label({ text: name });
+        this._label = new St.Label({
+            text: name
+        });
         this.actor.label_actor = this._label;
-        this._icons = new St.BoxLayout({ style_class: 'nm-dialog-icons' });
-        this._icon = new St.Icon({ style_class: 'nm-dialog-icon' });
-        this._securityIcon = new St.Icon({ style_class: 'nm-dialog-icon' });
+        this._icons = new St.BoxLayout({
+            style_class: 'nm-dialog-icons'
+        });
+        this._icon = new St.Icon({
+            style_class: 'nm-dialog-icon'
+        });
+        this._securityIcon = new St.Icon({
+            style_class: 'nm-dialog-icon'
+        });
         this._icon.icon_name = icon;
         this._securityIcon.icon_name = securityIcon;
         this._icons.add_actor(this._securityIcon);
         this._icons.add_actor(this._icon);
-        this.actor.add(this._label, { x_align: St.Align.START });
-        this.actor.add(this._icons, { expand: true, x_fill: false, x_align: St.Align.END });
+        this.actor.add(this._label, {
+            x_align: St.Align.START
+        });
+        this.actor.add(this._icons, {
+            expand: true,
+            x_fill: false,
+            x_align: St.Align.END
+        });
     },
 });
 
@@ -73,15 +89,25 @@ const ServiceChooser = new Lang.Class({
     Extends: ModalDialog.ModalDialog,
 
     _init: function(proxy, services, callback) {
-        this.parent({ styleClass: 'nm-dialog' });
+        this.parent({
+            styleClass: 'nm-dialog'
+        });
         this._proxy = proxy;
         this._services = {};
-        let headline = new St.BoxLayout({ style_class: 'nm-dialog-header-hbox' });
-        let icon = new St.Icon({ style_class: 'nm-dialog-header-icon',
-            icon_name: 'network-wireless-signal-excellent-symbolic' });
-        let titleBox = new St.BoxLayout({ vertical: true });
-        let title = new St.Label({ style_class: 'nm-dialog-header',
-            text: _("Connect to...") });
+        let headline = new St.BoxLayout({
+            style_class: 'nm-dialog-header-hbox'
+        });
+        let icon = new St.Icon({
+            style_class: 'nm-dialog-header-icon',
+            icon_name: 'network-wireless-signal-excellent-symbolic'
+        });
+        let titleBox = new St.BoxLayout({
+            vertical: true
+        });
+        let title = new St.Label({
+            style_class: 'nm-dialog-header',
+            text: _("Connect to...")
+        });
 
         titleBox.add(title);
 
@@ -91,18 +117,26 @@ const ServiceChooser = new Lang.Class({
         this.contentLayout.style_class = 'nm-dialog-content';
         this.contentLayout.add(headline);
 
-        this._stack = new St.Widget({ layout_manager: new Clutter.BinLayout() });
-        this._itemBox = new St.BoxLayout({ vertical: true,
-            style_class: 'nm-dialog-box' });
-        this._scrollView = new St.ScrollView({ style_class: 'nm-dialog-scroll-view'} );
+        this._stack = new St.Widget({
+            layout_manager: new Clutter.BinLayout()
+        });
+        this._itemBox = new St.BoxLayout({
+            vertical: true,
+            style_class: 'nm-dialog-box'
+        });
+        this._scrollView = new St.ScrollView({
+            style_class: 'nm-dialog-scroll-view'
+        });
         this._scrollView.set_x_expand(true);
         this._scrollView.set_y_expand(true);
         this._scrollView.set_policy(Gtk.PolicyType.NEVER,
-                Gtk.PolicyType.AUTOMATIC);
+            Gtk.PolicyType.AUTOMATIC);
         this._scrollView.add_actor(this._itemBox);
         this._stack.add_child(this._scrollView);
 
-        this.contentLayout.add(this._stack, { expand: true });
+        this.contentLayout.add(this._stack, {
+            expand: true
+        });
 
         for(let id in services)
             this.addService(services[id]);
@@ -113,13 +147,17 @@ const ServiceChooser = new Lang.Class({
             return !this._closed;
         }.bind(this));
 
-        this._cancelButton = this.addButton({ action: this.cancel.bind(this),
+        this._cancelButton = this.addButton({
+            action: this.cancel.bind(this),
             label: "Cancel",
-            key: Clutter.Escape });
+            key: Clutter.Escape
+        });
 
-        this._connectButton = this.addButton({ action: this.buttonEvent.bind(this),
+        this._connectButton = this.addButton({
+            action: this.buttonEvent.bind(this),
             label: "Connect",
-            key: Clutter.Enter });
+            key: Clutter.Enter
+        });
         this._connectButton.reactive = true;
         this._connectButton.can_focus = true;
 
@@ -201,11 +239,11 @@ const Service = new Lang.Class({
         this._connectionSwitch.connect('activate', this.buttonEvent.bind(this));
 
         this._sig = this._proxy.connectSignal('PropertyChanged',
-                function(proxy, sender, [name, value]) {
-                    let obj = {};
-                    obj[name] = value;
-                    this.update(obj);
-                }.bind(this));
+            function(proxy, sender, [name, value]) {
+                let obj = {};
+                obj[name] = value;
+                this.update(obj);
+            }.bind(this));
 
         this.state = ''
 
@@ -238,16 +276,14 @@ const Service = new Lang.Class({
     update: function(properties) {
         for(let key in properties) {
             let newProperty = properties[key].deep_unpack();
-            if(newProperty instanceof Object &&
-                    !(newProperty instanceof Array)) {
+            if(newProperty instanceof Object && !(newProperty instanceof Array)) {
                 if(!this._properties[key])
                     this._properties[key] = {};
                 for(let innerKey in newProperty) {
                     this._properties[key][innerKey] =
                         newProperty[innerKey].deep_unpack();
                 }
-            }
-            else {
+            } else {
                 this._properties[key] = newProperty;
             }
         }
@@ -267,35 +303,35 @@ const Service = new Lang.Class({
 
     signalToIcon: function() {
         let value = this._properties['Strength'];
-        if (value > 80)
+        if(value > 80)
             return 'excellent';
-        if (value > 55)
+        if(value > 55)
             return 'good';
-        if (value > 30)
+        if(value > 30)
             return 'ok';
-        if (value > 5)
+        if(value > 5)
             return 'weak';
         return 'none';
     },
 
     getStateString: function() {
         switch(this.state) {
-            case 'idle':
-                return _("Idle");
-            case 'failure':
-                return _("Failure");
-            case 'association':
-                return _("Association");
-            case 'configuration':
-                return _("Configuration");
-            case 'ready':
-                return _("Ready");
-            case 'disconnect':
-                return _("Disconnected");
-            case 'online':
-                return _("Online");
-            default:
-                return this.state;
+        case 'idle':
+            return _("Idle");
+        case 'failure':
+            return _("Failure");
+        case 'association':
+            return _("Association");
+        case 'configuration':
+            return _("Configuration");
+        case 'ready':
+            return _("Ready");
+        case 'disconnect':
+            return _("Disconnected");
+        case 'online':
+            return _("Online");
+        default:
+            return this.state;
         }
     },
 
@@ -308,8 +344,7 @@ const Service = new Lang.Class({
         this._indicator.destroy();
         try {
             this._proxy.disconnectSignal(this._sig);
-        }
-        catch(error) {
+        } catch(error) {
             Logger.logException(error, 'Failed to disconnect service proxy');
         }
         this.parent();
@@ -408,12 +443,12 @@ const WirelessService = new Lang.Class({
         if(!security || security == 'none')
             return '';
         switch(security) {
-            case 'ieee8021x':
-                return 'security-high-symbolic';
-            case 'wep':
-                return 'security-low-symbolic';
-            default:
-                return 'security-medium-symbolic';
+        case 'ieee8021x':
+            return 'security-high-symbolic';
+        case 'wep':
+            return 'security-low-symbolic';
+        default:
+            return 'security-medium-symbolic';
         }
     },
 
