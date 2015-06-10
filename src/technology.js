@@ -168,6 +168,7 @@ const WirelessInterface = new Lang.Class({
 
     addService: function(id, service) {
         this.parent(id, service);
+        service.menu.addMenuItem(this._createConnectionMenuItem());
         if(this._dialog)
             this._dialog.addService(service);
     },
