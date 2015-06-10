@@ -113,7 +113,7 @@ const ServiceChooser = new Lang.Class({
             return !this._closed;
         }.bind(this));
 
-        this._cancelButton = this.addButton({ action: this.close.bind(this),
+        this._cancelButton = this.addButton({ action: this.cancel.bind(this),
             label: "Cancel",
             key: Clutter.Escape });
 
@@ -147,12 +147,16 @@ const ServiceChooser = new Lang.Class({
         this._closed = true;
         Mainloop.source_remove(this._timeout);
         this.destroy();
-        this._callback();
     },
 
     buttonEvent: function() {
         this.close();
         this._callback(this._selected && this._selected.service);
+    },
+
+    cancel: function() {
+        this._callback();
+        this.close();
     },
 
     addService: function(service) {
