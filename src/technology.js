@@ -135,12 +135,17 @@ const WirelessInterface = new Lang.Class({
 
         this._menu.label.text = _("Wireless");
         this._menu.status.text = _("Idle");
-        this._connectionSwitch = new PopupMenu.PopupMenuItem(_("Connect"));
-        this._connectionSwitch.connect('activate', this.selectWifi.bind(this));
-        this._menu.menu.addMenuItem(this._connectionSwitch);
+        this._menu.menu.addMenuItem(this._createConnectionMenuItem());
         //this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem(_("Wireless Settings")));
         this._menu.icon.icon_name = 'network-wireless-signal-none-symbolic';
         this.addMenuItem(this._menu);
+    },
+
+    _createConnectionMenuItem: function() {
+        let connectionItem = new PopupMenu.PopupMenuItem(
+                _("Select wireless network"));
+        connectionItem.connect('activate', this.selectWifi.bind(this));
+        return connectionItem;
     },
 
     selectWifi: function() {

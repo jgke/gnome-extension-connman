@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-extension-connman 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-08 13:26+0300\n"
+"POT-Creation-Date: 2015-06-10 13:08+0300\n"
 "PO-Revision-Date: 2015-06-04 14:18+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -18,16 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/connmanAgent.js:92
+#: src/connmanAgent.js:90
 msgid "Authentication required by network connection"
 msgstr "Verkkoyhteys vaatii tunnistautumista"
 
-#: src/connmanAgent.js:122 src/service.js:194 src/service.js:244
-#: src/technology.js:138
+#: src/connmanAgent.js:116 src/service.js:200 src/service.js:257
 msgid "Connect"
 msgstr "Yhdist‰"
 
-#: src/connmanAgent.js:126
+#: src/connmanAgent.js:120
 msgid "Cancel"
 msgstr "Peruuta"
 
@@ -35,62 +34,66 @@ msgstr "Peruuta"
 msgid "Connect to..."
 msgstr "Yhdist‰..."
 
-#: src/service.js:208
+#: src/service.js:221
 msgid "Connection"
 msgstr "Yhteys"
 
-#: src/service.js:209
+#: src/service.js:222
 msgid "Settings"
 msgstr "Asetukset"
 
-#: src/service.js:246
+#: src/service.js:259
 msgid "Reconnect"
 msgstr "Uudelleenyhdist‰"
 
-#: src/service.js:248
+#: src/service.js:261
 msgid "Disconnect"
 msgstr "Katkaise yhteys"
 
-#: src/service.js:271 src/technology.js:137
+#: src/service.js:284 src/technology.js:137
 msgid "Idle"
 msgstr "Ei yhdistetty"
 
-#: src/service.js:273
+#: src/service.js:286
 msgid "Failure"
 msgstr "Virhe"
 
-#: src/service.js:275
+#: src/service.js:288
 msgid "Association"
 msgstr "Yhdist‰‰"
 
-#: src/service.js:277
+#: src/service.js:290
 msgid "Configuration"
 msgstr "Asettaa asetuksia"
 
-#: src/service.js:279
+#: src/service.js:292
 msgid "Ready"
 msgstr "Valmis"
 
-#: src/service.js:281
+#: src/service.js:294
 msgid "Disconnected"
 msgstr "Yhteys katkaistu"
 
-#: src/service.js:283
+#: src/service.js:296
 msgid "Online"
 msgstr "Verkossa"
 
-#: src/service.js:347 src/service.js:356 src/service.js:357
+#: src/service.js:368 src/service.js:384 src/service.js:385
 msgid "Wired"
 msgstr "Kiinte‰"
 
-#: src/service.js:348
+#: src/service.js:369
 msgid "Wired Settings"
 msgstr "Kiinte‰n verkon asetukset"
 
-#: src/service.js:368 src/technology.js:136
+#: src/service.js:396 src/technology.js:136
 msgid "Wireless"
 msgstr "Langaton"
 
-#: src/service.js:369 src/technology.js:150
+#: src/service.js:397
 msgid "Wireless Settings"
 msgstr "Langattoman verkon asetukset"
+
+#: src/technology.js:146
+msgid "Select wireless network"
+msgstr "Valitse langaton verkko"
