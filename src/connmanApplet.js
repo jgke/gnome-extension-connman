@@ -58,7 +58,8 @@ const ConnmanMenu = new Lang.Class({
             return;
         let proxy = new ConnmanInterface.TechnologyProxy(path);
         try {
-            this._technologies[type] = Technology.createTechnology(type, proxy);
+            this._technologies[type] = Technology.createTechnology(type, proxy,
+                this._manager);
         } catch(error) {
             Logger.logException(error, 'Failed to add technology');
             return;
@@ -202,6 +203,7 @@ const ConnmanApplet = new Lang.Class({
         this.menu.actor.show();
 
         this._manager = new ConnmanInterface.ManagerProxy();
+        this._menu._manager = this._manager;
         this._vpnManager = new ConnmanInterface.VPNManagerProxy();
         this._agent = new ConnmanAgent.Agent();
         this._vpnAgent = new ConnmanAgent.VPNAgent();
@@ -244,6 +246,7 @@ const ConnmanApplet = new Lang.Class({
     _disconnectEvent: function() {
         Logger.logInfo('Disconnected from Connman');
         this._menu.clear();
+        this._menu._manager = null;
         this.menu.actor.hide();
         this.indicators.hide();
         let signals = [this._asig, this._rsig, this._ssig, this._psig];

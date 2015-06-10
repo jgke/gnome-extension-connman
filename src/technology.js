@@ -126,7 +126,7 @@ const WirelessInterface = new Lang.Class({
     Name: 'WirelessInterface',
     Extends: Technology,
 
-    _init: function(name, proxy) {
+    _init: function(name, proxy, manager) {
         this.parent('wifi', proxy);
 
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
@@ -137,6 +137,7 @@ const WirelessInterface = new Lang.Class({
         //this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem(_("Wireless Settings")));
         this._menu.icon.icon_name = 'network-wireless-signal-none-symbolic';
         this.addMenuItem(this._menu);
+        this._manager = manager;
     },
 
     _createConnectionMenuItem: function() {
@@ -147,21 +148,21 @@ const WirelessInterface = new Lang.Class({
     },
 
     selectWifi: function() {
-        let services = Object.keys(this._services)
-            .map(function(key) {
-                return this._services[key];
-            }.bind(this)).filter(function(service) {
-                return service._properties['Name'];
-            });
+        let serviceList = [];
+        let result = this._manager.GetServicesSync();
+        let services = result[0];
+        for(let i = 0; i < services.length; i++)
+            if(this._services[services[i][0]])
+                serviceList.push(this._services[services[i][0]]);
         let callback = function(service) {
             this._dialog = null;
             if(service)
                 service.buttonEvent();
             else
                 Logger.logInfo('User canceled wifi dialog');
-        }
+        }.bind(this);
         this._dialog = new Service.ServiceChooser(this._proxy,
-            services, callback);
+            serviceList, callback);
     },
 
     addService: function(id, service) {
@@ -215,10 +216,11 @@ const WirelessTechnology = new Lang.Class({
     Name: 'WirelessTechnology',
     Extends: Technology,
 
-    _init: function(proxy) {
+    _init: function(proxy, manager) {
         this.parent('wifi', proxy);
         this._serviceInterfaces = {};
         this._interfaces = {};
+        this._manager = manager;
     },
 
     addService: function(id, service) {
@@ -226,7 +228,8 @@ const WirelessTechnology = new Lang.Class({
         this._serviceInterfaces[id] = intf;
         if(!this._interfaces[intf]) {
             Logger.logDebug('Adding interface ' + intf);
-            this._interfaces[intf] = new WirelessInterface(intf, this._proxy);
+            this._interfaces[intf] = new WirelessInterface(intf, this._proxy,
+                this._manager);
             this.addMenuItem(this._interfaces[intf]);
         }
         this._interfaces[intf].addService(id, service);
@@ -295,12 +298,12 @@ const VPNTechnology = new Lang.Class({
     },
 });
 
-function createTechnology(type, proxy) {
+function createTechnology(type, proxy, manager) {
     switch(type) {
     case 'ethernet':
         return new EthernetTechnology(proxy);
     case 'wifi':
-        return new WirelessTechnology(proxy);
+        return new WirelessTechnology(proxy, manager);
     case 'bluetooth':
         return new BluetoothTechnology(proxy);
     case 'p2p':
