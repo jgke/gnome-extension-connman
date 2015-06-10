@@ -136,27 +136,29 @@ const WirelessInterface = new Lang.Class({
         this._menu.label.text = _("Wireless");
         this._menu.status.text = _("Idle");
         this._connectionSwitch = new PopupMenu.PopupMenuItem(_("Connect"));
-        this._connectionSwitch.connect('activate', function() {
-            let services = Object.keys(this._services)
-                .map(function(key) {
-                    return this._services[key];
-                }.bind(this)).filter(function(service) {
-                    return service._properties['Name'];
-                });
-            let callback = function(service) {
-                this._dialog = null;
-                if(service)
-                    service.buttonEvent();
-                else
-                    Logger.logInfo('User canceled wifi dialog');
-            }.bind(this);
-            this._dialog = new Service.ServiceChooser(this._proxy,
-                    services, callback);
-        }.bind(this));
+        this._connectionSwitch.connect('activate', this.selectWifi.bind(this));
         this._menu.menu.addMenuItem(this._connectionSwitch);
         //this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem(_("Wireless Settings")));
         this._menu.icon.icon_name = 'network-wireless-signal-none-symbolic';
         this.addMenuItem(this._menu);
+    },
+
+    selectWifi: function() {
+        let services = Object.keys(this._services)
+            .map(function(key) {
+                return this._services[key];
+            }.bind(this)).filter(function(service) {
+                return service._properties['Name'];
+            });
+        let callback = function(service) {
+            this._dialog = null;
+            if(service)
+                service.buttonEvent();
+            else
+                Logger.logInfo('User canceled wifi dialog');
+        }
+        this._dialog = new Service.ServiceChooser(this._proxy,
+                services, callback);
     },
 
     addService: function(id, service) {
