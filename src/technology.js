@@ -299,20 +299,15 @@ const VPNTechnology = new Lang.Class({
 });
 
 function createTechnology(type, proxy, manager) {
-    switch(type) {
-    case 'ethernet':
-        return new EthernetTechnology(proxy);
-    case 'wifi':
-        return new WirelessTechnology(proxy, manager);
-    case 'bluetooth':
-        return new BluetoothTechnology(proxy);
-    case 'p2p':
-        return new P2PTechnology(proxy);
-    case 'cellular':
-        return new CellularTechnology(proxy);
-    case 'vpn':
-        return new VPNTechnology(proxy);
-    default:
-        throw 'tried to add unknown technology type ' + type;
-    }
+    technologies = {
+        ethernet: EthernetTechnology,
+        wifi: WirelessTechnology,
+        bluetooth: BluetoothTechnology,
+        p2p: P2PTechnology,
+        cellular: CellularTechnology,
+        vpn: VPNTechnology
+    };
+    if(technologies[type])
+        return new technologies[type](proxy, manager);
+    throw 'tried to add unknown technology type ' + type;
 }

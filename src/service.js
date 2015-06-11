@@ -334,24 +334,15 @@ const Service = new Lang.Class({
     },
 
     getStateString: function() {
-        switch(this.state) {
-        case 'idle':
-            return _("Idle");
-        case 'failure':
-            return _("Failure");
-        case 'association':
-            return _("Association");
-        case 'configuration':
-            return _("Configuration");
-        case 'ready':
-            return _("Ready");
-        case 'disconnect':
-            return _("Disconnected");
-        case 'online':
-            return _("Online");
-        default:
-            return this.state;
-        }
+        let states = {
+            idle: _("Idle"),
+            failure: _("Failure"),
+            association: _("Association"),
+            configuration: _("Configuration"),
+            ready: _("Ready"),
+            disconnect: _("Disconnected"),
+            online: _("Online") };
+        return states[this.state] || this.state;
     },
 
     setIcon: function(iconName) {
@@ -386,20 +377,17 @@ const Service = new Lang.Class({
     },
 
     getStatusIcon: function() {
-        switch(this.state) {
-        case 'online':
-        case 'ready':
-            return this.getIcon();
-        case 'configuration':
-        case 'association':
-            return this.getAcquiringIcon();
-        case 'disconnect':
-        case 'idle':
-            return this.getOfflineIcon();
-        case 'failure':
-        default:
-            return this.getErrorIcon();
-        }
+        let iconGetters = {
+            online: this.getIcon,
+            ready: this.getIcon,
+            configuration: this.getAcquiringIcon,
+            association: this.getAcquiringIcon,
+            disconnect: this.getOfflineIcon,
+            idle: this.getOfflineIcon,
+        };
+        if(iconGetters[this.state])
+            return iconGetters[this.state].bind(this)();
+        return this.getErrorIcon();
     },
 
     show: function() {
@@ -461,14 +449,11 @@ const WirelessService = new Lang.Class({
         let security = this._properties['Security'][0];
         if(!security || security == 'none')
             return '';
-        switch(security) {
-        case 'ieee8021x':
-            return 'security-high-symbolic';
-        case 'wep':
-            return 'security-low-symbolic';
-        default:
-            return 'security-medium-symbolic';
-        }
+        let icons = {
+            ieee8021x: 'security-high-symbolic',
+            wep: 'security-low-symbolic',
+        };
+        return icons[security] || 'security-medium-symbolic';
     },
 
     getIcon: function() {
@@ -537,18 +522,14 @@ const VPNService = new Lang.Class({
 });
 
 function createService(type, proxy, indicator) {
-    switch(type) {
-    case 'ethernet':
-        return new EthernetService(proxy, indicator);
-    case 'wifi':
-        return new WirelessService(proxy, indicator);
-    case 'bluetooth':
-        return new BluetoothService(proxy, indicator);
-    case 'cellular':
-        return new CellularService(proxy, indicator);
-    case 'vpn':
-        return new VPNService(proxy, indicator);
-    default:
-        throw 'tried to create unknown service type ' + type;
-    }
+    let services = {
+        ethernet: EthernetService,
+        wifi: WirelessService,
+        bluetooth: BluetoothService,
+        cellular: CellularService,
+        vpn: VPNService
+    };
+    if(services[type])
+        return new services[type](proxy, indicator);
+    throw 'tried to create unknown service type ' + type;
 }
