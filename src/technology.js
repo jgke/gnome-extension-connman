@@ -43,9 +43,17 @@ const Technology = new Lang.Class({
         if(this._proxy)
             this._sig = this._proxy.connectSignal('PropertyChanged',
                 function(proxy, sender, [name, value]) {
-                    Logger.logDebug('Technology ' + this._type + ' property ' +
-                        name + ' changed: ' + value.deep_unpack());
+                    this.propertyChanged(name, value.deep_unpack());
                 }.bind(this));
+    },
+
+    propertyChanged: function(name, value) {
+        if(name == "Powered") {
+            if(value)
+                this.show();
+            else
+                this.hide();
+        }
     },
 
     addService: function(id, service) {
@@ -110,6 +118,18 @@ const Technology = new Lang.Class({
                     this._indicator = this._services[path]._indicator;
             }
         }
+    },
+
+    show: function() {
+        this.actor.show();
+        if(this._indicator)
+            this._indicator.show();
+    },
+
+    hide: function() {
+        this.actor.hide();
+        if(this._indicator)
+            this._indicator.hide();
     }
 });
 
@@ -223,6 +243,12 @@ const WirelessTechnology = new Lang.Class({
         this._manager = manager;
     },
 
+    propertyChanged: function(name, value) {
+        this.parent(name, value);
+        for(let intf in this._interfaces)
+            this._interfaces[intf].propertyChanged(name, value);
+    },
+
     addService: function(id, service) {
         let intf = service._properties['Ethernet']['Interface'];
         this._serviceInterfaces[id] = intf;
@@ -299,7 +325,7 @@ const VPNTechnology = new Lang.Class({
 });
 
 function createTechnology(type, proxy, manager) {
-    technologies = {
+    let technologies = {
         ethernet: EthernetTechnology,
         wifi: WirelessTechnology,
         bluetooth: BluetoothTechnology,
