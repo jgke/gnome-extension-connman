@@ -57,9 +57,11 @@ const ConnmanMenu = new Lang.Class({
         if(this._technologies[type])
             return;
         let proxy = new ConnmanInterface.TechnologyProxy(path);
+        for(let i in properties)
+            properties[i] = properties[i].deep_unpack();
         try {
-            this._technologies[type] = Technology.createTechnology(type, proxy,
-                this._manager);
+            this._technologies[type] = Technology.createTechnology(type,
+                    properties, proxy, this._manager);
         } catch(error) {
             Logger.logException(error, 'Failed to add technology');
             return;
@@ -192,7 +194,8 @@ const ConnmanApplet = new Lang.Class({
             let technologies = result[0];
             for each(let [path, properties] in technologies)
                 this._menu.addTechnology(path, properties);
-            this._menu._technologies['vpn'] = Technology.createTechnology('vpn');
+            this._menu._technologies['vpn'] = Technology.createTechnology('vpn',
+                    {Powered: true});
             this._menu.addMenuItem(this._menu._technologies['vpn']);
             this._updateAllServices();
         }.bind(this));

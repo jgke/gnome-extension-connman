@@ -34,11 +34,12 @@ const Technology = new Lang.Class({
     Extends: PopupMenu.PopupMenuSection,
     Abstract: true,
 
-    _init: function(type, proxy) {
+    _init: function(properties, type, proxy) {
         this.parent();
         this._type = type;
         this._services = {}
         this._dialog = null;
+        this._properties = properties;
 
         this._proxy = proxy;
         if(this._proxy)
@@ -46,6 +47,10 @@ const Technology = new Lang.Class({
                 function(proxy, sender, [name, value]) {
                     this.propertyChanged(name, value.deep_unpack());
                 }.bind(this));
+        if(this._properties["Powered"])
+            this.show();
+        else
+            this.hide();
     },
 
     propertyChanged: function(name, value) {
@@ -138,8 +143,8 @@ const EthernetTechnology = new Lang.Class({
     Name: 'EthernetTechnology',
     Extends: Technology,
 
-    _init: function(proxy) {
-        this.parent('ethernet', proxy);
+    _init: function(properties, proxy) {
+        this.parent(properties, 'ethernet', proxy);
     },
 });
 
@@ -147,8 +152,8 @@ const WirelessTechnology = new Lang.Class({
     Name: 'WirelessTechnology',
     Extends: Technology,
 
-    _init: function(proxy, manager) {
-        this.parent('wifi', proxy);
+    _init: function(properties, proxy, manager) {
+        this.parent(properties, 'wifi', proxy);
 
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
 
@@ -157,11 +162,25 @@ const WirelessTechnology = new Lang.Class({
 
         this._menu.label.text = _("Wireless");
         this._menu.status.text = _("Idle");
-        this._menu.menu.addMenuItem(this._createConnectionMenuItem());
         this._menu.icon.icon_name = 'network-wireless-signal-none-symbolic';
-        this.addMenuItem(this._menu);
         this._manager = manager;
+        this.addMenuItem(this._menu);
+        this._menu.menu.addMenuItem(this._createConnectionMenuItem());
         this._menu.menu.addMenuItem(this._settings);
+        if(this._properties["Connected"])
+            this._menu.menu.actor.hide();
+        else
+            this._menu.menu.actor.show();
+    },
+
+    propertyChanged: function(name, value) {
+        this.parent(name, value);
+        if(name == "Connected") {
+            if(value)
+                this._menu.menu.hide();
+            else
+                this._menu.menu.show();
+        }
     },
 
     openSettings: function() {
@@ -198,23 +217,26 @@ const WirelessTechnology = new Lang.Class({
     addService: function(id, service) {
         this.parent(id, service);
         service.menu.addMenuItem(this._createConnectionMenuItem());
+        if(this._services[id]._properties['State'] != 'idle')
+            this._services[id].show();
         if(this._dialog)
             this._dialog.addService([service, service._properties["Ethernet"]["Interface"]]);
     },
 
     updateService: function(id, properties) {
         this.parent(id, properties);
+        if(this._services[id]._properties['State'] != 'idle')
+            this._services[id].show();
+        else
+            this._services[id].hide();
         if(this._dialog)
             this._dialog.updateService([this._services[id],
                 this._services[id]._properties["Ethernet"]["Interface"]]);
     },
 
     removeService: function(id) {
-        if(this._services[id]._properties['State'] != 'idle') {
+        if(this._services[id]._properties['State'] != 'idle')
             this._services[id].hide();
-            this._menu.actor.show();
-            this._service = null;
-        }
         this.parent(id);
         this.serviceUpdated(id);
         this.updateIcon();
@@ -226,13 +248,10 @@ const WirelessTechnology = new Lang.Class({
         this.parent();
         let service = this._services[id];
         if(service) {
-            if(service._properties['State'] == 'idle' && service.actor.visible) {
+            if(service._properties['State'] == 'idle' && service.actor.visible)
                 service.hide();
-                this._menu.actor.show();
-            } else if(service._properties['State'] != 'idle') {
+            else if(service._properties['State'] != 'idle')
                 this._menu.actor.hide();
-                service.show();
-            }
         }
         this.updateIcon();
     },
@@ -247,8 +266,8 @@ const BluetoothTechnology = new Lang.Class({
     Name: 'BluetoothTechnology',
     Extends: Technology,
 
-    _init: function(proxy) {
-        this.parent('bluetooth', proxy);
+    _init: function(properties, proxy) {
+        this.parent(properties, 'bluetooth', proxy);
     },
 });
 
@@ -256,8 +275,8 @@ const P2PTechnology = new Lang.Class({
     Name: 'P2PTechnology',
     Extends: Technology,
 
-    _init: function(proxy) {
-        this.parent('p2p', proxy);
+    _init: function(properties, proxy) {
+        this.parent(properties, 'p2p', proxy);
     },
 });
 
@@ -265,8 +284,8 @@ const CellularTechnology = new Lang.Class({
     Name: 'CellularTechnology',
     Extends: Technology,
 
-    _init: function(proxy) {
-        this.parent('cellular', proxy);
+    _init: function(properties, proxy) {
+        this.parent(properties, 'cellular', proxy);
     },
 });
 
@@ -274,12 +293,12 @@ const VPNTechnology = new Lang.Class({
     Name: 'VPNTechnology',
     Extends: Technology,
 
-    _init: function(proxy) {
-        this.parent('vpn', proxy);
+    _init: function(properties, proxy) {
+        this.parent(properties, 'vpn', proxy);
     },
 });
 
-function createTechnology(type, proxy, manager) {
+function createTechnology(type, properties, proxy, manager) {
     let technologies = {
         ethernet: EthernetTechnology,
         wifi: WirelessTechnology,
@@ -289,6 +308,6 @@ function createTechnology(type, proxy, manager) {
         vpn: VPNTechnology
     };
     if(technologies[type])
-        return new technologies[type](proxy, manager);
+        return new technologies[type](properties, proxy, manager);
     throw 'tried to add unknown technology type ' + type;
 }
