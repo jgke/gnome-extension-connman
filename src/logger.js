@@ -19,7 +19,7 @@
 const Lang = imports.lang;
 
 var enabled = true;
-var logLevel = 4;
+var logLevel = 2;
 var infoEnabled = true;
 
 function logMessage(msg) {
