@@ -46,6 +46,10 @@
 .cm-dialog-content {
   spacing: 20px; }
 
+.cm-dialog-interface {
+  color: #606060;
+  padding: 15px; }
+
 .cm-dialog-header-hbox {
   spacing: 10px; }
 
@@ -61,7 +65,7 @@
 .cm-dialog-item {
   font-size: 110%;
   border-bottom: 1px solid #1c1f1f;
-  padding: 12px;
+  padding: 12px 12px 12px 35px;
   spacing: 20px; }
 
 .cm-dialog-item:selected {

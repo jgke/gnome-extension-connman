@@ -142,11 +142,11 @@ const EthernetTechnology = new Lang.Class({
     },
 });
 
-const WirelessInterface = new Lang.Class({
-    Name: 'WirelessInterface',
+const WirelessTechnology = new Lang.Class({
+    Name: 'WirelessTechnology',
     Extends: Technology,
 
-    _init: function(name, proxy, manager) {
+    _init: function(proxy, manager) {
         this.parent('wifi', proxy);
 
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
@@ -171,9 +171,11 @@ const WirelessInterface = new Lang.Class({
         let serviceList = [];
         let result = this._manager.GetServicesSync();
         let services = result[0];
-        for(let i = 0; i < services.length; i++)
-            if(this._services[services[i][0]])
-                serviceList.push(this._services[services[i][0]]);
+        for(let i = 0; i < services.length; i++) {
+            let service = this._services[services[i][0]];
+            if(service && service._properties["Name"])
+                serviceList.push([service, service._properties["Ethernet"]["Interface"]]);
+        }
         let callback = function(service) {
             this._dialog = null;
             if(service)
@@ -189,13 +191,14 @@ const WirelessInterface = new Lang.Class({
         this.parent(id, service);
         service.menu.addMenuItem(this._createConnectionMenuItem());
         if(this._dialog)
-            this._dialog.addService(service);
+            this._dialog.addService([service, service._properties["Ethernet"]["Interface"]]);
     },
 
     updateService: function(id, properties) {
         this.parent(id, properties);
         if(this._dialog)
-            this._dialog.updateService(this._services[id]);
+            this._dialog.updateService([this._services[id],
+                this._services[id]._properties["Ethernet"]["Interface"]]);
     },
 
     removeService: function(id) {
@@ -228,62 +231,6 @@ const WirelessInterface = new Lang.Class({
 
     destroy: function() {
         this._proxy = null;
-        this.parent();
-    }
-});
-
-const WirelessTechnology = new Lang.Class({
-    Name: 'WirelessTechnology',
-    Extends: Technology,
-
-    _init: function(proxy, manager) {
-        this.parent('wifi', proxy);
-        this._serviceInterfaces = {};
-        this._interfaces = {};
-        this._manager = manager;
-    },
-
-    propertyChanged: function(name, value) {
-        this.parent(name, value);
-        for(let intf in this._interfaces)
-            this._interfaces[intf].propertyChanged(name, value);
-    },
-
-    addService: function(id, service) {
-        let intf = service._properties['Ethernet']['Interface'];
-        this._serviceInterfaces[id] = intf;
-        if(!this._interfaces[intf]) {
-            Logger.logDebug('Adding interface ' + intf);
-            this._interfaces[intf] = new WirelessInterface(intf, this._proxy,
-                this._manager);
-            this.addMenuItem(this._interfaces[intf]);
-        }
-        this._interfaces[intf].addService(id, service);
-    },
-
-    getService: function(id) {
-        let intf = this._serviceInterfaces[id];
-        if(!intf)
-            return null;
-        return this._interfaces[intf].getService(id);
-    },
-
-    updateService: function(id, properties) {
-        let intf = this._serviceInterfaces[id];
-        if(!this._interfaces[intf]) {
-            Logger.logError('Tried to update nonexisting wifi interface ' + intf);
-        }
-        this._interfaces[intf].updateService(id, properties);
-    },
-
-    removeService: function(id) {
-        let intf = this._serviceInterfaces[id];
-        this._interfaces[intf].removeService(id);
-    },
-
-    destroy: function() {
-        for(let intf in this._interfaces)
-            this._interfaces[intf].destroy();
         this.parent();
     }
 });

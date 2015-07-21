@@ -141,6 +141,7 @@ const ServiceChooser = new Lang.Class({
             vertical: true,
             style_class: 'cm-dialog-box'
         });
+        this._boxes = {};
         this._scrollView = new St.ScrollView({
             style_class: 'cm-dialog-scroll-view'
         });
@@ -215,22 +216,45 @@ const ServiceChooser = new Lang.Class({
     },
 
     addService: function(service) {
-        if(this._services[service.id]) {
-            this._services[service.id].enable();
+        if(this._services[service[0].id]) {
+            this._services[service[0].id].enable();
             return;
         }
-        let item = new DialogServiceItem(service, this.selectedEvent.bind(this));
-        this._itemBox.add_child(item.actor);
-        this._services[service.id] = item;
+        let item = new DialogServiceItem(service[0], this.selectedEvent.bind(this));
+        if(!item.actor)
+            return;
+        let intf = service[1];
+        if(!this._boxes[intf]) {
+            if(Object.keys(this._boxes).length == 1)
+                this._boxes[Object.keys(this._boxes)[0]]["label"].show();
+            let label = new St.Label({
+                text: intf,
+                style_class: 'cm-dialog-interface',
+            });
+            let box = new St.BoxLayout({
+                vertical: true,
+                style_class: 'cm-dialog-box'
+            });
+            this._boxes[intf] = {};
+            this._boxes[intf]["label"] = label;
+            this._boxes[intf]["box"] = box;
+            label.hide();
+            if(Object.keys(this._boxes).length > 1)
+                label.show();
+            this._itemBox.add_child(label);
+            this._itemBox.add_child(box);
+        }
+        this._boxes[intf]["box"].add_child(item.actor);
+        this._services[service[0].id] = item;
     },
 
     updateService: function(service) {
         if(this._closed)
             return;
-        if(!this._services[service.id])
+        if(!this._services[service[0].id])
             this.addService(service);
         else
-            this._services[service.id]._label.text = service.label.text;
+            this._services[service[0].id]._label.text = service[0].label.text;
     },
 
     removeService: function(id) {
@@ -435,7 +459,7 @@ const WirelessService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
-        this.label.text = _("Wireless");
+        this.label.text = "";
         this._settings.label.text = _("Wireless Settings");
         this._icons = {
             "ok": 'network-wireless-connected-symbolic',
