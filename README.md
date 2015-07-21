@@ -9,6 +9,7 @@ Dependencies
  * autoconf
  * intltool
  * gnome-autogen, available from gnome-common
+ * [connman-gtk](https://github.com/jgke/connman-gtk)
 
 Installation
 ------------

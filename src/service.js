@@ -300,13 +300,19 @@ const Service = new Lang.Class({
         this._indicator = indicator;
         this._indicator.show();
         this.label.text = _("Connection");
+
         this._settings = new PopupMenu.PopupMenuItem(_("Settings"));
+        this._settings.connect('activate', this.openSettings.bind(this));
 
         this.status.text = this.state;
 
         this.menu.addMenuItem(this._connectionSwitch);
-        //this.menu.addMenuItem(this._settings);
+        this.menu.addMenuItem(this._settings);
         this.hide();
+    },
+
+    openSettings: function() {
+        Util.spawnApp(['connman-gtk', '--page', this.type]);
     },
 
     buttonEvent: function() {
@@ -460,13 +466,14 @@ const WirelessService = new Lang.Class({
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
         this.label.text = "";
-        this._settings.label.text = _("Wireless Settings");
         this._icons = {
             "ok": 'network-wireless-connected-symbolic',
             "acquiring": 'network-wireless-acquiring-symbolic',
             "offline": 'network-wireless-offline-symbolic',
             "error": 'network-error-symbolic'
         };
+
+        this.show();
     },
 
     securityIcon: function() {
@@ -491,13 +498,15 @@ const BluetoothService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('bluetooth', proxy, indicator);
-        this.show();
+        this._settings.label.text = _("Bluetooth Settings");
         this._icons = {
             "ok": 'bluetooth-active-symbolic',
             "acquiring": 'bluetooth-active-symbolic',
             "offline": 'bluetooth-disabled-symbolic',
             "error": 'network-error-symbolic'
         };
+
+        this.show();
     },
 });
 
@@ -507,13 +516,15 @@ const CellularService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('cellular', proxy, indicator);
-        this.show();
+        this._settings.label.text = _("Cellular Settings");
         this._icons = {
             "ok": 'network-cellular-connected-symbolic',
             "acquiring": 'network-cellular-acquiring-symbolic',
             "offline": 'network-cellular-offline-symbolic',
             "error": 'network-error-symbolic'
         };
+
+        this.show();
     },
 
     getIcon: function() {
@@ -527,13 +538,15 @@ const VPNService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('vpn', proxy, indicator);
-        this.show();
+        this._settings.label.text = _("VPN Settings");
         this._icons = {
             "ok": 'network-vpn-symbolic',
             "acquiring": 'network-vpn-acquiring-symbolic',
             "offline": 'network-offline-symbolic',
             "error": 'network-error-symbolic',
         };
+
+        this.show();
     },
 
     getAcquiringIcon: function() {

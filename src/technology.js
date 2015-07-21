@@ -17,6 +17,7 @@
  */
 
 const Lang = imports.lang;
+const Util = imports.misc.util;
 
 const PopupMenu = imports.ui.popupMenu;
 
@@ -151,13 +152,20 @@ const WirelessTechnology = new Lang.Class({
 
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
 
+        this._settings = new PopupMenu.PopupMenuItem(_("Wireless Settings"));
+        this._settings.connect('activate', this.openSettings.bind(this));
+
         this._menu.label.text = _("Wireless");
         this._menu.status.text = _("Idle");
         this._menu.menu.addMenuItem(this._createConnectionMenuItem());
-        //this._menu.menu.addMenuItem(new PopupMenu.PopupMenuItem(_("Wireless Settings")));
         this._menu.icon.icon_name = 'network-wireless-signal-none-symbolic';
         this.addMenuItem(this._menu);
         this._manager = manager;
+        this._menu.menu.addMenuItem(this._settings);
+    },
+
+    openSettings: function() {
+        Util.spawnApp(['connman-gtk', '--page', 'wifi']);
     },
 
     _createConnectionMenuItem: function() {
