@@ -167,18 +167,9 @@ const WirelessTechnology = new Lang.Class({
         this.addMenuItem(this._menu);
         this._menu.menu.addMenuItem(this._createConnectionMenuItem());
         this._menu.menu.addMenuItem(this._settings);
-        if(this._properties["Connected"])
-            this._menu.menu.actor.hide();
-    },
-
-    propertyChanged: function(name, value) {
-        this.parent(name, value);
-        if(name == "Connected") {
-            if(value)
-                this._menu.menu.hide();
-            else
-                this._menu.menu.show();
-        }
+        this._connected = {};
+        this._connectedCount = 0;
+        this.show();
     },
 
     openSettings: function() {
@@ -215,26 +206,54 @@ const WirelessTechnology = new Lang.Class({
     addService: function(id, service) {
         this.parent(id, service);
         service.menu.addMenuItem(this._createConnectionMenuItem());
-        if(this._services[id]._properties['State'] != 'idle')
+	let state = this._services[id].state;
+        if(state != 'idle') {
             this._services[id].show();
+	    this._connected[id] = true;
+	    this._menu.actor.hide();
+	    this._connectedCount++;
+	}
         if(this._dialog)
             this._dialog.addService([service, service._properties["Ethernet"]["Interface"]]);
     },
 
     updateService: function(id, properties) {
         this.parent(id, properties);
-        if(this._services[id]._properties['State'] != 'idle')
-            this._services[id].show();
-        else
-            this._services[id].hide();
+        let state = this._services[id]._properties['State'];
+        if(state != 'idle') {
+            if(!this._connected[id]) {
+                this._connected[id] = true;
+                this._connectedCount++;
+                this._services[id].show();
+                this._menu.actor.hide();
+            }
+        }
+        else {
+            if(this._connected[id]) {
+                this._connected[id] = false;
+                this._connectedCount--;
+                this._services[id].show();
+                if(!this._connectedCount)
+                    this._menu.actor.show();
+            }
+	}
         if(this._dialog)
             this._dialog.updateService([this._services[id],
                 this._services[id]._properties["Ethernet"]["Interface"]]);
     },
 
     removeService: function(id) {
-        if(this._services[id]._properties['State'] != 'idle')
+        let state = this._services[id]._properties['State'];
+        if(state != 'idle') {
             this._services[id].hide();
+            if(this._connected[id]) {
+                this._connected[id] = false;
+                this._connectedCount--;
+                this._services[id].show();
+                if(!this._connectedCount)
+                    this._menu.actor.show();
+            }
+        }
         this.parent(id);
         this.serviceUpdated(id);
         this.updateIcon();
