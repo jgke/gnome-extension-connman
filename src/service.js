@@ -490,6 +490,14 @@ const WirelessService = new Lang.Class({
     getIcon: function() {
         return 'network-wireless-signal-' + this.signalToIcon() + '-symbolic';
     },
+
+    update: function(properties) {
+        this.parent(properties);
+        if(this.state == 'idle' || this.state == 'disconnect')
+            this.hide();
+        else
+            this.show();
+    }
 });
 
 const BluetoothService = new Lang.Class({

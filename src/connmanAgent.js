@@ -105,10 +105,6 @@ const Dialog = new Lang.Class({
             text: _("Authentication required by network connection")
         });
 
-        this.contentLayout.add(mainContentBox, {
-            x_fill: true,
-            y_fill: true
-        });
         mainContentBox.add(icon, {
             x_fill: true,
             y_fill: true,

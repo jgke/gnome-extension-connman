@@ -169,8 +169,6 @@ const WirelessTechnology = new Lang.Class({
         this._menu.menu.addMenuItem(this._settings);
         if(this._properties["Connected"])
             this._menu.menu.actor.hide();
-        else
-            this._menu.menu.actor.show();
     },
 
     propertyChanged: function(name, value) {
@@ -242,18 +240,6 @@ const WirelessTechnology = new Lang.Class({
         this.updateIcon();
         if(this._dialog)
             this._dialog.removeService(id);
-    },
-
-    serviceUpdated: function(id) {
-        this.parent();
-        let service = this._services[id];
-        if(service) {
-            if(service._properties['State'] == 'idle' && service.actor.visible)
-                service.hide();
-            else if(service._properties['State'] != 'idle')
-                this._menu.actor.hide();
-        }
-        this.updateIcon();
     },
 
     destroy: function() {
