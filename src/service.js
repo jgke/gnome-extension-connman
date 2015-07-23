@@ -466,6 +466,7 @@ const WirelessService = new Lang.Class({
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
         this.label.text = "";
+        this._settings.label.text = _("Wireless Settings");
         this._icons = {
             "ok": 'network-wireless-connected-symbolic',
             "acquiring": 'network-wireless-acquiring-symbolic',
