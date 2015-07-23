@@ -288,7 +288,7 @@ const Service = new Lang.Class({
                 this.update(obj);
             }.bind(this));
 
-        this.state = ''
+        this.state = 'idle'
 
         this._icons = {
             'ok': 'network-transmit-symbolic',
@@ -298,8 +298,7 @@ const Service = new Lang.Class({
         };
 
         this._indicator = indicator;
-        this._indicator.show();
-        this.label.text = _("Connection");
+        this.label.text = '';
 
         this._settings = new PopupMenu.PopupMenuItem(_("Settings"));
         this._settings.connect('activate', this.openSettings.bind(this));
@@ -473,8 +472,6 @@ const WirelessService = new Lang.Class({
             'offline': 'network-wireless-offline-symbolic',
             'error': 'network-error-symbolic'
         };
-
-        this.show();
     },
 
     securityIcon: function() {

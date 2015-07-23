@@ -206,13 +206,12 @@ const WirelessTechnology = new Lang.Class({
     addService: function(id, service) {
         this.parent(id, service);
         service.menu.addMenuItem(this._createConnectionMenuItem(), 1);
-	let state = this._services[id].state;
+        let state = this._services[id].state;
         if(state != 'idle') {
-            this._services[id].show();
-	    this._connected[id] = true;
-	    this._menu.actor.hide();
-	    this._connectedCount++;
-	}
+            this._connected[id] = true;
+            this._menu.actor.hide();
+            this._connectedCount++;
+        }
         if(this._dialog)
             this._dialog.addService([service, service._properties['Ethernet']['Interface']]);
     },
@@ -224,7 +223,6 @@ const WirelessTechnology = new Lang.Class({
             if(!this._connected[id]) {
                 this._connected[id] = true;
                 this._connectedCount++;
-                this._services[id].show();
                 this._menu.actor.hide();
             }
         }
@@ -232,7 +230,6 @@ const WirelessTechnology = new Lang.Class({
             if(this._connected[id]) {
                 this._connected[id] = false;
                 this._connectedCount--;
-                this._services[id].show();
                 if(!this._connectedCount)
                     this._menu.actor.show();
             }
@@ -249,7 +246,6 @@ const WirelessTechnology = new Lang.Class({
             if(this._connected[id]) {
                 this._connected[id] = false;
                 this._connectedCount--;
-                this._services[id].show();
                 if(!this._connectedCount)
                     this._menu.actor.show();
             }
