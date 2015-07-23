@@ -47,14 +47,14 @@ const Technology = new Lang.Class({
                 function(proxy, sender, [name, value]) {
                     this.propertyChanged(name, value.deep_unpack());
                 }.bind(this));
-        if(this._properties["Powered"])
+        if(this._properties['Powered'])
             this.show();
         else
             this.hide();
     },
 
     propertyChanged: function(name, value) {
-        if(name == "Powered") {
+        if(name == 'Powered') {
             if(value)
                 this.show();
             else
@@ -189,8 +189,8 @@ const WirelessTechnology = new Lang.Class({
         let services = result[0];
         for(let i = 0; i < services.length; i++) {
             let service = this._services[services[i][0]];
-            if(service && service._properties["Name"])
-                serviceList.push([service, service._properties["Ethernet"]["Interface"]]);
+            if(service && service._properties['Name'])
+                serviceList.push([service, service._properties['Ethernet']['Interface']]);
         }
         let callback = function(service) {
             this._dialog = null;
@@ -214,7 +214,7 @@ const WirelessTechnology = new Lang.Class({
 	    this._connectedCount++;
 	}
         if(this._dialog)
-            this._dialog.addService([service, service._properties["Ethernet"]["Interface"]]);
+            this._dialog.addService([service, service._properties['Ethernet']['Interface']]);
     },
 
     updateService: function(id, properties) {
@@ -239,7 +239,7 @@ const WirelessTechnology = new Lang.Class({
 	}
         if(this._dialog)
             this._dialog.updateService([this._services[id],
-                this._services[id]._properties["Ethernet"]["Interface"]]);
+                this._services[id]._properties['Ethernet']['Interface']]);
     },
 
     removeService: function(id) {

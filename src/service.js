@@ -167,13 +167,13 @@ const ServiceChooser = new Lang.Class({
 
         this._cancelButton = this.addButton({
             action: this.cancel.bind(this),
-            label: "Cancel",
+            label: _("Cancel"),
             key: Clutter.Escape
         });
 
         this._connectButton = this.addButton({
             action: this.buttonEvent.bind(this),
-            label: "Connect",
+            label: _("Connect"),
             key: Clutter.Enter
         });
         this._connectButton.reactive = true;
@@ -226,7 +226,7 @@ const ServiceChooser = new Lang.Class({
         let intf = service[1];
         if(!this._boxes[intf]) {
             if(Object.keys(this._boxes).length == 1)
-                this._boxes[Object.keys(this._boxes)[0]]["label"].show();
+                this._boxes[Object.keys(this._boxes)[0]]['label'].show();
             let label = new St.Label({
                 text: intf,
                 style_class: 'cm-dialog-interface',
@@ -236,15 +236,15 @@ const ServiceChooser = new Lang.Class({
                 style_class: 'cm-dialog-box'
             });
             this._boxes[intf] = {};
-            this._boxes[intf]["label"] = label;
-            this._boxes[intf]["box"] = box;
+            this._boxes[intf]['label'] = label;
+            this._boxes[intf]['box'] = box;
             label.hide();
             if(Object.keys(this._boxes).length > 1)
                 label.show();
             this._itemBox.add_child(label);
             this._itemBox.add_child(box);
         }
-        this._boxes[intf]["box"].add_child(item.actor);
+        this._boxes[intf]['box'].add_child(item.actor);
         this._services[service[0].id] = item;
     },
 
@@ -291,10 +291,10 @@ const Service = new Lang.Class({
         this.state = ''
 
         this._icons = {
-            "ok": 'network-transmit-symbolic',
-            "acquiring": 'network-no-route-symbolic',
-            "offline": 'network-offline-symbolic',
-            "error": 'network-error-symbolic'
+            'ok': 'network-transmit-symbolic',
+            'acquiring': 'network-no-route-symbolic',
+            'offline': 'network-offline-symbolic',
+            'error': 'network-error-symbolic'
         };
 
         this._indicator = indicator;
@@ -440,10 +440,10 @@ const EthernetService = new Lang.Class({
         this.label.text = _("Wired");
         this._settings.label.text = _("Wired Settings");
         this._icons = {
-            "ok": 'network-wired-symbolic',
-            "acquiring": 'network-wired-acquiring-symbolic',
-            "offline": 'network-wired-offline-symbolic',
-            "error": 'network-error-symbolic'
+            'ok': 'network-wired-symbolic',
+            'acquiring': 'network-wired-acquiring-symbolic',
+            'offline': 'network-wired-offline-symbolic',
+            'error': 'network-error-symbolic'
         };
 
         this.show();
@@ -465,13 +465,13 @@ const WirelessService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
-        this.label.text = "";
+        this.label.text = ''
         this._settings.label.text = _("Wireless Settings");
         this._icons = {
-            "ok": 'network-wireless-connected-symbolic',
-            "acquiring": 'network-wireless-acquiring-symbolic',
-            "offline": 'network-wireless-offline-symbolic',
-            "error": 'network-error-symbolic'
+            'ok': 'network-wireless-connected-symbolic',
+            'acquiring': 'network-wireless-acquiring-symbolic',
+            'offline': 'network-wireless-offline-symbolic',
+            'error': 'network-error-symbolic'
         };
 
         this.show();
@@ -509,10 +509,10 @@ const BluetoothService = new Lang.Class({
         this.parent('bluetooth', proxy, indicator);
         this._settings.label.text = _("Bluetooth Settings");
         this._icons = {
-            "ok": 'bluetooth-active-symbolic',
-            "acquiring": 'bluetooth-active-symbolic',
-            "offline": 'bluetooth-disabled-symbolic',
-            "error": 'network-error-symbolic'
+            'ok': 'bluetooth-active-symbolic',
+            'acquiring': 'bluetooth-active-symbolic',
+            'offline': 'bluetooth-disabled-symbolic',
+            'error': 'network-error-symbolic'
         };
 
         this.show();
@@ -527,10 +527,10 @@ const CellularService = new Lang.Class({
         this.parent('cellular', proxy, indicator);
         this._settings.label.text = _("Cellular Settings");
         this._icons = {
-            "ok": 'network-cellular-connected-symbolic',
-            "acquiring": 'network-cellular-acquiring-symbolic',
-            "offline": 'network-cellular-offline-symbolic',
-            "error": 'network-error-symbolic'
+            'ok': 'network-cellular-connected-symbolic',
+            'acquiring': 'network-cellular-acquiring-symbolic',
+            'offline': 'network-cellular-offline-symbolic',
+            'error': 'network-error-symbolic'
         };
 
         this.show();
@@ -549,10 +549,10 @@ const VPNService = new Lang.Class({
         this.parent('vpn', proxy, indicator);
         this._settings.label.text = _("VPN Settings");
         this._icons = {
-            "ok": 'network-vpn-symbolic',
-            "acquiring": 'network-vpn-acquiring-symbolic',
-            "offline": 'network-offline-symbolic',
-            "error": 'network-error-symbolic',
+            'ok': 'network-vpn-symbolic',
+            'acquiring': 'network-vpn-acquiring-symbolic',
+            'offline': 'network-offline-symbolic',
+            'error': 'network-error-symbolic',
         };
 
         this.show();
