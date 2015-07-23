@@ -205,7 +205,7 @@ const WirelessTechnology = new Lang.Class({
 
     addService: function(id, service) {
         this.parent(id, service);
-        service.menu.addMenuItem(this._createConnectionMenuItem());
+        service.menu.addMenuItem(this._createConnectionMenuItem(), 1);
 	let state = this._services[id].state;
         if(state != 'idle') {
             this._services[id].show();
