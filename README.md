@@ -16,7 +16,7 @@ Installation
 
 	./autogen.sh
 	make
-	sudo make install
+	make install
 
 License
 -------
