@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-10 13:08+0300\n"
+"POT-Creation-Date: 2015-07-23 10:35+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,82 +17,95 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/connmanAgent.js:90
+#: src/connmanAgent.js:105
 msgid "Authentication required by network connection"
 msgstr ""
 
-#: src/connmanAgent.js:116 src/service.js:200 src/service.js:257
+#: src/connmanAgent.js:145 src/service.js:176 src/service.js:281
+#: src/service.js:342
 msgid "Connect"
 msgstr ""
 
-#: src/connmanAgent.js:120
+#: src/connmanAgent.js:150 src/service.js:170
 msgid "Cancel"
 msgstr ""
 
-#: src/service.js:84
+#: src/service.js:126
 msgid "Connect to..."
 msgstr ""
 
-#: src/service.js:221
+#: src/service.js:302
 msgid "Connection"
 msgstr ""
 
-#: src/service.js:222
+#: src/service.js:304
 msgid "Settings"
 msgstr ""
 
-#: src/service.js:259
+#: src/service.js:344
 msgid "Reconnect"
 msgstr ""
 
-#: src/service.js:261
+#: src/service.js:346
 msgid "Disconnect"
 msgstr ""
 
-#: src/service.js:284 src/technology.js:137
+#: src/service.js:368 src/technology.js:164
 msgid "Idle"
 msgstr ""
 
-#: src/service.js:286
+#: src/service.js:369
 msgid "Failure"
 msgstr ""
 
-#: src/service.js:288
+#: src/service.js:370
 msgid "Association"
 msgstr ""
 
-#: src/service.js:290
+#: src/service.js:371
 msgid "Configuration"
 msgstr ""
 
-#: src/service.js:292
+#: src/service.js:372
 msgid "Ready"
 msgstr ""
 
-#: src/service.js:294
+#: src/service.js:373
 msgid "Disconnected"
 msgstr ""
 
-#: src/service.js:296
+#: src/service.js:374
 msgid "Online"
 msgstr ""
 
-#: src/service.js:368 src/service.js:384 src/service.js:385
+#: src/service.js:440 src/service.js:456 src/service.js:457
 msgid "Wired"
 msgstr ""
 
-#: src/service.js:369
+#: src/service.js:441
 msgid "Wired Settings"
 msgstr ""
 
-#: src/service.js:396 src/technology.js:136
-msgid "Wireless"
-msgstr ""
-
-#: src/service.js:397
+#: src/service.js:469 src/technology.js:160
 msgid "Wireless Settings"
 msgstr ""
 
-#: src/technology.js:146
+#: src/service.js:510
+msgid "Bluetooth Settings"
+msgstr ""
+
+#: src/service.js:528
+msgid "Cellular Settings"
+msgstr ""
+
+#: src/service.js:550
+msgid "VPN Settings"
+msgstr ""
+
+#: src/technology.js:163
+msgid "Wireless"
+msgstr ""
+
+#: src/technology.js:181
 msgid "Select wireless network"
 msgstr ""
