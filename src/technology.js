@@ -233,7 +233,7 @@ const WirelessTechnology = new Lang.Class({
                 if(!this._connectedCount)
                     this._menu.actor.show();
             }
-	}
+        }
         if(this._dialog)
             this._dialog.updateService([this._services[id],
                 this._services[id]._properties['Ethernet']['Interface']]);

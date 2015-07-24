@@ -307,7 +307,7 @@ const Service = new Lang.Class({
 
         this.menu.addMenuItem(this._connectionSwitch);
         this.menu.addMenuItem(this._settings);
-        this.hide();
+        this.show();
     },
 
     openSettings: function() {
