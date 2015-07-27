@@ -1,5 +1,5 @@
 AC_PREREQ(2.63)
-AC_INIT([gnome-extension-connman],[0.9],[https://github.com/jgke/gnome-extension-connman])
+AC_INIT([gnome-extension-connman],[0.91],[https://github.com/jgke/gnome-extension-connman])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
