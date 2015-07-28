@@ -53,9 +53,8 @@ const ConnmanMenu = new Lang.Class({
 
     addTechnology: function(path, properties) {
         let type = path.split('/').pop();
-        Logger.logInfo('Adding technology ' + type);
         if(this._technologies[type])
-            return;
+            this.removeTechnology(path);
         let proxy = new ConnmanInterface.TechnologyProxy(path);
         for(let i in properties)
             properties[i] = properties[i].deep_unpack();
