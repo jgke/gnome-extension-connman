@@ -3,6 +3,8 @@ gnome-extension-connman
 
 gnome-shell extension for connman.
 
+![screenshot](https://raw.githubusercontent.com/jgke/jgke.github.io/gnome-extension-connman/screenshot.png)
+
 Dependencies
 ------------
 
