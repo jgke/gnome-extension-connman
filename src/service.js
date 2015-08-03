@@ -491,7 +491,8 @@ const WirelessService = new Lang.Class({
 
     update: function(properties) {
         this.parent(properties);
-        if(this.state == 'idle' || this.state == 'disconnect')
+        if(this.state == 'idle' || this.state == 'disconnect' ||
+                this.state == 'failure')
             this.hide();
         else
             this.show();

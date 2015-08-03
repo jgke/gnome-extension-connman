@@ -207,7 +207,7 @@ const WirelessTechnology = new Lang.Class({
         this.parent(id, service);
         service.menu.addMenuItem(this._createConnectionMenuItem(), 1);
         let state = this._services[id].state;
-        if(state != 'idle') {
+        if(state != 'idle' && state != 'disconnect' && state != 'failure') {
             this._connected[id] = true;
             this._menu.actor.hide();
             this._connectedCount++;
@@ -219,7 +219,7 @@ const WirelessTechnology = new Lang.Class({
     updateService: function(id, properties) {
         this.parent(id, properties);
         let state = this._services[id]._properties['State'];
-        if(state != 'idle') {
+        if(state != 'idle' && state != 'disconnect' && state != 'failure') {
             if(!this._connected[id]) {
                 this._connected[id] = true;
                 this._connectedCount++;
@@ -241,7 +241,7 @@ const WirelessTechnology = new Lang.Class({
 
     removeService: function(id) {
         let state = this._services[id]._properties['State'];
-        if(state != 'idle') {
+        if(state != 'idle' && state != 'disconnect' && state != 'failure') {
             this._services[id].hide();
             if(this._connected[id]) {
                 this._connected[id] = false;
