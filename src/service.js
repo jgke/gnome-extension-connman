@@ -345,6 +345,11 @@ const Service = new Lang.Class({
             this._connectionSwitch.label.text = _("Disconnect");
         if(this._properties['Name'])
             this.label.text = this._properties['Name'];
+        if(this.state == 'idle' || this.state == 'disconnect' ||
+                this.state == 'failure')
+            this._indicator.hide();
+        else
+            this._indicator.show();
         this.status.text = this.getStateString();
         this.setIcon(this.getStatusIcon());
     },
