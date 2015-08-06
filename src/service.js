@@ -291,7 +291,7 @@ const Service = new Lang.Class({
         this.state = 'idle'
 
         this._icons = {
-            'ok': 'network-transmit-symbolic',
+            'ok': 'network-transmit-receive-symbolic',
             'acquiring': 'network-no-route-symbolic',
             'offline': 'network-offline-symbolic',
             'error': 'network-error-symbolic'
