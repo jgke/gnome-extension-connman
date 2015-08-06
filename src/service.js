@@ -580,5 +580,5 @@ function createService(type, proxy, indicator) {
     };
     if(services[type])
         return new services[type](proxy, indicator);
-    throw 'tried to create unknown service type ' + type;
+    return new Service('other', proxy, indicator);
 }
