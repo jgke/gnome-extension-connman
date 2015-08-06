@@ -310,5 +310,5 @@ function createTechnology(type, properties, proxy, manager) {
     };
     if(technologies[type])
         return new technologies[type](properties, proxy, manager);
-    throw 'tried to add unknown technology type ' + type;
+    return new Technology(properties, 'other', proxy);
 }
