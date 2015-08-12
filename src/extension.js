@@ -28,15 +28,16 @@ let applet;
 let menu = Main.panel.statusArea.aggregateMenu;
 
 function init() {
-    applet = new ConnmanApplet.ConnmanApplet();
 }
 
 function enable() {
+    applet = new ConnmanApplet.ConnmanApplet();
+    // XXX: Magic numbers
     menu.menu.addMenuItem(applet.menu, 3);
-    menu._indicators.insert_child_at_index(applet.indicators, 2);
-    applet.enable()
+    menu._indicators.insert_child_at_index(applet.indicators, 3);
 }
 
 function disable() {
-    applet.disable()
+    if(applet)
+        applet.destroy();
 }

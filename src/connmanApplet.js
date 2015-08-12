@@ -159,6 +159,14 @@ const ConnmanApplet = new Lang.Class({
         this._menu = new ConnmanMenu();
         this.menu.addMenuItem(this._menu);
         this.menu.actor.show();
+
+        Logger.logInfo('Enabling Connman applet');
+        if(!this._watch) {
+            this._watch = Gio.DBus.system.watch_name(ConnmanInterface.BUS_NAME,
+                Gio.BusNameWatcherFlags.NONE,
+                this._connectEvent.bind(this),
+                this._disconnectEvent.bind(this));
+        }
     },
 
     _updateService: function(path, properties) {
@@ -263,6 +271,11 @@ const ConnmanApplet = new Lang.Class({
                 }
             }
         }
+        try {
+            this._manager.UnregisterAgentRemote(ConnmanInterface.AGENT_PATH);
+            this._vpnManager.UnregisterAgentRemote(ConnmanInterface.VPN_AGENT_PATH);
+        } catch(error) {
+        }
         this._manager = null;
         this._vpnManager = null;
         if(this._agent)
@@ -273,22 +286,12 @@ const ConnmanApplet = new Lang.Class({
         this.vpnAgent = null;
     },
 
-    enable: function() {
-        Logger.logInfo('Enabling Connman applet');
-        if(!this._watch) {
-            this._watch = Gio.DBus.system.watch_name(ConnmanInterface.BUS_NAME,
-                Gio.BusNameWatcherFlags.NONE,
-                this._connectEvent.bind(this),
-                this._disconnectEvent.bind(this));
-        }
-    },
-
-    disable: function() {
+    destroy: function() {
         Logger.logInfo('Disabling Connman applet');
         this._disconnectEvent();
         this._menu.clear();
-        this.indicators.hide();
-        this.menu.actor.hide();
+        this.indicators.destroy();
+        this.menu.actor.destroy();
         if(this._watch)
             Gio.DBus.system.unwatch_name(this._watch);
         if(this._agent)
