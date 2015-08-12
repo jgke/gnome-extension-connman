@@ -15,7 +15,8 @@ AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE",
                    [The prefix for our gettext translation domains.])
 
-AC_DEFINE_UNQUOTED(LOCALEDIR, "${prefix}/share/locale", [Directory for the localization files])
+UUID=[gnome-extension-connman@jaakko.hannikainen.intel.com]
+AC_SUBST(UUID)
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
@@ -28,3 +29,7 @@ AC_CONFIG_FILES([
   src/Makefile
 ])
 AC_OUTPUT
+
+dnl XXX: Is there an other way to set the locale directory?
+extensiontopdir=${datadir}/gnome-shell/extensions/${UUID}
+${SED} -i -e "s%itlocaledir = .*%itlocaledir = ${extensiontopdir}/locale%g" po/Makefile

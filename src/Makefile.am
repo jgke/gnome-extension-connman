@@ -1,9 +1,6 @@
 # Change these to modify how installation is performed
-extensionurl = git://github.com/jgke/gnome-extension-connman.git
-topextensiondir = $(datadir)/gnome-shell/extensions
-extensiondir = $(topextensiondir)/$(uuid)
-uuid = gnome-extension-connman@jaakko.hannikainen.intel.com
-
+uuid = @UUID@
+extensiondir = $(datadir)/gnome-shell/extensions/$(uuid)
 
 dist_extension_DATA = metadata.json Makefile connmanAgent.js \
 		      connmanInterface.js Makefile.am service.js technology.js \
