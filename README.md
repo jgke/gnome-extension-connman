@@ -9,7 +9,7 @@ Dependencies
 ------------
 
  * gnome-autogen, available from gnome-common
- * [connman-gtk](https://github.com/jgke/connman-gtk)
+ * [connman-gtk](https://github.com/connectivity/connman-gtk)
 
 If building from git, you also need
 
