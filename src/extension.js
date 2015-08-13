@@ -22,7 +22,7 @@ const Main = imports.ui.main;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
-const ConnmanApplet = Ext.imports.connmanApplet;
+const Applet = Ext.imports.applet;
 
 let applet;
 let menu = Main.panel.statusArea.aggregateMenu;
@@ -31,7 +31,7 @@ function init() {
 }
 
 function enable() {
-    applet = new ConnmanApplet.ConnmanApplet();
+    applet = new Applet.Applet();
     // XXX: Magic numbers
     menu.menu.addMenuItem(applet.menu, 3);
     menu._indicators.insert_child_at_index(applet.indicators, 3);

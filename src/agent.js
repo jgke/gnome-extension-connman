@@ -28,7 +28,7 @@ const ShellEntry = imports.ui.shellEntry;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
-const ConnmanInterface = Ext.imports.connmanInterface;
+const Interface = Ext.imports.interface;
 const Logger = Ext.imports.logger;
 
 const Gettext = imports.gettext.domain('gnome-extension-connman');
@@ -235,7 +235,7 @@ const Agent = new Lang.Class({
     Extends: AbstractAgent,
 
     _init: function() {
-        this._dbusImpl = ConnmanInterface.addAgentImplementation(this);
+        this._dbusImpl = Interface.addAgentImplementation(this);
         this._canceledError = 'net.connman.Agent.Error.Canceled';
         this._retryError = 'net.connman.Agent.Error.Retry';
     },
@@ -246,7 +246,7 @@ const Agent = new Lang.Class({
 
     destroy: function() {
         this.parent();
-        ConnmanInterface.removeAgentImplementation(this._dbusImpl);
+        Interface.removeAgentImplementation(this._dbusImpl);
     },
 });
 
@@ -255,13 +255,13 @@ const VPNAgent = new Lang.Class({
     Extends: AbstractAgent,
 
     _init: function() {
-        this._dbusImpl = ConnmanInterface.addVPNAgentImplementation(this);
+        this._dbusImpl = Interface.addVPNAgentImplementation(this);
         this._canceledError = 'net.connman.vpn.Agent.Error.Canceled';
         this._retryError = 'net.connman.vpn.Agent.Error.Retry';
     },
 
     destroy: function() {
         this.parent();
-        ConnmanInterface.removeVPNAgentImplementation(this._dbusImpl);
+        Interface.removeVPNAgentImplementation(this._dbusImpl);
     },
 });

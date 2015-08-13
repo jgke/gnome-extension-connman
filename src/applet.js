@@ -26,15 +26,15 @@ const PopupMenu = imports.ui.popupMenu;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
-const ConnmanAgent = Ext.imports.connmanAgent;
-const ConnmanInterface = Ext.imports.connmanInterface;
+const Agent = Ext.imports.agent;
+const Interface = Ext.imports.interface;
 const Logger = Ext.imports.logger;
 const Service = Ext.imports.service;
 const Technology = Ext.imports.technology;
 
 /* menu with technologies and services */
-const ConnmanMenu = new Lang.Class({
-    Name: 'ConnmanMenu',
+const Menu = new Lang.Class({
+    Name: 'Menu',
     Extends: PopupMenu.PopupMenuSection,
 
     _init: function() {
@@ -55,7 +55,7 @@ const ConnmanMenu = new Lang.Class({
         let type = path.split('/').pop();
         if(this._technologies[type])
             this.removeTechnology(path);
-        let proxy = new ConnmanInterface.TechnologyProxy(path);
+        let proxy = new Interface.TechnologyProxy(path);
         for(let i in properties)
             properties[i] = properties[i].deep_unpack();
         try {
@@ -105,7 +105,7 @@ const ConnmanMenu = new Lang.Class({
             type = path.split('/').pop().split('_')[0];
         this._serviceTypes[path] = type;
 
-        let proxy = new ConnmanInterface.ServiceProxy(path);
+        let proxy = new Interface.ServiceProxy(path);
         let service = Service.createService(type, proxy, indicator);
         service.update(properties);
         this._technologies[type].addService(path, service);
@@ -149,20 +149,20 @@ const ConnmanMenu = new Lang.Class({
 });
 
 /* main applet class handling everything */
-const ConnmanApplet = new Lang.Class({
-    Name: 'ConnmanApplet',
+const Applet = new Lang.Class({
+    Name: 'Applet',
     Extends: PanelMenu.SystemIndicator,
 
     _init: function() {
         this.parent();
 
-        this._menu = new ConnmanMenu();
+        this._menu = new Menu();
         this.menu.addMenuItem(this._menu);
         this.menu.actor.show();
 
         Logger.logInfo('Enabling Connman applet');
         if(!this._watch) {
-            this._watch = Gio.DBus.system.watch_name(ConnmanInterface.BUS_NAME,
+            this._watch = Gio.DBus.system.watch_name(Interface.BUS_NAME,
                 Gio.BusNameWatcherFlags.NONE,
                 this._connectEvent.bind(this),
                 this._disconnectEvent.bind(this));
@@ -212,14 +212,14 @@ const ConnmanApplet = new Lang.Class({
         Logger.logInfo('Connected to Connman');
         this.menu.actor.show();
 
-        this._manager = new ConnmanInterface.ManagerProxy();
+        this._manager = new Interface.ManagerProxy();
         this._menu._manager = this._manager;
-        this._vpnManager = new ConnmanInterface.VPNManagerProxy();
-        this._agent = new ConnmanAgent.Agent();
-        this._vpnAgent = new ConnmanAgent.VPNAgent();
+        this._vpnManager = new Interface.VPNManagerProxy();
+        this._agent = new Agent.Agent();
+        this._vpnAgent = new Agent.VPNAgent();
 
-        this._manager.RegisterAgentRemote(ConnmanInterface.AGENT_PATH);
-        this._vpnManager.RegisterAgentRemote(ConnmanInterface.VPN_AGENT_PATH);
+        this._manager.RegisterAgentRemote(Interface.AGENT_PATH);
+        this._vpnManager.RegisterAgentRemote(Interface.VPN_AGENT_PATH);
         this._asig = this._manager.connectSignal('TechnologyAdded',
             function(proxy, sender, [path, properties]) {
                 try {
@@ -272,8 +272,8 @@ const ConnmanApplet = new Lang.Class({
             }
         }
         try {
-            this._manager.UnregisterAgentRemote(ConnmanInterface.AGENT_PATH);
-            this._vpnManager.UnregisterAgentRemote(ConnmanInterface.VPN_AGENT_PATH);
+            this._manager.UnregisterAgentRemote(Interface.AGENT_PATH);
+            this._vpnManager.UnregisterAgentRemote(Interface.VPN_AGENT_PATH);
         } catch(error) {
         }
         this._manager = null;

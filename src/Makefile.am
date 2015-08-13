@@ -2,9 +2,9 @@
 uuid = @UUID@
 extensiondir = $(datadir)/gnome-shell/extensions/$(uuid)
 
-dist_extension_DATA = metadata.json Makefile connmanAgent.js \
-		      connmanInterface.js Makefile.am service.js technology.js \
-		      connmanApplet.js extension.js logger.js stylesheet.css
+dist_extension_DATA = metadata.json Makefile agent.js \
+		      interface.js Makefile.am service.js technology.js \
+		      applet.js extension.js logger.js stylesheet.css
 nodist_extension_DATA = metadata.json $(EXTRA_EXTENSION)
 
 EXTRA_DIST = metadata.json.in
