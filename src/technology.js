@@ -63,6 +63,8 @@ const Technology = new Lang.Class({
     },
 
     addService: function(id, service) {
+        if(this._services[id])
+            this._services[id].destroy();
         this._services[id] = service;
         service.id = id;
         this.addMenuItem(service);
