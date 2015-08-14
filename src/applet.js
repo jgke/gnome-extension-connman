@@ -51,6 +51,17 @@ const Menu = new Lang.Class({
         this.actor.show();
     },
 
+    _addSorted: function(technology) {
+        let items = this._getMenuItems();
+        for(let i = 0; i < items.length; i++) {
+            if(items[i].getValue() < technology.getValue())
+                continue;
+            this.addMenuItem(technology, i);
+            return;
+        }
+        this.addMenuItem(technology);
+    },
+
     addTechnology: function(path, properties) {
         let type = properties.Type.deep_unpack();
         if(this._technologies[type])
@@ -65,7 +76,7 @@ const Menu = new Lang.Class({
             Logger.logException(error, 'Failed to add technology');
             return;
         }
-        this.addMenuItem(this._technologies[type]);
+        this._addSorted(this._technologies[type]);
     },
 
     /* FIXME: for some reason destroying an item from the menu

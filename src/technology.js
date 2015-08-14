@@ -53,6 +53,12 @@ const Technology = new Lang.Class({
             this.hide();
     },
 
+    getValue: function() {
+        let values = ["ethernet", "wifi", "bluetooth",
+                      "p2p", "cellular", "vpn", "other"];
+        return values.indexOf(this._type);
+    },
+
     propertyChanged: function(name, value) {
         if(name == 'Powered') {
             if(value)
