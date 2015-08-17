@@ -71,11 +71,15 @@ const DialogServiceItem = new Lang.Class({
         });
         this._icon.icon_name = icon;
         this._securityIcon.icon_name = securityIcon;
-        if(service._properties['Favorite'])
-            this._icons.add_actor(new St.Icon({
+        if(service._properties['Favorite']) {
+            let icon = new St.Icon({
                 style_class: 'cm-dialog-icon',
                 icon_name: 'object-select-symbolic'
-            }));
+            });
+            icon.add_style_pseudo_class('favourite');
+            this.actor.add_style_pseudo_class('favourite');
+            this.actor.add(icon);
+        }
         this._icons.add_actor(this._securityIcon);
         this._icons.add_actor(this._icon);
         this.actor.add(this._label, {

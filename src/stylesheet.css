@@ -65,8 +65,10 @@
 .cm-dialog-item {
   font-size: 110%;
   border-bottom: 1px solid #1c1f1f;
-  padding: 12px 12px 12px 35px;
-  spacing: 20px; }
+  padding: 12px 12px 12px 36px; }
+
+.cm-dialog-item:favourite {
+  padding: 12px 12px 12px 0px; }
 
 .cm-dialog-item:selected {
   background-color: #215d9c;
@@ -79,7 +81,11 @@
   spacing: .5em; }
 
 .cm-dialog-icon {
-  icon-size: 16px; }
+  icon-size: 16px;
+  padding-left: 5px; }
+
+.cm-dialog-icon:favourite {
+  padding: 0px 10px 0px 10px;}
 
 /* Network Agent Dialog */
 .cm-network-dialog-secret-table {
