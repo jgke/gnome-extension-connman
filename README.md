@@ -23,6 +23,8 @@ Installation
 	make
 	make install
 
+Use 'gnome-tweak-tool' to enable the extension.
+
 License
 -------
 
