@@ -3,6 +3,6 @@
     "name": "ConnMan Extension",
     "description": "Gnome-Shell ConnMan extension",
     "shell-version": ["3.14", "3.16"],
-    "url": "https://github.com/connectivity/gnome-extension-connman",
+    "url": "https://github.com/jgke/gnome-extension-connman",
     "localedir": "@LOCALEDIR@"
 }
