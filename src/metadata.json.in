@@ -2,7 +2,7 @@
     "uuid": "@uuid@",
     "name": "ConnMan Extension",
     "description": "Gnome-Shell ConnMan extension",
-    "shell-version": ["3.14", "3.16"],
+    "shell-version": ["3.14", "3.16", "3.18"],
     "url": "https://github.com/jgke/gnome-extension-connman",
     "localedir": "@LOCALEDIR@"
 }

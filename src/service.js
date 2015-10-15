@@ -307,7 +307,10 @@ const Service = new Lang.Class({
         this._settings = new PopupMenu.PopupMenuItem(_("Settings"));
         this._settings.connect('activate', this.openSettings.bind(this));
 
-        this.status.text = this.state;
+        if(this.status)
+            this.status.text = this.state;
+        else
+            this.label.text = this.state;
 
         this.menu.addMenuItem(this._connectionSwitch);
         this.menu.addMenuItem(this._settings);
@@ -354,7 +357,10 @@ const Service = new Lang.Class({
             this._indicator.hide();
         else
             this._indicator.show();
-        this.status.text = this.getStateString();
+        if(this.status)
+            this.status.text = this.getStateString();
+        else
+            this.label.text += " - " + this.getStateString();
         this.setIcon(this.getStatusIcon());
     },
 
@@ -459,7 +465,7 @@ const EthernetService = new Lang.Class({
 
     update: function(properties) {
         this.parent(properties);
-        if(this._properties['Name'] == 'Wired') {
+        if(this.status && this._properties['Name'] == 'Wired') {
             /* ensure translated name */
             this._properties['Name'] = _("Wired");
             this.label.text = _("Wired");

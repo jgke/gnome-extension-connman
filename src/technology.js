@@ -168,8 +168,12 @@ const WirelessTechnology = new Lang.Class({
         this._settings = new PopupMenu.PopupMenuItem(_("Wireless Settings"));
         this._settings.connect('activate', this.openSettings.bind(this));
 
-        this._menu.label.text = _("Wireless");
-        this._menu.status.text = _("Idle");
+       if(this._menu.status) {
+            this._menu.label.text = _("Wireless");
+            this._menu.status.text = _("Idle");
+        } else {
+            this._menu.label.text = _("Wireless") + " - " + _("Idle");
+        }
         this._menu.icon.icon_name = 'network-wireless-signal-none-symbolic';
         this._manager = manager;
         this.addMenuItem(this._menu);
