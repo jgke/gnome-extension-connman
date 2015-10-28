@@ -12,6 +12,10 @@ zip: src po
 	mkdir -p $(builddir)/_zip_build; \
 	$(MAKE) install DESTDIR="$(abs_builddir)/_zip_build"; \
 	(cd "$(builddir)/_zip_build$(datadir)/gnome-shell/extensions/@UUID@/"; \
+	 rm -rf Makefile Makefile.am; \
+	 zip -qr "$(abs_builddir)/@UUID@.shell-extension.zip" .; \
+	 cd ../../..; \
+	 rm -rf gnome-shell; \
 	 zip -qr "$(abs_builddir)/@UUID@.shell-extension.zip" .; \
 	); \
 	rm -rf $(builddir)/_zip_build
