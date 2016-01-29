@@ -1,0 +1,112 @@
+# Spanish translation for gnome-extension-connman.
+# Copyright (C) 2016 Adolfo Jayme Barrientos
+# This file is distributed under the same license as the PACKAGE package.
+# Adolfo Jayme Barrientos <fito@ubuntu.com>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-01-19 17:05-0600\n"
+"PO-Revision-Date: 2016-01-19 17:14-0600\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.6\n"
+"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: es\n"
+
+#: src/connmanAgent.js:105
+msgid "Authentication required by network connection"
+msgstr "Necesita autenticarse para conectar con la red"
+
+#: src/connmanAgent.js:145 src/service.js:176 src/service.js:281
+#: src/service.js:342
+msgid "Connect"
+msgstr "Conectar"
+
+#: src/connmanAgent.js:150 src/service.js:170
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: src/service.js:126
+msgid "Connect to..."
+msgstr "Conectar con…"
+
+#: src/service.js:302
+msgid "Connection"
+msgstr "Conexión"
+
+#: src/service.js:304
+msgid "Settings"
+msgstr "Configuración"
+
+#: src/service.js:344
+msgid "Reconnect"
+msgstr "Conectar otra vez"
+
+#: src/service.js:346
+msgid "Disconnect"
+msgstr "Desconectar"
+
+#: src/service.js:368 src/technology.js:164
+msgid "Idle"
+msgstr "Inactivo"
+
+#: src/service.js:369
+msgid "Failure"
+msgstr "Fallo"
+
+#: src/service.js:370
+msgid "Association"
+msgstr "Asociación"
+
+#: src/service.js:371
+msgid "Configuration"
+msgstr "Configuración"
+
+#: src/service.js:372
+msgid "Ready"
+msgstr "Preparado"
+
+#: src/service.js:373
+msgid "Disconnected"
+msgstr "Desconectado"
+
+#: src/service.js:374
+msgid "Online"
+msgstr "En línea"
+
+#: src/service.js:440 src/service.js:456 src/service.js:457
+msgid "Wired"
+msgstr "Cableada"
+
+#: src/service.js:441
+msgid "Wired Settings"
+msgstr "Configuración de red cableada"
+
+#: src/service.js:469 src/technology.js:160
+msgid "Wireless Settings"
+msgstr "Configuración de red inalámbrica"
+
+#: src/service.js:510
+msgid "Bluetooth Settings"
+msgstr "Configuración de Bluetooth"
+
+#: src/service.js:528
+msgid "Cellular Settings"
+msgstr "Configuración de red móvil"
+
+#: src/service.js:550
+msgid "VPN Settings"
+msgstr "Configuración de VPN"
+
+#: src/technology.js:163
+msgid "Wireless"
+msgstr "Inalámbrica"
+
+#: src/technology.js:181
+msgid "Select wireless network"
+msgstr "Seleccione una red inalámbrica"
