@@ -32,6 +32,11 @@ const ModalDialog = imports.ui.modalDialog;
 const Gettext = imports.gettext.domain('gnome-extension-connman');
 const _ = Gettext.gettext;
 
+const ExtensionUtils = imports.misc.extensionUtils;
+const Ext = ExtensionUtils.getCurrentExtension();
+const Version = Ext.imports.version;
+const version = Version.version();
+
 const DialogServiceItem = new Lang.Class({
     Name: 'DialogServiceItem',
 
@@ -307,7 +312,7 @@ const Service = new Lang.Class({
         this._settings = new PopupMenu.PopupMenuItem(_("Settings"));
         this._settings.connect('activate', this.openSettings.bind(this));
 
-        if(this.status)
+        if(version < 318)
             this.status.text = this.state;
         else
             this.label.text = this.state;
@@ -357,7 +362,7 @@ const Service = new Lang.Class({
             this._indicator.hide();
         else
             this._indicator.show();
-        if(this.status)
+        if(version < 318)
             this.status.text = this.getStateString();
         else
             this.label.text += " - " + this.getStateString();
@@ -465,7 +470,7 @@ const EthernetService = new Lang.Class({
 
     update: function(properties) {
         this.parent(properties);
-        if(this.status && this._properties['Name'] == 'Wired') {
+        if(version < 318 && this._properties['Name'] == 'Wired') {
             /* ensure translated name */
             this._properties['Name'] = _("Wired");
             this.label.text = _("Wired");

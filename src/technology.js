@@ -29,6 +29,9 @@ const Logger = Ext.imports.logger;
 const Gettext = imports.gettext.domain('gnome-extension-connman');
 const _ = Gettext.gettext;
 
+const Version = Ext.imports.version;
+const version = Version.version();
+
 const Technology = new Lang.Class({
     Name: 'Technology',
     Extends: PopupMenu.PopupMenuSection,
@@ -168,7 +171,7 @@ const WirelessTechnology = new Lang.Class({
         this._settings = new PopupMenu.PopupMenuItem(_("Wireless Settings"));
         this._settings.connect('activate', this.openSettings.bind(this));
 
-       if(this._menu.status) {
+       if(version < 318) {
             this._menu.label.text = _("Wireless");
             this._menu.status.text = _("Idle");
         } else {
