@@ -1,7 +1,8 @@
-src/connmanAgent.js
-src/connmanApplet.js
-src/connmanInterface.js
+src/agent.js
+src/applet.js
 src/extension.js
+src/interface.js
 src/logger.js
 src/service.js
 src/technology.js
+src/version.js

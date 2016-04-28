@@ -1,14 +1,14 @@
 # Finnish translations for gnome-extension-connman package
 # Suomenkielinen käännös gnome-extension-connman-paketille.
-# Copyright (C) 2015 THE gnome-extension-connman'S COPYRIGHT HOLDER
+# Copyright (C) 2015,2016 THE gnome-extension-connman'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the gnome-extension-connman package.
-# Jaakko Hannikainen <jaakko.hannikainen@intel.com>, 2015.
+# Jaakko Hannikainen <jaakko.hannikainen@intel.com>, 2015,2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-extension-connman 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-23 10:35+0300\n"
+"POT-Creation-Date: 2016-04-28 10:58+0300\n"
 "PO-Revision-Date: 2015-06-04 14:18+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -18,95 +18,118 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/connmanAgent.js:105
+#: src/agent.js:105
 msgid "Authentication required by network connection"
 msgstr "Verkkoyhteys vaatii tunnistautumista"
 
-#: src/connmanAgent.js:145 src/service.js:176 src/service.js:281
-#: src/service.js:342
+#: src/agent.js:145 src/service.js:185 src/service.js:290 src/service.js:354
 msgid "Connect"
 msgstr "Yhdistä"
 
-#: src/connmanAgent.js:150 src/service.js:170
+#: src/agent.js:150 src/service.js:179
 msgid "Cancel"
 msgstr "Peruuta"
 
-#: src/service.js:126
+#: src/service.js:135
 msgid "Connect to..."
 msgstr "Yhdistä..."
 
-#: src/service.js:302
-msgid "Connection"
-msgstr "Yhteys"
-
-#: src/service.js:304
+#: src/service.js:313
 msgid "Settings"
 msgstr "Asetukset"
 
-#: src/service.js:344
+#: src/service.js:356
 msgid "Reconnect"
 msgstr "Uudelleenyhdistä"
 
-#: src/service.js:346
+#: src/service.js:358
 msgid "Disconnect"
 msgstr "Katkaise yhteys"
 
-#: src/service.js:368 src/technology.js:164
+#: src/service.js:390 src/technology.js:176 src/technology.js:178
 msgid "Idle"
 msgstr "Ei yhdistetty"
 
-#: src/service.js:369
+#: src/service.js:391
 msgid "Failure"
 msgstr "Virhe"
 
-#: src/service.js:370
+#: src/service.js:392
 msgid "Association"
 msgstr "Yhdistää"
 
-#: src/service.js:371
+#: src/service.js:393
 msgid "Configuration"
 msgstr "Asettaa asetuksia"
 
-#: src/service.js:372
+#: src/service.js:394
 msgid "Ready"
 msgstr "Valmis"
 
-#: src/service.js:373
+#: src/service.js:395
 msgid "Disconnected"
 msgstr "Yhteys katkaistu"
 
-#: src/service.js:374
+#: src/service.js:396
 msgid "Online"
 msgstr "Verkossa"
 
-#: src/service.js:440 src/service.js:456 src/service.js:457
+#: src/service.js:462 src/service.js:479 src/service.js:480
 msgid "Wired"
 msgstr "Kiinteä"
 
-#: src/service.js:441
+#: src/service.js:464
 msgid "Wired Settings"
 msgstr "Kiinteän verkon asetukset"
 
-#: src/service.js:469 src/technology.js:160
+#: src/service.js:491
+msgid "Hidden"
+msgstr "Piilotettu"
+
+#: src/service.js:492 src/technology.js:171
 msgid "Wireless Settings"
 msgstr "Langattoman verkon asetukset"
 
-#: src/service.js:510
+#: src/service.js:530
+msgid "Hidden ieee8021x secured network"
+msgstr "Piilotettu ieee8021x-suojattu verkko"
+
+#: src/service.js:531
+msgid "Hidden WPA secured network"
+msgstr "Piilotettu WPA-suojattu verkko"
+
+#: src/service.js:532
+msgid "Hidden WEP secured network"
+msgstr "Piilotettu WEP-suojattu verkko"
+
+#: src/service.js:533
+msgid "Hidden WPS secured network"
+msgstr "Piilotettu WPS-suojattu verkko"
+
+#: src/service.js:534
+msgid "Hidden unsecured network"
+msgstr "Piilotettu suojaamaton verkko"
+
+#: src/service.js:536
+msgid "Hidden network"
+msgstr "Piilotettu verkko"
+
+#: src/service.js:547
 msgid "Bluetooth Settings"
 msgstr "Bluetooth-asetukset"
 
-#: src/service.js:528
+#: src/service.js:565
 msgid "Cellular Settings"
 msgstr "Mobiiliyhteyden asetukset"
 
-#: src/service.js:550
+#: src/service.js:587
 msgid "VPN Settings"
 msgstr "VPN-asetukset"
 
-#: src/technology.js:163
+#: src/technology.js:175 src/technology.js:178
 msgid "Wireless"
 msgstr "Langaton"
 
-#: src/technology.js:181
+#: src/technology.js:196
 msgid "Select wireless network"
 msgstr "Valitse langaton verkko"
