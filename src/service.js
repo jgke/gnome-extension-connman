@@ -298,6 +298,7 @@ const Service = new Lang.Class({
             }.bind(this));
 
         this.state = 'idle'
+        this.hidden = true;
 
         this._icons = {
             'ok': 'network-transmit-receive-symbolic',
@@ -355,8 +356,10 @@ const Service = new Lang.Class({
             this._connectionSwitch.label.text = _("Reconnect");
         else
             this._connectionSwitch.label.text = _("Disconnect");
-        if(this._properties['Name'])
+        if(this._properties['Name']) {
             this.name = this._properties['Name'];
+            this.hidden = false;
+        }
         if(this.state == 'idle' || this.state == 'disconnect' ||
                 this.state == 'failure')
             this._indicator.hide();
@@ -512,11 +515,26 @@ const WirelessService = new Lang.Class({
 
     update: function(properties) {
         this.parent(properties);
+
         if(this.state == 'idle' || this.state == 'disconnect' ||
                 this.state == 'failure')
             this.hide();
         else
             this.show();
+
+        if(this.hidden) {
+                let security = this._properties['Security'][0];
+                if(!security)
+                        security = 'none';
+                let names = {
+                        ieee8021x: _("Hidden ieee8021x secured network"),
+                        psk: _("Hidden WPA secured network"),
+                        wep: _("Hidden WEP secured network"),
+                        wps: _("Hidden WPS secured network"),
+                        none: _("Hidden unsecured network")
+                };
+                this.name = names[security] || _("Hidden network");
+        }
     }
 });
 
