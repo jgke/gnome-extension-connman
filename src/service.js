@@ -41,7 +41,7 @@ const DialogServiceItem = new Lang.Class({
     Name: 'DialogServiceItem',
 
     _init: function(service, callback) {
-        let name = service.label.text;
+        let name = service.name || service.label.text;
         if(!name)
             return;
         let icon = service.getIcon();
@@ -263,7 +263,7 @@ const ServiceChooser = new Lang.Class({
         if(!this._services[service[0].id])
             this.addService(service);
         else
-            this._services[service[0].id]._label.text = service[0].label.text;
+            this._services[service[0].id]._label.text = service[0].name || service[0].label.text;
     },
 
     removeService: function(id) {
@@ -356,7 +356,7 @@ const Service = new Lang.Class({
         else
             this._connectionSwitch.label.text = _("Disconnect");
         if(this._properties['Name'])
-            this.label.text = this._properties['Name'];
+            this.name = this._properties['Name'];
         if(this.state == 'idle' || this.state == 'disconnect' ||
                 this.state == 'failure')
             this._indicator.hide();
@@ -365,7 +365,7 @@ const Service = new Lang.Class({
         if(version < 318)
             this.status.text = this.getStateString();
         else
-            this.label.text += " - " + this.getStateString();
+            this.label.text = this.name + " - " + this.getStateString();
         this.setIcon(this.getStatusIcon());
     },
 
@@ -456,7 +456,8 @@ const EthernetService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('ethernet', proxy, indicator);
-        this.label.text = _("Wired");
+        this.name = _("Wired");
+        this.label.text = this.name;
         this._settings.label.text = _("Wired Settings");
         this._icons = {
             'ok': 'network-wired-symbolic',
@@ -484,7 +485,7 @@ const WirelessService = new Lang.Class({
 
     _init: function(proxy, indicator) {
         this.parent('wifi', proxy, indicator);
-        this.label.text = ''
+        this.name = _("Hidden");
         this._settings.label.text = _("Wireless Settings");
         this._icons = {
             'ok': 'network-wireless-connected-symbolic',
