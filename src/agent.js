@@ -190,13 +190,13 @@ const AbstractAgent = new Lang.Class({
 
     RequestInputAsync: function([service, fields], invocation) {
         Logger.logDebug('Requested password');
-        let fields = Object.keys(fields)
+        let __fields = Object.keys(fields)
             .map(function(key) {
-                fields[key] = fields[key].deep_unpack();
-                Object.keys(fields[key]).map(function(innerKey) {
-                    fields[key][innerKey] = fields[key][innerKey].deep_unpack();
+                __fields[key] = __fields[key].deep_unpack();
+                Object.keys(__fields[key]).map(function(innerKey) {
+                    __fields[key][innerKey] = __fields[key][innerKey].deep_unpack();
                 });
-                return [key, fields[key]];
+                return [key, __fields[key]];
             });
         let dialogFields = [];
         for(let i = 0; i < fields.length; i++)
