@@ -20,6 +20,7 @@ const Lang = imports.lang;
 
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
 
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
@@ -33,25 +34,23 @@ const Service = Ext.imports.service;
 const Technology = Ext.imports.technology;
 
 /* menu with technologies and services */
-const Menu = new Lang.Class({
-    Name: 'Menu',
-    Extends: PopupMenu.PopupMenuSection,
+var Menu = class extends PopupMenu.PopupMenuSection {
 
-    _init: function() {
-        this.parent();
+    constructor(params) {
+        super(params);
         this._technologies = {};
         this._serviceTypes = {};
-    },
+    }
 
-    hide: function() {
+    hide() {
         this.actor.hide();
-    },
+    }
 
-    show: function() {
+    show() {
         this.actor.show();
-    },
+    }
 
-    _addSorted: function(technology) {
+    _addSorted(technology) {
         let items = this._getMenuItems();
         for(let i = 0; i < items.length; i++) {
             if(items[i].getValue() < technology.getValue())
@@ -60,9 +59,9 @@ const Menu = new Lang.Class({
             return;
         }
         this.addMenuItem(technology);
-    },
+    }
 
-    addTechnology: function(path, properties) {
+    addTechnology(path, properties) {
         let type = properties.Type.deep_unpack();
         if(this._technologies[type])
             this.removeTechnology(path);
@@ -77,16 +76,16 @@ const Menu = new Lang.Class({
             return;
         }
         this._addSorted(this._technologies[type]);
-    },
+    }
 
     /* FIXME: for some reason destroying an item from the menu
      * leaves a hole, but for some reason this fixes it */
-    fixMenu: function() {
+    fixMenu() {
         this.addMenuItem(new PopupMenu.PopupMenuItem('Connman'), 0);
         this.firstMenuItem.destroy();
-    },
+    }
 
-    removeTechnology: function(path) {
+    removeTechnology(path) {
         let type = path.split('/').pop();
         Logger.logInfo('Removing technology ' + type);
         let technology = this._technologies[type];
@@ -97,18 +96,18 @@ const Menu = new Lang.Class({
         technology.destroy();
         delete this._technologies[type];
         this.fixMenu();
-    },
+    }
 
-    getService: function(path) {
+    getService(path) {
         if(!this._serviceTypes[path])
             return null;
         if(!this._technologies[this._serviceTypes[path]])
             return null;
         return this._technologies[this._serviceTypes[path]].getService(path);
-    },
+    }
 
-    addService: function(path, properties, indicator) {
-        Logger.logDebug('Adding service ' + path);
+    addService(path, properties, indicator) {
+        if (!('Type' in properties)) return;
         let type;
         if(properties.Type.deep_unpack) {
             type = properties.Type.deep_unpack();
@@ -133,32 +132,31 @@ const Menu = new Lang.Class({
         let service = Service.createService(type, proxy, indicator);
         service.update(properties);
         this._technologies[type].addService(path, service);
-    },
+    }
 
-    updateService: function(path, properties) {
+    updateService(path, properties) {
         if(this._serviceTypes[path]) {
-            Logger.logDebug('Updating service ' + path);
             var type = this._serviceTypes[path];
             this._technologies[type].updateService(path, properties);
             return;
         } else
             this.addService(path, properties);
-    },
+    }
 
-    removeService: function(path) {
+    removeService(path) {
         if(!this._serviceTypes[path]) {
-            Logger.logInfo('Tried to remove unknown service ' + path);
+            log('Tried to remove unknown service ' + path);
             return;
         }
         if(this._technologies[this._serviceTypes[path]]) {
-            Logger.logDebug('Removing service ' + path);
+            log('Removing service ' + path);
             this._technologies[this._serviceTypes[path]].removeService(path);
         }
         delete this._serviceTypes[path];
         this.fixMenu();
-    },
+    }
 
-    clear: function() {
+    clear() {
         for(let type in this._technologies) {
             try {
                 if(type != "vpn") {
@@ -169,9 +167,9 @@ const Menu = new Lang.Class({
                 Logger.logException(error, 'Failed to clear technology ' + type);
             }
         }
-    },
+    }
 
-    vpnClear: function() {
+    vpnClear() {
         if(!this._technologies["vpn"])
             return;
         try {
@@ -180,22 +178,20 @@ const Menu = new Lang.Class({
         } catch(error) {
             Logger.logException(error, 'Failed to clear VPN connections');
         }
-    },
-});
+    }
+};
 
 /* main applet class handling everything */
-const Applet = new Lang.Class({
-    Name: 'Applet',
-    Extends: PanelMenu.SystemIndicator,
+var Applet = GObject.registerClass(class Applet extends PanelMenu.SystemIndicator {
 
-    _init: function() {
-        this.parent();
+    _init() {
+        super._init();
 
         this._menu = new Menu();
         this.menu.addMenuItem(this._menu);
         this.menu.actor.show();
 
-        Logger.logInfo('Enabling Connman applet');
+        log('Enabling Connman applet');
         this._watch = Gio.DBus.system.watch_name(Interface.BUS_NAME,
                 Gio.BusNameWatcherFlags.NONE,
                 this._connectEvent.bind(this),
@@ -204,39 +200,37 @@ const Applet = new Lang.Class({
                 Gio.BusNameWatcherFlags.NONE,
                 this._vpnConnectEvent.bind(this),
                 this._vpnDisconnectEvent.bind(this));
-    },
+    }
 
-    _addIndicator: function() {
-        let indicator = this.parent();
+    _addIndicator() {
+        let indicator = super._addIndicator();
         indicator.hide();
         return indicator;
-    },
+    }
 
-    _updateService: function(path, properties) {
+    _updateService(path, properties) {
         if(path.indexOf("service/vpn") != -1)
             return;
         if(this._menu.getService(path))
             this._menu.updateService(path, properties);
         else
             this._menu.addService(path, properties, this._addIndicator());
-    },
+    }
 
-    _updateAllServices: function() {
-        Logger.logInfo('Updating all services');
+    _updateAllServices() {
         this._manager.GetServicesRemote(function(result, exception) {
             if(!result || exception) {
                 Logger.logError('Error fetching services: ' + exception);
                 return;
             }
             let services = result[0];
-            for each(let [path, properties] in services)
-                this._updateService(path, properties);
+            for (var o of services)
+                this._updateService(o[0], o[1]);
 
         }.bind(this));
-    },
+    }
 
-    _updateAllTechnologies: function() {
-        Logger.logInfo('Updating all technologies');
+    _updateAllTechnologies() {
         this._menu.clear();
         this._manager.GetTechnologiesRemote(function(result, exception) {
             if(!result || exception) {
@@ -244,45 +238,44 @@ const Applet = new Lang.Class({
                 return;
             }
             let technologies = result[0];
-            for each(let [path, properties] in technologies)
-                this._menu.addTechnology(path, properties);
+            for (var o of technologies)
+                this._menu.addTechnology(o[0], o[1]);
             this._updateAllServices();
         }.bind(this));
-    },
+    }
 
-    _updateAllConnections: function() {
+    _updateAllConnections() {
         this._menu.vpnClear();
 
         this._menu._technologies['vpn'] = Technology.createTechnology('vpn',
                 {Powered: true});
         this._menu.addMenuItem(this._menu._technologies['vpn']);
 
-        Logger.logInfo('Updating all vpn connections');
         this._vpnManager.GetConnectionsRemote(function(result, exception) {
             if(!result || exception) {
-                Logger.logError('Error fetching technologies: ' + exception);
+                Logger.logError('Error fetching VPN connections: ' + exception);
                 return;
             }
             let connections = result[0];
-            for each(let [path, properties] in connections) {
-                properties['Type'] = 'vpn';
-                this._menu.addService(path, properties, this._addIndicator());
+            for (var o of connections) {
+                o[1]['Type'] = 'vpn';
+                this._menu.addService(o[0], o[1], this._addIndicator());
             }
         }.bind(this));
-    },
+    }
 
-    _updateVisibility: function() {
+    _updateVisibility() {
         if(this._manager || this._vpnManager) {
             this.menu.actor.show();
-            this.indicators.show();
+            //this.indicators.show();
         }
         else {
             this.menu.actor.hide();
-            this.indicators.hide();
+            //this.indicators.hide();
         }
-    },
+    }
 
-    _connectEvent: function() {
+    _connectEvent() {
         Logger.logInfo('Connected to Connman');
 
         this._manager = new Interface.ManagerProxy();
@@ -291,9 +284,9 @@ const Applet = new Lang.Class({
 
         this._manager.RegisterAgentRemote(Interface.AGENT_PATH);
         this._asig = this._manager.connectSignal('TechnologyAdded',
-            function(proxy, sender, [path, properties]) {
+            function(proxy, sender, o) {
                 try {
-                    this._menu.addTechnology(path, properties);
+                    this._menu.addTechnology(o[0], o[1]);
                 } catch(error) {
                     Logger.logException(error);
                 }
@@ -310,9 +303,9 @@ const Applet = new Lang.Class({
         this._ssig = this._manager.connectSignal('ServicesChanged',
             function(proxy, sender, [changed, removed]) {
                 try {
-                    for each(let [path, properties] in changed)
-                        this._updateService(path, properties);
-                    for each(let path in removed)
+                    for (var o of changed)
+                        this._updateService(o[0], o[1]);
+                    for (var path of removed)
                         this._menu.removeService(path);
                 } catch(error) {
                     Logger.logException(error);
@@ -321,9 +314,9 @@ const Applet = new Lang.Class({
 
         this._updateAllTechnologies();
         this._updateVisibility();
-    },
+    }
 
-    _vpnConnectEvent: function() {
+    _vpnConnectEvent() {
         this._vpnManager = new Interface.VPNManagerProxy();
         this._vpnAgent = new Agent.VPNAgent();
         this._vpnManager.RegisterAgentRemote(Interface.VPN_AGENT_PATH);
@@ -344,9 +337,9 @@ const Applet = new Lang.Class({
             }.bind(this));
 
         this._updateAllConnections();
-    },
+    }
 
-    _vpnDisconnectEvent: function() {
+    _vpnDisconnectEvent() {
         let signals = [this._vasig, this._vrsig];
         if(this._vpnManager) {
             Logger.logDebug('Disconnecting vpn signals');
@@ -370,9 +363,9 @@ const Applet = new Lang.Class({
             this._vpnAgent.destroy();
         this.vpnAgent = null;
         this._updateVisibility();
-    },
+    }
 
-    _disconnectEvent: function() {
+    _disconnectEvent() {
         Logger.logInfo('Disconnected from Connman');
         this._menu.clear();
         this._menu._manager = null;
@@ -397,13 +390,13 @@ const Applet = new Lang.Class({
             this._agent.destroy();
         this._agent = null;
         this._updateVisibility();
-    },
+    }
 
-    destroy: function() {
-        Logger.logInfo('Disabling Connman applet');
+    destroy() {
+        Logger.logInfo('Destroying Connman applet');
         this._disconnectEvent();
         this._menu.clear();
-        this.indicators.destroy();
+        //this.indicators.destroy();
         this.menu.actor.destroy();
         if(this._watch)
             Gio.DBus.system.unwatch_name(this._watch);
@@ -416,5 +409,5 @@ const Applet = new Lang.Class({
         this._agent = null;
         this._vpnAgent = null;
         this._watch = null;
-    },
+    }
 });

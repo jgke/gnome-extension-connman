@@ -20,6 +20,7 @@ const Lang = imports.lang;
 const Util = imports.misc.util;
 
 const PopupMenu = imports.ui.popupMenu;
+const GObject = imports.gi.GObject;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Ext = ExtensionUtils.getCurrentExtension();
@@ -32,46 +33,43 @@ const _ = Gettext.gettext;
 const Version = Ext.imports.version;
 const version = Version.version();
 
-const Technology = new Lang.Class({
-    Name: 'Technology',
-    Extends: PopupMenu.PopupMenuSection,
-    Abstract: true,
+var Technology = class extends PopupMenu.PopupMenuSection {
 
-    _init: function(properties, type, proxy) {
-        this.parent();
+    constructor(properties, type, proxy) {
+        super();
         this._type = type;
         this._services = {}
         this._dialog = null;
         this._properties = properties;
 
         this._proxy = proxy;
-        if(this._proxy)
+        if (this._proxy)
             this._sig = this._proxy.connectSignal('PropertyChanged',
                 function(proxy, sender, [name, value]) {
                     this.propertyChanged(name, value.deep_unpack());
                 }.bind(this));
-        if(this._properties['Powered'])
+        if (this._properties['Powered'])
             this.show();
         else
             this.hide();
-    },
+    }
 
-    getValue: function() {
+    getValue() {
         let values = ["ethernet", "wifi", "bluetooth",
                       "p2p", "cellular", "vpn", "other"];
         return values.indexOf(this._type);
-    },
+    }
 
-    propertyChanged: function(name, value) {
+    propertyChanged(name, value) {
         if(name == 'Powered') {
             if(value)
                 this.show();
             else
                 this.hide();
         }
-    },
+    }
 
-    addService: function(id, service) {
+    addService(id, service) {
         if(this._services[id])
             this._services[id].destroy();
         this._services[id] = service;
@@ -79,22 +77,22 @@ const Technology = new Lang.Class({
         this.addMenuItem(service);
         this.serviceUpdated(id);
         this.updateIcon();
-    },
+    }
 
-    getService: function(id) {
+    getService(id) {
         return this._services[id];
-    },
+    }
 
-    updateService: function(id, properties) {
+    updateService(id, properties) {
         if(!this._services[id])
             return false;
         this._services[id].update(properties);
         this.serviceUpdated(id);
         this.updateIcon();
         return true;
-    },
+    }
 
-    removeService: function(id) {
+    removeService(id) {
         if(!this._services[id])
             return false;
         this._services[id].destroy();
@@ -102,9 +100,9 @@ const Technology = new Lang.Class({
         this.serviceUpdated(id);
         this.updateIcon();
         return true;
-    },
+    }
 
-    destroy: function() {
+    destroy() {
         for(let path in this._services) {
             try {
                 this.removeService(path);
@@ -116,12 +114,12 @@ const Technology = new Lang.Class({
         } catch(error) {
             Logger.logException(error, 'Failed to disconnect service proxy');
         }
-        this.parent();
-    },
+        super.destroy();
+    }
 
-    serviceUpdated: function(id) {},
+    serviceUpdated(id) {}
 
-    updateIcon: function() {
+    updateIcon() {
         if(Object.keys(this._services)) {
             this._indicator = this._services[Object.keys(this._services)[0]];
             for(let path in this._services) {
@@ -135,43 +133,39 @@ const Technology = new Lang.Class({
                     this._indicator = this._services[path]._indicator;
             }
         }
-    },
+    }
 
-    show: function() {
+    show() {
         this.actor.show();
         if(this._indicator)
             this._indicator.show();
-    },
+    }
 
-    hide: function() {
+    hide() {
         this.actor.hide();
         if(this._indicator)
             this._indicator.hide();
     }
-});
+};
 
-const EthernetTechnology = new Lang.Class({
-    Name: 'EthernetTechnology',
-    Extends: Technology,
+var EthernetTechnology = class extends Technology {
 
-    _init: function(properties, proxy) {
-        this.parent(properties, 'ethernet', proxy);
-    },
-});
+    constructor(properties, proxy) {
+        super(properties, 'ethernet', proxy);
+    }
+};
 
-const WirelessTechnology = new Lang.Class({
-    Name: 'WirelessTechnology',
-    Extends: Technology,
+var WirelessTechnology = class extends Technology {
 
-    _init: function(properties, proxy, manager) {
-        this.parent(properties, 'wifi', proxy);
+    constructor(properties, proxy, manager) {
+        super(properties, 'wifi', proxy);
 
         this._menu = new PopupMenu.PopupSubMenuMenuItem('', true);
 
         this._settings = new PopupMenu.PopupMenuItem(_("Wireless Settings"));
         this._settings.connect('activate', this.openSettings.bind(this));
 
-       if(version < 318) {
+        if (version < 318) {
             this._menu.label.text = _("Wireless");
             this._menu.status.text = _("Idle");
         } else {
@@ -185,20 +179,20 @@ const WirelessTechnology = new Lang.Class({
         this._connected = {};
         this._connectedCount = 0;
         this.show();
-    },
+    }
 
-    openSettings: function() {
+    openSettings() {
         Util.spawnApp(['connman-gtk', '--page', 'wifi']);
-    },
+    }
 
-    _createConnectionMenuItem: function() {
+    _createConnectionMenuItem() {
         let connectionItem = new PopupMenu.PopupMenuItem(
             _("Select wireless network"));
         connectionItem.connect('activate', this.selectWifi.bind(this));
         return connectionItem;
-    },
+    }
 
-    selectWifi: function() {
+    selectWifi() {
         let serviceList = [];
         let result = this._manager.GetServicesSync();
         let services = result[0];
@@ -216,10 +210,10 @@ const WirelessTechnology = new Lang.Class({
         }.bind(this);
         this._dialog = new Service.ServiceChooser(this._proxy,
             serviceList, callback);
-    },
+    }
 
-    addService: function(id, service) {
-        this.parent(id, service);
+    addService(id, service) {
+        super.addService(id, service);
         service.menu.addMenuItem(this._createConnectionMenuItem(), 1);
         let state = this._services[id].state;
         if(state != 'idle' && state != 'disconnect' && state != 'failure') {
@@ -229,10 +223,10 @@ const WirelessTechnology = new Lang.Class({
         }
         if(this._dialog)
             this._dialog.addService([service, service._properties['Ethernet']['Interface']]);
-    },
+    }
 
-    updateService: function(id, properties) {
-        this.parent(id, properties);
+    updateService(id, properties) {
+        super.updateService(id, properties);
         let state = this._services[id]._properties['State'];
         if(state != 'idle' && state != 'disconnect' && state != 'failure') {
             if(!this._connected[id]) {
@@ -252,9 +246,9 @@ const WirelessTechnology = new Lang.Class({
         if(this._dialog)
             this._dialog.updateService([this._services[id],
                 this._services[id]._properties['Ethernet']['Interface']]);
-    },
+    }
 
-    removeService: function(id) {
+    removeService(id) {
         let state = this._services[id]._properties['State'];
         if(state != 'idle' && state != 'disconnect' && state != 'failure') {
             this._services[id].hide();
@@ -265,54 +259,46 @@ const WirelessTechnology = new Lang.Class({
                     this._menu.actor.show();
             }
         }
-        this.parent(id);
+        super.removeService(id);
         this.serviceUpdated(id);
         this.updateIcon();
         if(this._dialog)
             this._dialog.removeService(id);
-    },
-
-    destroy: function() {
-        this._proxy = null;
-        this.parent();
     }
-});
 
-const BluetoothTechnology = new Lang.Class({
-    Name: 'BluetoothTechnology',
-    Extends: Technology,
+    destroy() {
+        this._proxy = null;
+        super.destroy();
+    }
+};
 
-    _init: function(properties, proxy) {
-        this.parent(properties, 'bluetooth', proxy);
-    },
-});
+var BluetoothTechnology = class extends Technology {
 
-const P2PTechnology = new Lang.Class({
-    Name: 'P2PTechnology',
-    Extends: Technology,
+    constructor(properties, proxy) {
+        super(properties, 'bluetooth', proxy);
+    }
+};
 
-    _init: function(properties, proxy) {
-        this.parent(properties, 'p2p', proxy);
-    },
-});
+var P2PTechnology = class extends Technology {
 
-const CellularTechnology = new Lang.Class({
-    Name: 'CellularTechnology',
-    Extends: Technology,
+    constructor(properties, proxy) {
+        super(properties, 'p2p', proxy);
+    }
+};
 
-    _init: function(properties, proxy) {
-        this.parent(properties, 'cellular', proxy);
-    },
-});
+var CellularTechnology = class extends Technology {
 
-const VPNTechnology = new Lang.Class({
-    Name: 'VPNTechnology',
-    Extends: Technology,
+    constructor(properties, proxy) {
+        super(properties, 'cellular', proxy);
+    }
+};
 
-    _init: function(properties, proxy) {
-        this.parent(properties, 'vpn', proxy);
-    },
-});
+class VPNTechnology extends Technology {
+
+    constructor(properties, proxy) {
+        super(properties, 'vpn', proxy);
+    }
+};
 
 function createTechnology(type, properties, proxy, manager) {
     let technologies = {

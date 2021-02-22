@@ -22,6 +22,7 @@ const Clutter = imports.gi.Clutter;
 const GLib = imports.gi.GLib;
 const St = imports.gi.St;
 const Pango = imports.gi.Pango;
+const GObject = imports.gi.GObject;
 
 const ModalDialog = imports.ui.modalDialog;
 const ShellEntry = imports.ui.shellEntry;
@@ -34,15 +35,14 @@ const Logger = Ext.imports.logger;
 const Gettext = imports.gettext.domain('gnome-extension-connman');
 const _ = Gettext.gettext;
 
-const DialogField = new Lang.Class({
-    Name: 'DialogField',
+var DialogField = class DialogField {
 
-    _init: function(label) {
+    constructor(label) {
         this.addLabel(label);
         this.addEntry();
-    },
+    }
 
-    addLabel: function(label) {
+    addLabel(label) {
         this.label = new St.Label({
             style_class: 'cm-prompt-dialog-password-label',
             text: label,
@@ -50,40 +50,36 @@ const DialogField = new Lang.Class({
             y_align: Clutter.ActorAlign.CENTER
         });
         this.label.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
-    },
+    }
 
-    addEntry: function() {
-        this.entry = new St.Entry({
+    addEntry() {
+        this.entry = new St.PasswordEntry({
             style_class: 'cm-prompt-dialog-password-entry',
             can_focus: true,
             reactive: true,
             x_expand: true
         });
-        ShellEntry.addContextMenu(this.entry, {
-            isPassword: true
-        });
+        ShellEntry.addContextMenu(this.entry);
         this.entry.clutter_text.set_password_char('\u25cf');
-    },
+    }
 
-    getLabel: function() {
+    getLabel() {
         return this.label.text;
-    },
+    }
 
-    getValue: function() {
+    getValue() {
         return this.entry.get_text();
-    },
+    }
 
-    valid: function() {
+    valid() {
         return true;
     }
-});
+};
 
-const Dialog = new Lang.Class({
-    Name: 'Dialog',
-    Extends: ModalDialog.ModalDialog,
+var Dialog = GObject.registerClass(class Dialog extends ModalDialog.ModalDialog {
 
-    _init: function(fields, callback) {
-        this.parent({
+    _init(fields, callback) {
+        super._init({
             styleClass: 'cm-prompt-dialog'
         });
         this._fields = [];
@@ -102,28 +98,28 @@ const Dialog = new Lang.Class({
         });
         let subjectLabel = new St.Label({
             style_class: 'cm-prompt-dialog-headline headline',
-            text: _("Authentication required by network connection")
+            text: _("Connection requires authentication")
         });
 
-        mainContentBox.add(icon, {
-            x_fill: true,
-            y_fill: true,
-            x_align: St.Align.END,
-            y_align: St.Align.START
-        });
-        mainContentBox.add(messageBox, {
-            y_align: St.Align.START
-        });
-        messageBox.add(subjectLabel, {
-            x_fill: true,
-            y_fill: false,
-            y_align: St.Align.START
-        });
+        icon.x_fill = true;
+        icon.y_fill = true;
+        icon.x_align = St.Align.END;
+        icon.y_align = St.Align.START;
+        messageBox.y_align = true;
 
-        this.contentLayout.add(mainContentBox, {
-            x_fill: true,
-            y_fill: true
-        });
+        mainContentBox.add_child(icon);
+        mainContentBox.add_child(messageBox);
+
+        subjectLabel.x_fill = true;
+        subjectLabel.y_fill = false;
+        subjectLabel.y_align = St.Align.START;
+
+        messageBox.add_child(subjectLabel);
+
+        mainContentBox.x_fill = true;
+        mainContentBox.y_fill = true;
+
+        this.contentLayout.add_child(mainContentBox);
 
         let layout = new Clutter.GridLayout({
             orientation: Clutter.Orientation.VERTICAL
@@ -153,9 +149,9 @@ const Dialog = new Lang.Class({
         };
         this.setButtons([this._cancelButton, this._okButton]);
         this.open();
-    },
+    }
 
-    _onOk: function() {
+    _onOk() {
         this.close();
         if(!this._fields.reduce(function(a, b) {
                 return a && b.valid()
@@ -166,31 +162,32 @@ const Dialog = new Lang.Class({
             values[this._fields[key].getLabel()] = this._fields[key].getValue();
         }.bind(this));
         this._callback(values);
-    },
+    }
 
-    _onCancel: function() {
+    _onCancel() {
         this.close();
         this._callback();
     }
 });
 
-const AbstractAgent = new Lang.Class({
-    Name: 'AbstractAgent',
+var AbstractAgent = class AbstractAgent {
 
-    _init: function() {},
+    constructor() {
+    }
 
-    Release: function() {
+    Release() {
         this.destroy();
-    },
+    }
 
-    ReportErrorAsync: function([service, error], invocation) {
+    ReportErrorAsync([service, error], invocation) {
         Logger.logDebug('Service reported error: ' + error);
         invocation.return_dbus_error(this._retryError, '');
-    },
+    }
 
-    RequestInputAsync: function([service, fields], invocation) {
+    RequestInputAsync([service, _fields], invocation) {
         Logger.logDebug('Requested password');
-        let fields = Object.keys(fields)
+        var fields = _fields;
+        fields = Object.keys(_fields)
             .map(function(key) {
                 fields[key] = fields[key].deep_unpack();
                 Object.keys(fields[key]).map(function(innerKey) {
@@ -215,53 +212,51 @@ const AbstractAgent = new Lang.Class({
             invocation.return_value(GLib.Variant.new('(a{sv})', [fields]));
         }.bind(this);
         this._dialog = new Dialog(dialogFields, callback);
-    },
+    }
 
-    Cancel: function(params, invocation) {
+    Cancel(params, invocation) {
         Logger.logDebug('Password dialog canceled');
         this._dialog._onCancel();
         this._dialog = null;
-    },
+    }
 
-    destroy: function() {
+    destroy() {
         if(this._dialog)
             this._dialog._onCancel();
         this._dialog = null;
     }
-});
+};
 
-const Agent = new Lang.Class({
-    Name: 'Agent',
-    Extends: AbstractAgent,
+var Agent = class Agent extends AbstractAgent {
 
-    _init: function() {
+    constructor() {
+        super();
         this._dbusImpl = Interface.addAgentImplementation(this);
         this._canceledError = 'net.connman.Agent.Error.Canceled';
         this._retryError = 'net.connman.Agent.Error.Retry';
-    },
+    }
 
-    RequestBrowser: function(service, url) {
+    RequestBrowser(service, url) {
         Logger.logDebug('Requested browser');
-    },
+    }
 
-    destroy: function() {
-        this.parent();
+    destroy() {
+        super.destroy();
         Interface.removeAgentImplementation(this._dbusImpl);
-    },
-});
+    }
+};
 
-const VPNAgent = new Lang.Class({
-    Name: 'VPNAgent',
-    Extends: AbstractAgent,
+var VPNAgent = class VPNAgent extends AbstractAgent {
 
-    _init: function() {
+    constructor() {
+        super();
         this._dbusImpl = Interface.addVPNAgentImplementation(this);
         this._canceledError = 'net.connman.vpn.Agent.Error.Canceled';
         this._retryError = 'net.connman.vpn.Agent.Error.Retry';
-    },
+    }
 
-    destroy: function() {
-        this.parent();
+    destroy() {
+        super.destroy();
         Interface.removeVPNAgentImplementation(this._dbusImpl);
-    },
-});
+    }
+};

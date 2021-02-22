@@ -18,11 +18,11 @@
 
 const Gio = imports.gi.Gio;
 
-const BUS_NAME = 'net.connman';
-const VPN_BUS_NAME = 'net.connman.vpn';
-const MANAGER_PATH = '/';
-const AGENT_PATH = '/net/connman/gnome3/agent';
-const VPN_AGENT_PATH = '/net/connman/gnome3/vpn/agent';
+var BUS_NAME = 'net.connman';
+var VPN_BUS_NAME = 'net.connman.vpn';
+var MANAGER_PATH = '/';
+var AGENT_PATH = '/net/connman/gnome3/agent';
+var VPN_AGENT_PATH = '/net/connman/gnome3/vpn/agent';
 
 const _MANAGER_INTERFACE = '<node>\
 <interface name="net.connman.Manager">\
