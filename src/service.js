@@ -23,11 +23,13 @@ const Signals = imports.signals;
 const Clutter = imports.gi.Clutter;
 const Gtk = imports.gi.Gtk;
 const St = imports.gi.St;
+const GObject = imports.gi.GObject;
 
 const Util = imports.misc.util;
 
 const PopupMenu = imports.ui.popupMenu;
 const ModalDialog = imports.ui.modalDialog;
+const Dialog = imports.ui.dialog;
 
 const Gettext = imports.gettext.domain('gnome-extension-connman');
 const _ = Gettext.gettext;
@@ -37,10 +39,11 @@ const Ext = ExtensionUtils.getCurrentExtension();
 const Version = Ext.imports.version;
 const version = Version.version();
 
-const DialogServiceItem = new Lang.Class({
-    Name: 'DialogServiceItem',
+const Logger = Ext.imports.logger;
 
-    _init: function(service, callback) {
+const DialogServiceItem = class DialogServiceItem {
+
+    constructor(service, callback) {
         let name = service.name || service.label.text;
         if(!name)
             return;
@@ -87,61 +90,36 @@ const DialogServiceItem = new Lang.Class({
         }
         this._icons.add_actor(this._securityIcon);
         this._icons.add_actor(this._icon);
-        this.actor.add(this._label, {
-            x_align: St.Align.START
-        });
-        this.actor.add(this._icons, {
-            expand: true,
-            x_fill: false,
-            x_align: St.Align.END
-        });
-    },
+        this._label.x_align = St.Align.START;
+        this.actor.add_child(this._label);
+        this._icons.expand = true;
+        this._icons.x_fill = true;
+        this._icons.x_align = St.Align.END;
+        this.actor.add_child(this._icons);
+    }
 
-    enable: function() {
+    enable() {
         this.actor.can_focus = true;
         this.actor.reactive = true;
         this.actor.remove_style_pseudo_class('passive');
-    },
+    }
 
-    disable: function() {
+    disable() {
         this.actor.can_focus = false;
         this.actor.reactive = false;
         this.actor.add_style_pseudo_class('passive');
     }
-});
+};
 
-const ServiceChooser = new Lang.Class({
-    Name: 'ServiceChooser',
-    Extends: ModalDialog.ModalDialog,
+var ServiceChooser = GObject.registerClass(class ServiceChooser extends ModalDialog.ModalDialog {
 
-    _init: function(proxy, services, callback) {
-        this.parent({
-            styleClass: 'cm-dialog'
-        });
+    _init(proxy, services, callback) {
+        super._init({});
         this._proxy = proxy;
         this._services = {};
-        let headline = new St.BoxLayout({
-            style_class: 'cm-dialog-header-hbox'
-        });
-        let icon = new St.Icon({
-            style_class: 'cm-dialog-header-icon',
-            icon_name: 'network-wireless-signal-excellent-symbolic'
-        });
-        let titleBox = new St.BoxLayout({
-            vertical: true
-        });
-        let title = new St.Label({
-            style_class: 'cm-dialog-header',
-            text: _("Connect to...")
-        });
 
-        titleBox.add(title);
-
-        headline.add(icon);
-        headline.add(titleBox);
-
-        this.contentLayout.style_class = 'cm-dialog-content';
-        this.contentLayout.add(headline);
+        let content = new Dialog.MessageDialogContent({ title: _('Select Wireless Network') });
+        this.contentLayout.add_actor(content);
 
         this._stack = new St.Widget({
             layout_manager: new Clutter.BinLayout()
@@ -161,9 +139,8 @@ const ServiceChooser = new Lang.Class({
         this._scrollView.add_actor(this._itemBox);
         this._stack.add_child(this._scrollView);
 
-        this.contentLayout.add(this._stack, {
-            expand: true
-        });
+        this.contentLayout.x_expand = true;
+        this.contentLayout.add_child(this._stack);
 
         for(let id in services)
             this.addService(services[id]);
@@ -191,13 +168,13 @@ const ServiceChooser = new Lang.Class({
         this._callback = callback;
 
         this.open();
-    },
+    }
 
-    scanRemote: function() {
+    scanRemote() {
         this._proxy.ScanRemote();
-    },
+    }
 
-    selectedEvent: function(service) {
+    selectedEvent(service) {
         if(this._selected)
             this._selected.actor.remove_style_pseudo_class('selected');
         Util.ensureActorVisibleInScrollView(this._scrollView, service.actor);
@@ -205,26 +182,26 @@ const ServiceChooser = new Lang.Class({
         this._selected.actor.add_style_pseudo_class('selected');
         this._connectButton.reactive = true;
         this._connectButton.can_focus = true;
-    },
+    }
 
-    close: function() {
-        this.parent();
+    close() {
+        super.close();
         this._closed = true;
         Mainloop.source_remove(this._timeout);
         this.destroy();
-    },
+    }
 
-    buttonEvent: function() {
+    buttonEvent() {
         this.close();
         this._callback(this._selected && this._selected.service);
-    },
+    }
 
-    cancel: function() {
+    cancel() {
         this._callback();
         this.close();
-    },
+    }
 
-    addService: function(service) {
+    addService(service) {
         if(this._services[service[0].id]) {
             this._services[service[0].id].enable();
             return;
@@ -255,30 +232,27 @@ const ServiceChooser = new Lang.Class({
         }
         this._boxes[intf]['box'].add_child(item.actor);
         this._services[service[0].id] = item;
-    },
+    }
 
-    updateService: function(service) {
+    updateService(service) {
         if(this._closed)
             return;
         if(!this._services[service[0].id])
             this.addService(service);
         else
             this._services[service[0].id]._label.text = service[0].name || service[0].label.text;
-    },
+    }
 
-    removeService: function(id) {
+    removeService(id) {
         if(this._services[id])
             this._services[id].disable();
     }
 });
 
-const Service = new Lang.Class({
-    Name: 'Service',
-    Extends: PopupMenu.PopupSubMenuMenuItem,
-    Abstract: true,
+var Service = GObject.registerClass(class Service extends PopupMenu.PopupSubMenuMenuItem {
 
-    _init: function(type, proxy, indicator) {
-        this.parent('', true);
+    _init(type, proxy, indicator) {
+        super._init('', true);
 
         this.type = type;
 
@@ -321,20 +295,20 @@ const Service = new Lang.Class({
         this.menu.addMenuItem(this._connectionSwitch);
         this.menu.addMenuItem(this._settings);
         this.show();
-    },
+    }
 
-    openSettings: function() {
+    openSettings() {
         Util.spawnApp(['connman-gtk', '--page', this.type]);
-    },
+    }
 
-    buttonEvent: function() {
+    buttonEvent() {
         if(this.state == 'idle' || this.state == 'failure' || this.state == 'disconnect')
             this._proxy.ConnectRemote();
         else
             this._proxy.DisconnectRemote();
-    },
+    }
 
-    update: function(properties) {
+    update(properties) {
         for(let key in properties) {
             let newProperty = properties[key].deep_unpack();
             if(newProperty instanceof Object && !(newProperty instanceof Array)) {
@@ -370,9 +344,9 @@ const Service = new Lang.Class({
         else
             this.label.text = this.name + " - " + this.getStateString();
         this.setIcon(this.getStatusIcon());
-    },
+    }
 
-    signalToIcon: function() {
+    signalToIcon() {
         let value = this._properties['Strength'];
         if(value > 80)
             return 'excellent';
@@ -383,9 +357,9 @@ const Service = new Lang.Class({
         if(value > 5)
             return 'weak';
         return 'none';
-    },
+    }
 
-    getStateString: function() {
+    getStateString() {
         let states = {
             idle: _("Idle"),
             failure: _("Failure"),
@@ -395,40 +369,40 @@ const Service = new Lang.Class({
             disconnect: _("Disconnected"),
             online: _("Online") };
         return states[this.state] || this.state;
-    },
+    }
 
-    setIcon: function(iconName) {
+    setIcon(iconName) {
         this._indicator.icon_name = iconName;
         this.icon.icon_name = iconName;
-    },
+    }
 
-    destroy: function() {
+    destroy() {
         this._indicator.destroy();
         try {
             this._proxy.disconnectSignal(this._sig);
         } catch(error) {
             Logger.logException(error, 'Failed to disconnect service proxy');
         }
-        this.parent();
-    },
+        super.destroy();
+    }
 
-    getIcon: function() {
+    getIcon() {
         return this._icons['ok'];
-    },
+    }
 
-    getAcquiringIcon: function() {
+    getAcquiringIcon() {
         return this._icons['acquiring'];
-    },
+    }
 
-    getOfflineIcon: function() {
+    getOfflineIcon() {
         return this._icons['offline'];
-    },
+    }
 
-    getErrorIcon: function() {
+    getErrorIcon() {
         return this._icons['error'];
-    },
+    }
 
-    getStatusIcon: function() {
+    getStatusIcon() {
         let iconGetters = {
             online: this.getIcon,
             ready: this.getIcon,
@@ -440,25 +414,23 @@ const Service = new Lang.Class({
         if(iconGetters[this.state])
             return iconGetters[this.state].bind(this)();
         return this.getErrorIcon();
-    },
+    }
 
-    show: function() {
-        this.actor.show();
+    show() {
+        //this.actor.show();
         this._indicator.show();
-    },
+    }
 
-    hide: function() {
-        this.actor.hide();
+    hide() {
+        //this.actor.hide();
         this._indicator.hide();
     }
 });
 
-const EthernetService = new Lang.Class({
-    Name: 'EthernetService',
-    Extends: Service,
+var EthernetService = GObject.registerClass(class EthernetService extends Service {
 
-    _init: function(proxy, indicator) {
-        this.parent('ethernet', proxy, indicator);
+    _init(proxy, indicator) {
+        super._init('ethernet', proxy, indicator);
         this.name = _("Wired");
         this.label.text = this.name;
         this._settings.label.text = _("Wired Settings");
@@ -470,10 +442,10 @@ const EthernetService = new Lang.Class({
         };
 
         this.show();
-    },
+    }
 
-    update: function(properties) {
-        this.parent(properties);
+    update(properties) {
+        super.update(properties);
         if(version < 318 && this._properties['Name'] == 'Wired') {
             /* ensure translated name */
             this._properties['Name'] = _("Wired");
@@ -482,12 +454,10 @@ const EthernetService = new Lang.Class({
     }
 });
 
-const WirelessService = new Lang.Class({
-    Name: 'WirelessService',
-    Extends: Service,
+var WirelessService = GObject.registerClass(class WirelessService extends Service {
 
-    _init: function(proxy, indicator) {
-        this.parent('wifi', proxy, indicator);
+    _init(proxy, indicator) {
+        super._init('wifi', proxy, indicator);
         this.name = _("Hidden");
         this._settings.label.text = _("Wireless Settings");
         this._icons = {
@@ -496,9 +466,9 @@ const WirelessService = new Lang.Class({
             'offline': 'network-wireless-offline-symbolic',
             'error': 'network-error-symbolic'
         };
-    },
+    }
 
-    securityIcon: function() {
+    securityIcon() {
         let security = this._properties['Security'][0];
         if(!security || security == 'none')
             return '';
@@ -507,14 +477,14 @@ const WirelessService = new Lang.Class({
             wep: 'security-low-symbolic',
         };
         return icons[security] || 'security-medium-symbolic';
-    },
+    }
 
-    getIcon: function() {
+    getIcon() {
         return 'network-wireless-signal-' + this.signalToIcon() + '-symbolic';
-    },
+    }
 
-    update: function(properties) {
-        this.parent(properties);
+    update(properties) {
+        super.update(properties);
 
         if(this.state == 'idle' || this.state == 'disconnect' ||
                 this.state == 'failure')
@@ -538,12 +508,10 @@ const WirelessService = new Lang.Class({
     }
 });
 
-const BluetoothService = new Lang.Class({
-    Name: 'BluetoothService',
-    Extends: Service,
+var BluetoothService = GObject.registerClass(class BluetoothService extends Service {
 
-    _init: function(proxy, indicator) {
-        this.parent('bluetooth', proxy, indicator);
+    _init(proxy, indicator) {
+        super._init('bluetooth', proxy, indicator);
         this._settings.label.text = _("Bluetooth Settings");
         this._icons = {
             'ok': 'bluetooth-active-symbolic',
@@ -553,15 +521,13 @@ const BluetoothService = new Lang.Class({
         };
 
         this.show();
-    },
+    }
 });
 
-const CellularService = new Lang.Class({
-    Name: 'CellularService',
-    Extends: Service,
+var CellularService = GObject.registerClass(class CellularService extends Service {
 
-    _init: function(proxy, indicator) {
-        this.parent('cellular', proxy, indicator);
+    _init(proxy, indicator) {
+        super._init('cellular', proxy, indicator);
         this._settings.label.text = _("Cellular Settings");
         this._icons = {
             'ok': 'network-cellular-connected-symbolic',
@@ -571,19 +537,17 @@ const CellularService = new Lang.Class({
         };
 
         this.show();
-    },
+    }
 
-    getIcon: function() {
+    getIcon() {
         return 'network-cellular-signal-' + this.signalToIcon() + '-symbolic';
     }
 });
 
-const VPNService = new Lang.Class({
-    Name: 'VPNService',
-    Extends: Service,
+var VPNService = GObject.registerClass(class VPNService extends Service {
 
-    _init: function(proxy, indicator) {
-        this.parent('vpn', proxy, indicator);
+    _init(proxy, indicator) {
+        super._init('vpn', proxy, indicator);
         this._settings.label.text = _("VPN Settings");
         this._icons = {
             'ok': 'network-vpn-symbolic',
@@ -593,13 +557,13 @@ const VPNService = new Lang.Class({
         };
 
         this.show();
-    },
+    }
 
-    getAcquiringIcon: function() {
+    getAcquiringIcon() {
         return 'network-vpn-acquiring-symbolic';
-    },
+    }
 
-    getIcon: function() {
+    getIcon() {
         return 'network-vpn-symbolic';
     }
 });
@@ -612,7 +576,7 @@ function createService(type, proxy, indicator) {
         cellular: CellularService,
         vpn: VPNService
     };
-    if(services[type])
+    if (services[type])
         return new services[type](proxy, indicator);
     return new Service('other', proxy, indicator);
 }
